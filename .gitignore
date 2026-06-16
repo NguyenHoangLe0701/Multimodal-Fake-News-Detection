@@ -1,0 +1,23 @@
+# ── OS & IDE Files ──
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ── Global Environments ──
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ── Root Level Data Folders ──
+# Ignore massive dataset and model weight folders at root level
+/datasets/
+/models/
+/docs/images/

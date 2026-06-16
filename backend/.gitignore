@@ -1,0 +1,30 @@
+# ── Python ──
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# ── Virtual Environments ──
+venv/
+env/
+ENV/
+.venv/
+
+# ── Environment Variables ──
+.env
+.env.*
+
+# ── Local Storage & Uploads ──
+# Do not commit user-uploaded images or heavy model weights
+/uploads/
+/model_weights/
+
+# ── Logs & Databases ──
+*.log
+*.sqlite3
+db.sqlite3
+
+# ── IDEs ──
+.idea/
+.vscode/
+.DS_Store

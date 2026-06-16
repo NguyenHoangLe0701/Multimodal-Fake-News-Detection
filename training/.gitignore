@@ -1,0 +1,27 @@
+# ── Python ──
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ── Virtual Environments ──
+venv/
+env/
+.venv/
+
+# ── Huge Data Folders ──
+# DO NOT commit raw images or huge CSV datasets!
+/datasets/raw/
+/datasets/processed/
+*.csv
+
+# ── Logs & Checkpoints ──
+*.log
+runs/
+lightning_logs/
+checkpoints/
+*.ckpt
+*.pth
+*.pt
+
+# ── Jupyter Notebooks ──
+.ipynb_checkpoints/

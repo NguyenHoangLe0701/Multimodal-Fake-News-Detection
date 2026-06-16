@@ -1,0 +1,34 @@
+# ── Dependencies ──
+node_modules/
+.pnp
+.pnp.js
+
+# ── Build Outputs ──
+dist/
+dist-ssr/
+build/
+*.tsbuildinfo
+
+# ── Vite / React Environment ──
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ── Logs ──
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ── Editor ──
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
