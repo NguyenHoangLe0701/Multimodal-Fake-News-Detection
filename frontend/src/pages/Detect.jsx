@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
-import { Upload, X, FileText, Loader2, ShieldCheck, ShieldAlert, AlertTriangle } from 'lucide-react';
+import { Upload, X, FileText, Loader2, ShieldCheck, ShieldAlert, AlertTriangle, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Detect = () => {
   const [newsText, setNewsText] = useState('');
@@ -40,195 +41,231 @@ const Detect = () => {
 
   const canSubmit = newsText.trim().length > 10 || imageFile;
   const isFake = result?.label === 'FAKE';
-  const verdictColor = isFake ? 'var(--danger-light)' : 'var(--accent-light)';
-  const verdictBg = isFake ? 'rgba(239,68,68,0.08)' : 'rgba(16,185,129,0.08)';
-  const barColor = isFake ? 'var(--danger)' : 'var(--accent)';
 
   return (
-    <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 24px' }}>
-      {/* Header */}
-      <div style={{ marginBottom: 32 }}>
-        <p style={{ color: 'var(--accent)', fontSize: 12, fontFamily: 'var(--font-code)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 4 }}>
-          Analysis
-        </p>
-        <h1 style={{ color: 'var(--c-100)', fontSize: 24, fontWeight: 700, letterSpacing: '-0.02em' }}>Fake News Detection</h1>
-        <p style={{ color: 'var(--c-400)', fontSize: 14, marginTop: 4 }}>Provide the news content and/or an image for AI verification.</p>
-      </div>
+    <div className="min-h-screen pt-24 pb-20 relative overflow-hidden">
+      {/* Background elements */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#10b981]/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 24 }} className="lg:!grid-cols-[3fr_2fr]">
-        {/* ── Input Panel ─────────────── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          {/* Text input */}
-          <div style={{ borderRadius: 12, border: '1px solid var(--c-700)', background: 'var(--c-900)', overflow: 'hidden' }}>
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              padding: '10px 16px', borderBottom: '1px solid var(--c-800)',
-            }}>
-              <FileText size={14} style={{ color: 'var(--c-400)' }} />
-              <span style={{ color: 'var(--c-300)', fontSize: 12, fontWeight: 500 }}>News Content</span>
-              <span style={{ color: 'var(--c-500)', fontSize: 12, fontFamily: 'var(--font-code)', marginLeft: 'auto' }}>{newsText.length}</span>
-            </div>
-            <textarea
-              value={newsText}
-              onChange={(e) => setNewsText(e.target.value)}
-              placeholder="Paste the full news article or headline here..."
-              style={{
-                width: '100%', height: 192, padding: '12px 16px',
-                background: 'transparent', color: 'var(--c-100)', fontSize: 14,
-                lineHeight: 1.7, resize: 'none', outline: 'none', border: 'none',
-                fontFamily: 'var(--font-body)',
-              }}
-            />
+      <div className="max-w-6xl mx-auto px-6 relative z-10">
+        {/* Header */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-12 text-center"
+        >
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#10b981]/10 border border-[#10b981]/20 mb-4">
+            <Sparkles size={14} className="text-[#10b981]" />
+            <span className="text-[#10b981] text-xs font-bold uppercase tracking-wider">AI Verification Engine</span>
           </div>
+          <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4">Fake News Detection</h1>
+          <p className="text-gray-400 text-lg">Provide the news content or an image for deep multimodal analysis.</p>
+        </motion.div>
 
-          {/* Image upload */}
-          <div style={{ borderRadius: 12, border: '1px solid var(--c-700)', background: 'var(--c-900)', overflow: 'hidden' }}>
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              padding: '10px 16px', borderBottom: '1px solid var(--c-800)',
-            }}>
-              <Upload size={14} style={{ color: 'var(--c-400)' }} />
-              <span style={{ color: 'var(--c-300)', fontSize: 12, fontWeight: 500 }}>Image Attachment</span>
+        <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-8 items-start">
+          {/* ── Input Panel ─────────────── */}
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+            className="flex flex-col gap-6"
+          >
+            {/* Text input */}
+            <div className="bg-[#0f0f13]/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden group focus-within:border-[#10b981]/50 transition-colors shadow-2xl">
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-white/[0.02]">
+                <FileText size={16} className="text-gray-400" />
+                <span className="text-gray-300 text-sm font-semibold">News Content</span>
+                <span className="text-gray-500 text-xs font-mono ml-auto">{newsText.length} chars</span>
+              </div>
+              <textarea
+                value={newsText}
+                onChange={(e) => setNewsText(e.target.value)}
+                placeholder="Paste the full news article or headline here..."
+                className="w-full h-48 p-4 bg-transparent text-gray-200 placeholder-gray-600 resize-none outline-none focus:ring-0"
+              />
             </div>
 
-            {!imagePreview ? (
-              <div
-                onDrop={(e) => { e.preventDefault(); handleImageChange(e); }}
-                onDragOver={(e) => e.preventDefault()}
-                onClick={() => fileInputRef.current?.click()}
-                style={{
-                  display: 'flex', flexDirection: 'column', alignItems: 'center',
-                  justifyContent: 'center', padding: '40px 16px', cursor: 'pointer',
-                  transition: 'background 0.2s',
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(24,24,29,0.3)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-              >
-                <div style={{
-                  width: 40, height: 40, borderRadius: 8,
-                  border: '1px dashed var(--c-600)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12,
-                }}>
-                  <Upload size={16} style={{ color: 'var(--c-500)' }} />
-                </div>
-                <p style={{ color: 'var(--c-400)', fontSize: 14, marginBottom: 4 }}>Drop image here or click to browse</p>
-                <p style={{ color: 'var(--c-600)', fontSize: 12 }}>PNG, JPG, WEBP up to 10MB</p>
-                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
+            {/* Image upload */}
+            <div className="bg-[#0f0f13]/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl transition-colors hover:border-white/20">
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-white/[0.02]">
+                <Upload size={16} className="text-gray-400" />
+                <span className="text-gray-300 text-sm font-semibold">Image Attachment</span>
               </div>
-            ) : (
-              <div style={{ position: 'relative', padding: 16 }}>
-                <img src={imagePreview} alt="Preview" style={{
-                  width: '100%', maxHeight: 240, objectFit: 'contain', borderRadius: 8, background: 'var(--c-800)',
-                }} />
-                <button onClick={removeImage} style={{
-                  position: 'absolute', top: 24, right: 24,
-                  width: 28, height: 28, borderRadius: '50%',
-                  background: 'rgba(9,9,11,0.8)', border: '1px solid var(--c-600)',
-                  color: 'var(--c-300)', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                  <X size={13} />
-                </button>
-                <p style={{ color: 'var(--c-500)', fontSize: 12, fontFamily: 'var(--font-code)', marginTop: 8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {imageFile?.name}
-                </p>
-              </div>
-            )}
-          </div>
 
-          {/* Submit */}
-          <button onClick={handleSubmit} disabled={!canSubmit || isLoading} style={{
-            width: '100%', padding: '12px 0', borderRadius: 8, fontSize: 14, fontWeight: 600,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            border: 'none', cursor: canSubmit && !isLoading ? 'pointer' : 'not-allowed',
-            background: canSubmit && !isLoading ? 'var(--accent)' : 'var(--c-800)',
-            color: canSubmit && !isLoading ? 'var(--c-950)' : 'var(--c-500)',
-            transition: 'all 0.2s',
-          }}>
-            {isLoading ? (<><Loader2 size={15} className="animate-spin" /> Analyzing...</>) : 'Analyze Content'}
-          </button>
-        </div>
-
-        {/* ── Result Panel ────────────── */}
-        <div>
-          {!result && !isLoading && (
-            <div style={{
-              borderRadius: 12, border: '1px dashed var(--c-800)',
-              background: 'rgba(15,15,19,0.5)', minHeight: 300,
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24,
-            }}>
-              <div style={{
-                width: 40, height: 40, borderRadius: '50%', border: '1px solid var(--c-700)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12,
-              }}>
-                <ShieldCheck size={18} style={{ color: 'var(--c-600)' }} />
-              </div>
-              <p style={{ color: 'var(--c-500)', fontSize: 14, marginBottom: 4 }}>No results yet</p>
-              <p style={{ color: 'var(--c-600)', fontSize: 12 }}>Submit content to see the analysis</p>
+              <AnimatePresence mode="wait">
+                {!imagePreview ? (
+                  <motion.div
+                    key="upload"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onDrop={(e) => { e.preventDefault(); handleImageChange(e); }}
+                    onDragOver={(e) => e.preventDefault()}
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex flex-col items-center justify-center py-16 px-6 cursor-pointer hover:bg-white/[0.02] transition-colors group"
+                  >
+                    <div className="w-16 h-16 rounded-2xl border-2 border-dashed border-gray-600 flex items-center justify-center mb-4 group-hover:border-[#10b981] group-hover:bg-[#10b981]/10 transition-colors">
+                      <Upload size={24} className="text-gray-500 group-hover:text-[#10b981] transition-colors" />
+                    </div>
+                    <p className="text-gray-300 font-medium mb-1">Drop image here or click to browse</p>
+                    <p className="text-gray-500 text-xs">Supports PNG, JPG, WEBP up to 10MB</p>
+                    <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                  </motion.div>
+                ) : (
+                  <motion.div 
+                    key="preview"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="relative p-4"
+                  >
+                    <div className="relative rounded-xl overflow-hidden bg-black/50 border border-white/10">
+                      <img src={imagePreview} alt="Preview" className="w-full h-auto max-h-[300px] object-contain" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
+                      <button 
+                        onClick={removeImage} 
+                        className="absolute top-4 right-4 p-2 bg-black/50 hover:bg-red-500/80 backdrop-blur-md rounded-full text-white transition-colors"
+                      >
+                        <X size={16} />
+                      </button>
+                      <p className="absolute bottom-4 left-4 text-white text-sm font-medium truncate max-w-[80%]">
+                        {imageFile?.name}
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-          )}
 
-          {isLoading && (
-            <div style={{
-              borderRadius: 12, border: '1px solid var(--c-700)', background: 'var(--c-900)',
-              minHeight: 300, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24,
-            }}>
-              <Loader2 size={24} style={{ color: 'var(--accent)' }} className="animate-spin" />
-              <p style={{ color: 'var(--c-300)', fontSize: 14, fontWeight: 500, marginTop: 12, marginBottom: 4 }}>Processing...</p>
-              <p style={{ color: 'var(--c-500)', fontSize: 12 }}>Running multimodal analysis</p>
-            </div>
-          )}
+            {/* Submit */}
+            <button 
+              onClick={handleSubmit} 
+              disabled={!canSubmit || isLoading} 
+              className={`w-full py-4 rounded-xl text-lg font-bold flex items-center justify-center gap-2 transition-all duration-300 ${
+                canSubmit && !isLoading 
+                  ? 'bg-[#10b981] hover:bg-[#059669] text-black shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)]' 
+                  : 'bg-white/5 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              {isLoading ? (
+                <><Loader2 size={20} className="animate-spin" /> Running AI Analysis...</>
+              ) : (
+                <><Sparkles size={20} /> Analyze Content</>
+              )}
+            </button>
+          </motion.div>
 
-          {result && !isLoading && (
-            <div className="animate-fade-up" style={{ borderRadius: 12, border: '1px solid var(--c-700)', background: 'var(--c-900)', overflow: 'hidden' }}>
-              {/* Verdict banner */}
-              <div style={{ padding: '20px 24px', background: verdictBg }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-                  {isFake ? <ShieldAlert size={22} style={{ color: verdictColor }} /> : <ShieldCheck size={22} style={{ color: verdictColor }} />}
-                  <span style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em', color: verdictColor }}>{result.label}</span>
-                </div>
-                <p style={{ color: 'var(--c-300)', fontSize: 12 }}>
-                  {isFake ? 'This content shows signs of misinformation.' : 'This content appears to be authentic.'}
-                </p>
-              </div>
+          {/* ── Result Panel ────────────── */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+            className="sticky top-24"
+          >
+            <AnimatePresence mode="wait">
+              {!result && !isLoading && (
+                <motion.div 
+                  key="empty"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="bg-[#0f0f13]/40 backdrop-blur-sm border border-dashed border-white/10 rounded-2xl min-h-[400px] flex flex-col items-center justify-center p-8 text-center"
+                >
+                  <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 border border-white/10">
+                    <ShieldCheck size={24} className="text-gray-500" />
+                  </div>
+                  <h3 className="text-gray-300 font-medium text-lg mb-2">Awaiting Content</h3>
+                  <p className="text-gray-500 text-sm max-w-xs">Submit text or an image on the left to see the AI verification results here.</p>
+                </motion.div>
+              )}
 
-              {/* Confidence */}
-              <div style={{ padding: '16px 24px', borderTop: '1px solid var(--c-800)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <span style={{ color: 'var(--c-400)', fontSize: 12, fontWeight: 500 }}>Confidence</span>
-                  <span style={{ color: 'var(--c-100)', fontSize: 14, fontFamily: 'var(--font-code)', fontWeight: 500 }}>
-                    {(result.confidence * 100).toFixed(1)}%
-                  </span>
-                </div>
-                <div style={{ height: 6, borderRadius: 99, background: 'var(--c-800)', overflow: 'hidden' }}>
-                  <div style={{ height: '100%', borderRadius: 99, background: barColor, transition: 'width 0.7s ease', width: `${result.confidence * 100}%` }} />
-                </div>
-              </div>
+              {isLoading && (
+                <motion.div 
+                  key="loading"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="bg-[#0f0f13]/80 backdrop-blur-xl border border-white/10 rounded-2xl min-h-[400px] flex flex-col items-center justify-center p-8 text-center shadow-2xl"
+                >
+                  <div className="relative w-20 h-20 flex items-center justify-center mb-6">
+                    <div className="absolute inset-0 border-4 border-[#10b981]/20 rounded-full" />
+                    <div className="absolute inset-0 border-4 border-[#10b981] rounded-full border-t-transparent animate-spin" />
+                    <Sparkles size={24} className="text-[#10b981] animate-pulse" />
+                  </div>
+                  <h3 className="text-gray-200 font-bold text-xl mb-2">Analyzing Networks</h3>
+                  <p className="text-gray-400 text-sm">Cross-referencing multimodal datasets...</p>
+                </motion.div>
+              )}
 
-              {/* Breakdown */}
-              <div style={{ padding: '16px 24px', borderTop: '1px solid var(--c-800)' }}>
-                <h4 style={{ color: 'var(--c-300)', fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>Breakdown</h4>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <span style={{ color: 'var(--c-400)', fontSize: 14 }}>Text signal</span>
-                  <span style={{ color: 'var(--c-200)', fontSize: 14, fontFamily: 'var(--font-code)' }}>{result.textScore}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--c-400)', fontSize: 14 }}>Image signal</span>
-                  <span style={{ color: 'var(--c-200)', fontSize: 14, fontFamily: 'var(--font-code)' }}>{result.imageScore}</span>
-                </div>
-              </div>
+              {result && !isLoading && (
+                <motion.div 
+                  key="result"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="bg-[#0f0f13]/90 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl relative"
+                >
+                  {/* Glow backdrop based on result */}
+                  <div className={`absolute -top-32 -right-32 w-64 h-64 rounded-full blur-[80px] pointer-events-none opacity-30 ${isFake ? 'bg-red-500' : 'bg-[#10b981]'}`} />
 
-              {/* Warning */}
-              <div style={{ padding: '12px 24px', borderTop: '1px solid var(--c-800)', background: 'rgba(24,24,29,0.3)' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-                  <AlertTriangle size={12} style={{ color: 'var(--warn)', marginTop: 2, flexShrink: 0 }} />
-                  <p style={{ color: 'var(--c-500)', fontSize: 11, lineHeight: 1.6 }}>
-                    AI predictions are not definitive. Always verify news through multiple trusted sources.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
+                  {/* Verdict banner */}
+                  <div className={`p-8 border-b border-white/5 ${isFake ? 'bg-red-500/10' : 'bg-[#10b981]/10'}`}>
+                    <div className="flex items-center gap-4 mb-3">
+                      <div className={`p-3 rounded-xl ${isFake ? 'bg-red-500/20 text-red-400' : 'bg-[#10b981]/20 text-[#10b981]'}`}>
+                        {isFake ? <ShieldAlert size={28} /> : <ShieldCheck size={28} />}
+                      </div>
+                      <span className={`text-4xl font-black tracking-tight ${isFake ? 'text-red-400' : 'text-[#10b981]'}`}>
+                        {result.label}
+                      </span>
+                    </div>
+                    <p className="text-gray-300 font-medium">
+                      {isFake ? 'This content exhibits strong signs of manipulation and misinformation.' : 'This content appears to be authentic with high reliability.'}
+                    </p>
+                  </div>
+
+                  <div className="p-8">
+                    {/* Confidence */}
+                    <div className="mb-8">
+                      <div className="flex items-end justify-between mb-3">
+                        <span className="text-gray-400 font-medium uppercase tracking-wider text-xs">AI Confidence</span>
+                        <span className="text-3xl font-mono font-bold text-white leading-none">
+                          {(result.confidence * 100).toFixed(1)}<span className="text-lg text-gray-500">%</span>
+                        </span>
+                      </div>
+                      <div className="h-2.5 rounded-full bg-white/5 overflow-hidden">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${result.confidence * 100}%` }}
+                          transition={{ duration: 1, ease: "easeOut" }}
+                          className={`h-full rounded-full ${isFake ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]' : 'bg-[#10b981] shadow-[0_0_10px_rgba(16,185,129,0.8)]'}`} 
+                        />
+                      </div>
+                    </div>
+
+                    {/* Breakdown */}
+                    <div className="bg-white/5 rounded-xl p-5 mb-6">
+                      <h4 className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-4 border-b border-white/10 pb-2">Multimodal Breakdown</h4>
+                      <div className="flex justify-between items-center mb-3">
+                        <span className="text-gray-300 font-medium">Text Semantics</span>
+                        <span className="text-[#10b981] font-mono font-medium">{result.textScore}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-300 font-medium">Visual Artifacts</span>
+                        <span className="text-[#10b981] font-mono font-medium">{result.imageScore}</span>
+                      </div>
+                    </div>
+
+                    {/* Warning */}
+                    <div className="flex items-start gap-3 bg-white/5 rounded-xl p-4 border border-white/5">
+                      <AlertTriangle size={16} className="text-yellow-500 shrink-0 mt-0.5" />
+                      <p className="text-gray-400 text-xs leading-relaxed">
+                        AI predictions are probabilistic and not definitive. Please verify sensitive news through multiple official trusted sources.
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
         </div>
       </div>
     </div>
