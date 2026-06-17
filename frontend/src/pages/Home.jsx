@@ -148,26 +148,27 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="section-block border-t border-surface-700 bg-white">
-        <div className="page-container">
-          <div className="mx-auto flex max-w-2xl flex-col items-center gap-8 text-center md:gap-10">
+      <section className="section-block border-t border-surface-700 bg-white w-full flex justify-center">
+        <div className="page-container flex justify-center w-full">
+          <div className="mx-auto flex w-full max-w-2xl flex-col items-center justify-center gap-8 text-center md:gap-10">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-accent/10">
               <ShieldCheck size={32} className="text-accent" />
             </div>
 
-            <div className="space-y-5">
-              <h2 className="text-2xl font-bold tracking-tight text-surface-50 md:text-3xl">
+            <div className="space-y-5 w-full flex flex-col items-center justify-center text-center">
+              <h2 className="text-2xl font-bold tracking-tight text-surface-50 md:text-3xl w-full block" style={{ textAlign: 'center' }}>
                 Sẵn sàng kiểm tra tin tức?
               </h2>
-              <p className="mx-auto max-w-lg text-base leading-relaxed text-surface-400 md:text-lg">
+              <p className="mx-auto max-w-lg text-base leading-relaxed text-surface-400 md:text-lg w-full block" style={{ textAlign: 'center' }}>
                 Dán nội dung bài viết và upload hình ảnh đi kèm. Hệ thống AI sẽ
+                <br className="hidden md:block" />
                 phân tích và đưa ra kết quả trong vài giây.
               </p>
             </div>
 
-            <Link to="/detect" className="btn-primary btn-primary-lg group mt-1 bg-surface-50 hover:bg-surface-100">
+            <Link to="/detect" className="btn-primary btn-primary-lg group mt-1 bg-surface-50 hover:bg-surface-100 flex items-center justify-center mx-auto">
               Khởi chạy Detection Engine
-              <ArrowRight size={17} className="transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight size={17} className="transition-transform group-hover:translate-x-0.5 ml-2" />
             </Link>
           </div>
         </div>

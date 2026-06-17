@@ -66,8 +66,8 @@ const Navbar = () => {
             })}
           </nav>
 
-          <Link to="/admin" className="btn-outline">
-            Admin
+          <Link to="/login" className="btn-primary">
+            Đăng nhập
           </Link>
         </div>
 
@@ -107,8 +107,8 @@ const Navbar = () => {
                 );
               })}
               <div className="my-2 h-px bg-surface-700" />
-              <Link to="/admin" className="btn-primary justify-center">
-                Admin Panel
+              <Link to="/login" className="btn-primary justify-center">
+                Đăng nhập
               </Link>
             </nav>
           </motion.div>

@@ -89,28 +89,28 @@ const Detect = () => {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1, duration: 0.5 }}
-            className="lg:col-span-8 flex flex-col gap-8"
+            className="lg:col-span-8 flex flex-col gap-10"
           >
-            {/* Card 1: Text Input */}
-            <div className="relative rounded-3xl bg-white p-8 md:p-10 shadow-xl border border-surface-700/60 flex flex-col items-center">
-              <div className="absolute top-0 right-0 -mr-20 -mt-20 w-48 h-48 rounded-full bg-emerald-50/50 blur-3xl pointer-events-none z-0"></div>
+            {/* Form Section 1: Text Input */}
+            <div className="relative z-10 w-full flex flex-col items-center bg-white p-8 md:p-12 shadow-xl rounded-[2.5rem] border border-surface-700/60 overflow-hidden">
+              <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-emerald-50/50 blur-3xl pointer-events-none z-0"></div>
               
-              <div className="relative z-10 w-full flex flex-col">
-                <div className="flex items-center justify-center gap-3 mb-6">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
-                    <FileText size={20} />
+              <div className="relative z-10 w-full flex flex-col items-center">
+                <div className="flex items-center justify-center gap-3 mb-8">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+                    <FileText size={24} />
                   </div>
-                  <span className="text-base font-bold text-surface-100 uppercase tracking-wider text-center">Nội dung bài viết</span>
+                  <span className="text-lg font-extrabold text-surface-100 uppercase tracking-widest text-center">Nội dung bài viết</span>
                 </div>
                 
-                <div className="flex flex-col w-full rounded-2xl border-2 border-surface-700 bg-surface-900/50 focus-within:border-emerald-500/50 focus-within:bg-white focus-within:ring-4 focus-within:ring-emerald-500/10 transition-all overflow-hidden">
+                <div className="flex flex-col w-full rounded-3xl border-2 border-surface-700 bg-surface-900/50 focus-within:border-emerald-500/50 focus-within:bg-white focus-within:ring-4 focus-within:ring-emerald-500/10 transition-all overflow-hidden">
                   <textarea
                     value={newsText}
                     onChange={(e) => setNewsText(e.target.value)}
                     placeholder="Dán toàn bộ nội dung bài viết hoặc tiêu đề vào đây để AI bắt đầu phân tích..."
-                    className="min-h-[240px] w-full resize-y bg-transparent p-6 text-lg leading-relaxed text-surface-50 outline-none placeholder:text-surface-400 text-center block"
+                    className="min-h-[280px] w-full resize-y bg-transparent p-8 text-xl leading-relaxed text-surface-50 outline-none placeholder:text-surface-400 text-center block"
                   />
-                  <div className="flex justify-center px-6 py-4 border-t-2 border-surface-700/50 bg-surface-800/30 w-full">
+                  <div className="flex justify-center px-6 py-5 border-t-2 border-surface-700/50 bg-surface-800/30 w-full">
                     <span className={`font-mono text-sm font-bold ${newsText.length > 0 ? 'text-emerald-600' : 'text-surface-400'}`}>
                       {newsText.length} ký tự
                     </span>
@@ -119,17 +119,17 @@ const Detect = () => {
               </div>
             </div>
 
-            {/* Card 2: Image Input */}
-            <div className="relative rounded-3xl bg-white p-8 md:p-10 shadow-xl border border-surface-700/60 flex flex-col items-center">
-              <div className="absolute top-0 left-0 -ml-20 -mt-20 w-48 h-48 rounded-full bg-teal-50/50 blur-3xl pointer-events-none z-0"></div>
+            {/* Form Section 2: Image Input */}
+            <div className="relative z-10 w-full flex flex-col items-center bg-white p-8 md:p-12 shadow-xl rounded-[2.5rem] border border-surface-700/60 overflow-hidden">
+              <div className="absolute top-0 left-0 -ml-20 -mt-20 w-64 h-64 rounded-full bg-teal-50/50 blur-3xl pointer-events-none z-0"></div>
 
-              <div className="relative z-10 w-full flex flex-col">
-                <div className="flex items-center justify-center gap-3 mb-6">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-100 text-teal-600">
-                    <Upload size={20} />
+              <div className="relative z-10 w-full flex flex-col items-center">
+                <div className="flex items-center justify-center gap-3 mb-8">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-100 text-teal-600">
+                    <Upload size={24} />
                   </div>
-                  <span className="text-base font-bold text-surface-100 uppercase tracking-wider text-center">
-                    Hình ảnh đính kèm <span className="text-surface-400 font-medium normal-case ml-1">(Tùy chọn)</span>
+                  <span className="text-lg font-extrabold text-surface-100 uppercase tracking-widest text-center">
+                    Hình ảnh đính kèm <span className="text-surface-400 font-medium normal-case ml-2">(Tùy chọn)</span>
                   </span>
                 </div>
                 
@@ -147,15 +147,15 @@ const Detect = () => {
                         }}
                         onDragOver={(e) => e.preventDefault()}
                         onClick={() => fileInputRef.current?.click()}
-                        className="flex flex-col items-center justify-center w-full rounded-2xl border-2 border-dashed border-surface-600 bg-surface-900/30 px-8 py-16 cursor-pointer transition-all hover:border-teal-500 hover:bg-teal-50/50 group"
+                        className="flex flex-col items-center justify-center w-full rounded-3xl border-2 border-dashed border-surface-600 bg-surface-900/30 px-8 py-24 cursor-pointer transition-all hover:border-teal-500 hover:bg-teal-50/50 group"
                       >
-                        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-sm ring-2 ring-surface-700 transition-transform group-hover:scale-110">
-                          <Upload size={32} className="text-surface-400 transition-colors group-hover:text-teal-500" />
+                        <div className="mb-8 flex h-24 w-24 items-center justify-center rounded-full bg-white shadow-sm ring-2 ring-surface-700 transition-transform group-hover:scale-110">
+                          <Upload size={40} className="text-surface-400 transition-colors group-hover:text-teal-500" />
                         </div>
-                        <p className="mb-3 text-lg font-bold text-surface-100 text-center">
+                        <p className="mb-4 text-xl font-bold text-surface-100 text-center">
                           Kéo thả hoặc nhấn để tải ảnh lên
                         </p>
-                        <p className="text-sm font-medium text-surface-400 text-center">Hỗ trợ định dạng PNG, JPG, WEBP (Tối đa 10MB)</p>
+                        <p className="text-base font-medium text-surface-400 text-center">Hỗ trợ định dạng PNG, JPG, WEBP (Tối đa 10MB)</p>
                         <input
                           ref={fileInputRef}
                           type="file"
@@ -169,23 +169,23 @@ const Detect = () => {
                         key="preview"
                         initial={{ opacity: 0, scale: 0.98 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="relative overflow-hidden rounded-2xl border-2 border-surface-700 bg-surface-900 shadow-inner group w-full flex flex-col"
+                        className="relative overflow-hidden rounded-3xl border-2 border-surface-700 bg-surface-900 shadow-inner group w-full flex flex-col"
                       >
                         <img
                            src={imagePreview}
                            alt="Preview"
-                           className="mx-auto h-auto max-h-[360px] w-full object-contain block"
+                           className="mx-auto h-auto max-h-[400px] w-full object-contain block"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         <button
                           type="button"
                           onClick={removeImage}
-                          className="absolute right-6 top-6 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-surface-500 shadow-sm backdrop-blur-sm transition-all hover:bg-danger hover:text-white hover:scale-110"
+                          className="absolute right-6 top-6 flex h-12 w-12 items-center justify-center rounded-full bg-white/90 text-surface-500 shadow-sm backdrop-blur-sm transition-all hover:bg-danger hover:text-white hover:scale-110"
                         >
-                          <X size={20} />
+                          <X size={24} />
                         </button>
-                        <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all">
-                          <p className="truncate text-base font-bold text-white drop-shadow-md text-center">
+                        <div className="absolute bottom-0 left-0 right-0 p-8 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all">
+                          <p className="truncate text-lg font-bold text-white drop-shadow-md text-center">
                             {imageFile?.name}
                           </p>
                         </div>
@@ -196,16 +196,16 @@ const Detect = () => {
               </div>
             </div>
 
-            {/* Submit Button */}
-            <div className="relative z-10 w-full flex flex-col mt-4">
+            {/* Submit Button Section */}
+            <div className="relative z-10 w-full flex flex-col bg-white p-6 shadow-xl rounded-[2.5rem] border border-surface-700/60 overflow-hidden">
               <button
                 type="button"
                 onClick={handleSubmit}
                 disabled={!canSubmit || isLoading}
-                className={`relative flex items-center justify-center gap-3 w-full h-16 rounded-2xl text-lg font-extrabold text-white shadow-xl transition-all duration-300 overflow-hidden ${
+                className={`relative flex items-center justify-center gap-4 w-full h-20 rounded-3xl text-xl font-black uppercase tracking-wider transition-all duration-300 overflow-hidden ${
                   !canSubmit || isLoading 
-                    ? 'cursor-not-allowed bg-surface-800 text-surface-400 shadow-none' 
-                    : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-emerald-500/25 hover:-translate-y-1 active:translate-y-0'
+                    ? 'cursor-not-allowed bg-surface-200 text-surface-400 shadow-none opacity-80' 
+                    : 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-xl hover:shadow-emerald-500/25 hover:-translate-y-1 active:translate-y-0'
                 }`}
               >
                 {!canSubmit && !isLoading ? null : (
@@ -215,12 +215,12 @@ const Detect = () => {
                 <span className="relative flex items-center justify-center gap-3 z-10">
                   {isLoading ? (
                     <>
-                      <Loader2 size={24} className="animate-spin" />
-                      Đang phân tích dữ liệu...
+                      <Loader2 size={28} className="animate-spin text-white" />
+                      <span className="text-white">Đang phân tích dữ liệu...</span>
                     </>
                   ) : (
                     <>
-                      <Sparkles size={24} className={!canSubmit ? "opacity-50" : ""} />
+                      <Sparkles size={28} className={!canSubmit ? "opacity-50" : ""} />
                       KHỞI CHẠY AI VERIFICATION
                     </>
                   )}
@@ -231,9 +231,9 @@ const Detect = () => {
                 <motion.div 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mt-6 flex items-center justify-center gap-3 rounded-xl border border-red-200 bg-red-50 p-5 text-base font-bold text-danger shadow-sm w-full text-center"
+                  className="mt-6 flex items-center justify-center gap-3 rounded-xl border border-red-200 bg-red-50 p-6 text-base font-bold text-danger shadow-sm w-full text-center"
                 >
-                  <AlertTriangle size={20} className="shrink-0" />
+                  <AlertTriangle size={24} className="shrink-0" />
                   {error}
                 </motion.div>
               )}
