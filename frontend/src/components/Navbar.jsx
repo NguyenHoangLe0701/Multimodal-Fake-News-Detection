@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ShieldCheck } from 'lucide-react';
+import { Menu, X, ShieldCheck, User, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const navLinks = [
@@ -14,8 +14,19 @@ const Navbar = () => {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
+    // Lấy thông tin user từ localStorage
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     const onScroll = () => setScrolled(window.scrollY > 8);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
@@ -24,6 +35,12 @@ const Navbar = () => {
   useEffect(() => {
     setMobileOpen(false);
   }, [location.pathname]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+    window.location.reload();
+  };
 
   return (
     <header
@@ -66,9 +83,32 @@ const Navbar = () => {
             })}
           </nav>
 
-          <Link to="/login" className="btn-primary">
-            Đăng nhập
-          </Link>
+          {user ? (
+            <div className="flex items-center gap-4 ml-2 border-l border-surface-700/60 pl-6">
+              <div className="flex items-center gap-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent/10 text-accent font-semibold text-sm">
+                  {(user.name || user.email || 'U').charAt(0).toUpperCase()}
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-semibold text-surface-50">
+                    {user.name || user.email.split('@')[0]}
+                  </span>
+                  <span className="text-[11px] text-surface-400">Người dùng</span>
+                </div>
+              </div>
+              <button 
+                onClick={handleLogout}
+                className="btn-icon text-surface-400 hover:text-danger hover:bg-red-50"
+                title="Đăng xuất"
+              >
+                <LogOut size={18} />
+              </button>
+            </div>
+          ) : (
+            <Link to="/login" className="btn-primary">
+              Đăng nhập
+            </Link>
+          )}
         </div>
 
         <button
@@ -107,9 +147,26 @@ const Navbar = () => {
                 );
               })}
               <div className="my-2 h-px bg-surface-700" />
-              <Link to="/login" className="btn-primary justify-center">
-                Đăng nhập
-              </Link>
+              {user ? (
+                <div className="flex flex-col gap-3 px-2">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10 text-accent font-bold">
+                      {(user.name || user.email || 'U').charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="text-sm font-bold text-surface-50">{user.name || user.email.split('@')[0]}</div>
+                      <div className="text-xs text-surface-400">{user.email}</div>
+                    </div>
+                  </div>
+                  <button onClick={handleLogout} className="btn-secondary w-full justify-center text-danger border-red-100 hover:bg-red-50 mt-2">
+                    <LogOut size={18} /> Đăng xuất
+                  </button>
+                </div>
+              ) : (
+                <Link to="/login" className="btn-primary justify-center">
+                  Đăng nhập
+                </Link>
+              )}
             </nav>
           </motion.div>
         )}
