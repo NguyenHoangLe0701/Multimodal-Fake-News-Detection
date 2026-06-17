@@ -2,13 +2,25 @@ import { useState, useRef, useEffect } from 'react';
 import { Menu, Bell, Search, ChevronDown, LogOut, Home } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
+import adminAvatar from '../../assets/admin.jpg';
 
 const AdminHeader = ({ isSidebarOpen, toggleSidebar, title }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef(null);
   const navigate = useNavigate();
 
+  const [user, setUser] = useState(null);
+
   useEffect(() => {
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setIsProfileOpen(false);
@@ -62,15 +74,17 @@ const AdminHeader = ({ isSidebarOpen, toggleSidebar, title }) => {
             onClick={() => setIsProfileOpen(!isProfileOpen)}
             className="admin-profile-btn"
           >
-            <div className="h-9 w-9 shrink-0 rounded-full bg-gradient-to-br from-accent to-accent-dark p-[2px]">
+            <div className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-br from-[#2563EB] to-[#9333EA] p-[2px] shadow-md">
               <img
-                className="h-full w-full rounded-full border-2 border-white object-cover"
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                className="h-full w-full rounded-full border-2 border-white object-cover bg-white"
+                src={adminAvatar}
                 alt="Admin avatar"
               />
             </div>
             <div className="hidden text-left sm:block">
-              <p className="text-sm font-semibold leading-tight text-surface-100">Admin User</p>
+              <p className="text-sm font-semibold leading-tight text-surface-100">
+                {user ? (user.name || user.email.split('@')[0]) : 'Admin User'}
+              </p>
               <p className="text-[11px] text-accent">Super Admin</p>
             </div>
             <motion.div
@@ -92,7 +106,7 @@ const AdminHeader = ({ isSidebarOpen, toggleSidebar, title }) => {
                 className="admin-dropdown"
               >
                 <div className="admin-dropdown-header sm:hidden">
-                  <p className="font-semibold text-surface-100">Admin User</p>
+                  <p className="font-semibold text-surface-100">{user ? (user.name || user.email.split('@')[0]) : 'Admin User'}</p>
                   <p className="text-xs text-accent">Super Admin</p>
                 </div>
 

@@ -85,8 +85,8 @@ const Navbar = () => {
 
           {user ? (
             <div className="flex items-center gap-4 ml-2 border-l border-surface-700/60 pl-6">
-              <div className="flex items-center gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent/10 text-accent font-semibold text-sm">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#2563EB] to-[#9333EA] text-white font-bold text-base shadow-md ring-2 ring-white">
                   {(user.name || user.email || 'U').charAt(0).toUpperCase()}
                 </div>
                 <div className="flex flex-col">
@@ -150,7 +150,7 @@ const Navbar = () => {
               {user ? (
                 <div className="flex flex-col gap-3 px-2">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10 text-accent font-bold">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#2563EB] to-[#9333EA] text-white font-bold text-lg shadow-md ring-2 ring-white">
                       {(user.name || user.email || 'U').charAt(0).toUpperCase()}
                     </div>
                     <div>

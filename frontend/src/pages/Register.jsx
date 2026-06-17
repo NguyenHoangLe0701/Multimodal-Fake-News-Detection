@@ -56,7 +56,38 @@ const Register = () => {
         throw signUpError;
       }
 
-      localStorage.setItem('user', JSON.stringify({ email: data.user?.email || email, name }));
+      const userEmail = data.user?.email || email;
+      const userId = data.user?.id;
+      localStorage.setItem('user', JSON.stringify({ email: userEmail, name }));
+      
+      // Lưu thông tin người dùng vào bảng users
+      if (userId) {
+        try {
+          await supabase.from('users').insert([{
+            id: userId,
+            email: userEmail,
+            full_name: name,
+            role: 'user',
+            status: 'Active'
+          }]);
+        } catch (dbError) {
+          console.error("Lỗi khi tạo user profile:", dbError);
+        }
+      }
+      const logs = JSON.parse(localStorage.getItem('login_logs') || '[]');
+      logs.unshift({ email: userEmail, role: 'user', time: new Date().toISOString() });
+      localStorage.setItem('login_logs', JSON.stringify(logs));
+
+      try {
+        await supabase.from('login_logs').insert([{ 
+          email: userEmail, 
+          role: 'user',
+          login_time: new Date().toISOString()
+        }]);
+      } catch (logError) {
+        console.error("Không thể ghi log xuống Supabase:", logError);
+      }
+
       navigate('/');
     } catch (err) {
       setError(err.message || 'Đăng ký thất bại. Vui lòng thử lại.');
