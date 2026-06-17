@@ -28,28 +28,26 @@ const sections = [
 
 const About = () => {
   return (
-    <div className="page-shell pb-20 pt-12 md:pb-24 md:pt-16">
+    <div className="page-shell" style={{ paddingTop: '8rem', paddingBottom: '6rem' }}>
       <div className="page-container max-w-4xl">
         <motion.header
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="page-header text-center"
+          className="page-header w-full flex flex-col items-center justify-center text-center"
         >
-          <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-surface-700 bg-white shadow-sm">
-            <ShieldCheck size={28} className="text-accent" />
-          </div>
-          <h1 className="page-title">
+          <h1 className="page-title w-full text-center block" style={{ textAlign: 'center' }}>
             Công nghệ đằng sau
             <br />
             <span className="text-gradient">AntiFakeNews</span>
           </h1>
-          <p className="page-subtitle mx-auto">
+          <p className="page-subtitle mx-auto w-full text-center block mt-4" style={{ textAlign: 'center' }}>
             Kiến trúc AI đa phương thức kết hợp xử lý ngôn ngữ tự nhiên
+            <br className="hidden md:block" />
             với thị giác máy tính để phát hiện tin giả.
           </p>
         </motion.header>
 
-        <div className="space-y-8">
+        <div>
           {sections.map((section, i) => (
             <motion.article
               key={section.title}
@@ -62,14 +60,15 @@ const About = () => {
                   ? 'border-emerald-200 bg-gradient-to-br from-white to-emerald-50/60'
                   : 'hover:shadow-md'
               }`}
+              style={{ marginBottom: i === sections.length - 1 ? 0 : '2.5rem', display: 'block' }}
             >
-              <div className="mb-5 flex items-start gap-4">
+              <div className="mb-5 flex items-center gap-4">
                 <div
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border ${section.iconBg} ${section.iconColor}`}
+                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border ${section.iconBg} ${section.iconColor}`}
                 >
-                  <section.icon size={22} />
+                  <section.icon size={24} />
                 </div>
-                <h2 className="pt-1 text-xl font-bold text-surface-50 md:text-2xl">
+                <h2 className="text-xl font-bold text-surface-50 md:text-2xl">
                   {section.title}
                 </h2>
               </div>

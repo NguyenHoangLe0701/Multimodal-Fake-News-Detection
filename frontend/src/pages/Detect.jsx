@@ -8,6 +8,7 @@ import {
   ShieldAlert,
   AlertTriangle,
   Sparkles,
+  Layers,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { predictNews } from '../services/api';
@@ -60,147 +61,191 @@ const Detect = () => {
   const isFake = result?.label === 'FAKE';
 
   return (
-    <div className="page-shell pb-20 pt-12 md:pb-24 md:pt-16">
-      <div className="page-container">
+    <div className="page-shell pb-20">
+      <div className="h-28 md:h-36 w-full"></div> {/* Larger spacer for beautiful top margin */}
+      <div className="page-container relative z-10">
         <motion.header
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="page-header mx-auto max-w-3xl text-center"
+          className="page-header w-full flex flex-col items-center justify-center text-center mb-14"
         >
-          <div className="section-label mx-auto">
-            <Sparkles size={13} />
+          <div className="inline-flex items-center justify-center gap-2 mb-5 px-4 py-1.5 rounded-full border border-emerald-200/50 bg-emerald-50 text-xs font-bold uppercase tracking-[0.15em] text-emerald-600 shadow-sm mx-auto">
+            <Sparkles size={14} className="text-emerald-500" />
             AI Verification Engine
           </div>
-          <h1 className="page-title">Kiểm tra tin giả</h1>
-          <p className="page-subtitle mx-auto">
-            Nhập nội dung bài viết hoặc hình ảnh để phân tích bằng AI đa phương thức.
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-surface-50 mb-5 w-full block" style={{ textAlign: 'center' }}>
+            Kiểm tra <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">tin giả</span>
+          </h1>
+          <p className="text-base md:text-lg text-surface-400 w-full block leading-relaxed" style={{ textAlign: 'center' }}>
+            Hệ thống phân tích đa phương thức (Multimodal AI) kết hợp NLP và Computer
+            <br className="hidden md:block" />
+            Vision để phát hiện tin giả với độ chính xác cao.
           </p>
         </motion.header>
 
-        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12 lg:gap-10">
+        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12 lg:gap-12">
+          {/* Left Column: Input Form */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.08 }}
-            className="section-stack lg:col-span-7"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1, duration: 0.5 }}
+            className="lg:col-span-8 flex flex-col gap-8"
           >
-            <div className="card transition-colors focus-within:border-accent/30">
-              <div className="card-header">
-                <FileText size={16} className="text-surface-400" />
-                <span className="text-sm font-semibold text-surface-100">Nội dung bài viết</span>
-                <span className="ml-auto font-mono text-xs text-surface-500">
-                  {newsText.length} ký tự
-                </span>
+            {/* Card 1: Text Input */}
+            <div className="relative rounded-3xl bg-white p-8 md:p-10 shadow-xl border border-surface-700/60 flex flex-col items-center">
+              <div className="absolute top-0 right-0 -mr-20 -mt-20 w-48 h-48 rounded-full bg-emerald-50/50 blur-3xl pointer-events-none z-0"></div>
+              
+              <div className="relative z-10 w-full flex flex-col">
+                <div className="flex items-center justify-center gap-3 mb-6">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
+                    <FileText size={20} />
+                  </div>
+                  <span className="text-base font-bold text-surface-100 uppercase tracking-wider text-center">Nội dung bài viết</span>
+                </div>
+                
+                <div className="flex flex-col w-full rounded-2xl border-2 border-surface-700 bg-surface-900/50 focus-within:border-emerald-500/50 focus-within:bg-white focus-within:ring-4 focus-within:ring-emerald-500/10 transition-all overflow-hidden">
+                  <textarea
+                    value={newsText}
+                    onChange={(e) => setNewsText(e.target.value)}
+                    placeholder="Dán toàn bộ nội dung bài viết hoặc tiêu đề vào đây để AI bắt đầu phân tích..."
+                    className="min-h-[240px] w-full resize-y bg-transparent p-6 text-lg leading-relaxed text-surface-50 outline-none placeholder:text-surface-400 text-center block"
+                  />
+                  <div className="flex justify-center px-6 py-4 border-t-2 border-surface-700/50 bg-surface-800/30 w-full">
+                    <span className={`font-mono text-sm font-bold ${newsText.length > 0 ? 'text-emerald-600' : 'text-surface-400'}`}>
+                      {newsText.length} ký tự
+                    </span>
+                  </div>
+                </div>
               </div>
-              <textarea
-                value={newsText}
-                onChange={(e) => setNewsText(e.target.value)}
-                placeholder="Dán toàn bộ nội dung bài viết hoặc tiêu đề vào đây..."
-                className="min-h-52 w-full resize-y bg-transparent p-5 text-sm leading-relaxed text-surface-100 outline-none placeholder:text-surface-500"
-              />
             </div>
 
-            <div className="card">
-              <div className="card-header">
-                <Upload size={16} className="text-surface-400" />
-                <span className="text-sm font-semibold text-surface-100">Hình ảnh đính kèm</span>
-              </div>
+            {/* Card 2: Image Input */}
+            <div className="relative rounded-3xl bg-white p-8 md:p-10 shadow-xl border border-surface-700/60 flex flex-col items-center">
+              <div className="absolute top-0 left-0 -ml-20 -mt-20 w-48 h-48 rounded-full bg-teal-50/50 blur-3xl pointer-events-none z-0"></div>
 
-              <AnimatePresence mode="wait">
-                {!imagePreview ? (
-                  <motion.div
-                    key="upload"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      handleImageChange(e);
-                    }}
-                    onDragOver={(e) => e.preventDefault()}
-                    onClick={() => fileInputRef.current?.click()}
-                    className="group/drop flex cursor-pointer flex-col items-center justify-center px-6 py-14 transition-colors hover:bg-surface-900/60"
-                  >
-                    <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-dashed border-surface-600 transition-colors group-hover/drop:border-accent group-hover/drop:bg-accent/5">
-                      <Upload
-                        size={22}
-                        className="text-surface-400 transition-colors group-hover/drop:text-accent"
-                      />
-                    </div>
-                    <p className="mb-1 text-sm font-medium text-surface-200">
-                      Kéo thả hoặc nhấn để chọn ảnh
-                    </p>
-                    <p className="text-xs text-surface-500">PNG, JPG, WEBP — tối đa 10MB</p>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="hidden"
-                    />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="preview"
-                    initial={{ opacity: 0, scale: 0.98 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="card-body"
-                  >
-                    <div className="relative overflow-hidden rounded-xl border border-surface-700 bg-surface-900">
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="mx-auto h-auto max-h-72 w-full object-contain"
-                      />
-                      <button
-                        type="button"
-                        onClick={removeImage}
-                        className="absolute right-3 top-3 rounded-full bg-white/90 p-2 text-surface-200 shadow-sm transition-colors hover:bg-danger hover:text-white"
+              <div className="relative z-10 w-full flex flex-col">
+                <div className="flex items-center justify-center gap-3 mb-6">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-100 text-teal-600">
+                    <Upload size={20} />
+                  </div>
+                  <span className="text-base font-bold text-surface-100 uppercase tracking-wider text-center">
+                    Hình ảnh đính kèm <span className="text-surface-400 font-medium normal-case ml-1">(Tùy chọn)</span>
+                  </span>
+                </div>
+                
+                <div className="w-full flex flex-col">
+                  <AnimatePresence mode="wait">
+                    {!imagePreview ? (
+                      <motion.div
+                        key="upload"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          handleImageChange(e);
+                        }}
+                        onDragOver={(e) => e.preventDefault()}
+                        onClick={() => fileInputRef.current?.click()}
+                        className="flex flex-col items-center justify-center w-full rounded-2xl border-2 border-dashed border-surface-600 bg-surface-900/30 px-8 py-16 cursor-pointer transition-all hover:border-teal-500 hover:bg-teal-50/50 group"
                       >
-                        <X size={14} />
-                      </button>
-                      <p className="border-t border-surface-700 bg-white px-4 py-2 text-sm text-surface-300">
-                        {imageFile?.name}
-                      </p>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-sm ring-2 ring-surface-700 transition-transform group-hover:scale-110">
+                          <Upload size={32} className="text-surface-400 transition-colors group-hover:text-teal-500" />
+                        </div>
+                        <p className="mb-3 text-lg font-bold text-surface-100 text-center">
+                          Kéo thả hoặc nhấn để tải ảnh lên
+                        </p>
+                        <p className="text-sm font-medium text-surface-400 text-center">Hỗ trợ định dạng PNG, JPG, WEBP (Tối đa 10MB)</p>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageChange}
+                          className="hidden"
+                        />
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="preview"
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="relative overflow-hidden rounded-2xl border-2 border-surface-700 bg-surface-900 shadow-inner group w-full flex flex-col"
+                      >
+                        <img
+                           src={imagePreview}
+                           alt="Preview"
+                           className="mx-auto h-auto max-h-[360px] w-full object-contain block"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <button
+                          type="button"
+                          onClick={removeImage}
+                          className="absolute right-6 top-6 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-surface-500 shadow-sm backdrop-blur-sm transition-all hover:bg-danger hover:text-white hover:scale-110"
+                        >
+                          <X size={20} />
+                        </button>
+                        <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all">
+                          <p className="truncate text-base font-bold text-white drop-shadow-md text-center">
+                            {imageFile?.name}
+                          </p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
             </div>
 
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={!canSubmit || isLoading}
-              className={`btn-primary btn-primary-lg w-full ${
-                !canSubmit || isLoading ? 'cursor-not-allowed opacity-50 hover:shadow-none' : ''
-              } ${!canSubmit || isLoading ? '!bg-surface-800 !text-surface-500 hover:!bg-surface-800' : ''}`}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 size={18} className="animate-spin" />
-                  Đang phân tích...
-                </>
-              ) : (
-                <>
-                  <Sparkles size={18} />
-                  Phân tích nội dung
-                </>
+            {/* Submit Button */}
+            <div className="relative z-10 w-full flex flex-col mt-4">
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={!canSubmit || isLoading}
+                className={`relative flex items-center justify-center gap-3 w-full h-16 rounded-2xl text-lg font-extrabold text-white shadow-xl transition-all duration-300 overflow-hidden ${
+                  !canSubmit || isLoading 
+                    ? 'cursor-not-allowed bg-surface-800 text-surface-400 shadow-none' 
+                    : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-emerald-500/25 hover:-translate-y-1 active:translate-y-0'
+                }`}
+              >
+                {!canSubmit && !isLoading ? null : (
+                  <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent hover:animate-shimmer"></div>
+                )}
+                
+                <span className="relative flex items-center justify-center gap-3 z-10">
+                  {isLoading ? (
+                    <>
+                      <Loader2 size={24} className="animate-spin" />
+                      Đang phân tích dữ liệu...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={24} className={!canSubmit ? "opacity-50" : ""} />
+                      KHỞI CHẠY AI VERIFICATION
+                    </>
+                  )}
+                </span>
+              </button>
+              
+              {error && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-6 flex items-center justify-center gap-3 rounded-xl border border-red-200 bg-red-50 p-5 text-base font-bold text-danger shadow-sm w-full text-center"
+                >
+                  <AlertTriangle size={20} className="shrink-0" />
+                  {error}
+                </motion.div>
               )}
-            </button>
-
-            {error && (
-              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-danger">
-                {error}
-              </div>
-            )}
+            </div>
           </motion.div>
 
+          {/* Right Column: AI Result */}
           <motion.aside
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.16 }}
-            className="lg:col-span-5 lg:sticky lg:top-24"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="lg:col-span-4 lg:sticky lg:top-28"
           >
             <AnimatePresence mode="wait">
               {!result && !isLoading && (
@@ -209,14 +254,18 @@ const Detect = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="card flex min-h-[420px] flex-col items-center justify-center p-8 text-center"
+                  className="relative rounded-3xl border border-surface-700/60 bg-gradient-to-b from-white to-surface-900/50 p-8 min-h-[460px] flex flex-col items-center justify-center text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden"
                 >
-                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-surface-700 bg-surface-900">
-                    <ShieldCheck size={22} className="text-surface-400" />
+                  {/* Subtle background circles */}
+                  <div className="absolute top-10 left-10 w-32 h-32 bg-emerald-50 rounded-full blur-3xl opacity-60"></div>
+                  <div className="absolute bottom-10 right-10 w-32 h-32 bg-teal-50 rounded-full blur-3xl opacity-60"></div>
+                  
+                  <div className="relative z-10 mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-surface-700/50">
+                    <ShieldCheck size={32} className="text-surface-300" />
                   </div>
-                  <h3 className="mb-2 text-lg font-semibold text-surface-100">Chờ nội dung</h3>
-                  <p className="max-w-xs text-sm leading-relaxed text-surface-400">
-                    Nhập văn bản hoặc ảnh bên trái để xem kết quả phân tích AI tại đây.
+                  <h3 className="relative z-10 mb-3 text-xl font-bold text-surface-100">Chờ nội dung phân tích</h3>
+                  <p className="relative z-10 max-w-xs text-sm leading-relaxed text-surface-400">
+                    AI engine đã sẵn sàng. Hãy nhập văn bản hoặc hình ảnh ở bên trái để xem kết quả đối chiếu đa phương thức tại đây.
                   </p>
                 </motion.div>
               )}
@@ -227,99 +276,124 @@ const Detect = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="card flex min-h-[420px] flex-col items-center justify-center p-8 text-center"
+                  className="relative rounded-3xl border border-surface-700/60 bg-white p-8 min-h-[460px] flex flex-col items-center justify-center text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden"
                 >
-                  <div className="relative mb-6 flex h-16 w-16 items-center justify-center">
-                    <div className="absolute inset-0 rounded-full border-[3px] border-accent/20" />
-                    <div className="absolute inset-0 animate-spin rounded-full border-[3px] border-accent border-t-transparent" />
-                    <Sparkles size={20} className="text-accent" />
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-emerald-50/30 to-transparent animate-pulse"></div>
+                  
+                  <div className="relative z-10 mb-8 flex h-24 w-24 items-center justify-center">
+                    <div className="absolute inset-0 rounded-full border-4 border-emerald-500/20" />
+                    <div className="absolute inset-0 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent border-r-transparent" />
+                    <div className="absolute inset-2 animate-spin-reverse rounded-full border-4 border-teal-500/40 border-b-transparent border-l-transparent" />
+                    <Sparkles size={28} className="text-emerald-500" />
                   </div>
-                  <h3 className="mb-2 text-lg font-bold text-surface-100">Đang phân tích</h3>
-                  <p className="text-sm text-surface-400">Đối chiếu dữ liệu multimodal...</p>
+                  <h3 className="relative z-10 mb-2 text-xl font-bold text-surface-100">Đang quét đa phương thức</h3>
+                  <p className="relative z-10 text-sm text-surface-400 font-medium">Phân tích chéo dữ liệu văn bản và hình ảnh...</p>
                 </motion.div>
               )}
 
               {result && !isLoading && (
                 <motion.div
                   key="result"
-                  initial={{ opacity: 0, scale: 0.98 }}
+                  initial={{ opacity: 0, scale: 0.96 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="card overflow-hidden"
+                  className="rounded-3xl border border-surface-700/60 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] overflow-hidden"
                 >
                   <div
-                    className={`border-b border-surface-700 px-6 py-6 ${
-                      isFake ? 'bg-red-50' : 'bg-emerald-50'
+                    className={`px-8 py-8 relative overflow-hidden ${
+                      isFake ? 'bg-gradient-to-br from-red-50 to-rose-50/50' : 'bg-gradient-to-br from-emerald-50 to-teal-50/50'
                     }`}
                   >
-                    <div className="mb-3 flex items-center gap-3">
+                    <div className={`absolute -right-10 -top-10 w-40 h-40 rounded-full blur-3xl opacity-40 ${isFake ? 'bg-red-300' : 'bg-emerald-300'}`}></div>
+                    
+                    <div className="relative z-10 mb-4 flex items-center gap-4">
                       <div
-                        className={`rounded-xl p-3 ${
-                          isFake ? 'bg-red-100 text-danger' : 'bg-emerald-100 text-accent'
+                        className={`flex h-14 w-14 items-center justify-center rounded-2xl shadow-sm ${
+                          isFake ? 'bg-white text-danger ring-1 ring-red-200' : 'bg-white text-emerald-600 ring-1 ring-emerald-200'
                         }`}
                       >
-                        {isFake ? <ShieldAlert size={24} /> : <ShieldCheck size={24} />}
+                        {isFake ? <ShieldAlert size={28} /> : <ShieldCheck size={28} />}
                       </div>
-                      <span
-                        className={`text-3xl font-black tracking-tight ${
-                          isFake ? 'text-danger' : 'text-accent'
-                        }`}
-                      >
-                        {result.label}
-                      </span>
+                      <div className="flex flex-col">
+                        <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-surface-500 mb-1">
+                          Kết luận AI
+                        </span>
+                        <span
+                          className={`text-3xl font-black tracking-tight leading-none ${
+                            isFake ? 'text-danger' : 'text-emerald-600'
+                          }`}
+                        >
+                          {result.label}
+                        </span>
+                      </div>
                     </div>
-                    <p className="text-sm font-medium text-surface-200">
+                    <p className="relative z-10 text-[15px] leading-relaxed font-medium text-surface-200">
                       {isFake
-                        ? 'Nội dung này có dấu hiệu mạnh của thao túng thông tin và tin giả.'
-                        : 'Nội dung này có vẻ xác thực với độ tin cậy cao.'}
+                        ? 'Cảnh báo: Nội dung này có dấu hiệu cao của việc thao túng thông tin hoặc là tin giả mạo.'
+                        : 'Xác thực: Nội dung này có mức độ tin cậy cao và không tìm thấy dấu hiệu thao túng đáng ngờ.'}
                     </p>
                   </div>
 
-                  <div className="card-body space-y-6">
+                  <div className="p-8 space-y-8">
+                    {/* Confidence Score */}
                     <div>
-                      <div className="mb-3 flex items-end justify-between gap-4">
-                        <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-surface-500">
-                          Độ tin cậy AI
+                      <div className="mb-3 flex items-end justify-between">
+                        <span className="text-xs font-bold uppercase tracking-[0.15em] text-surface-500">
+                          Độ tin cậy của mô hình
                         </span>
-                        <span className="font-mono text-2xl font-bold leading-none text-surface-50">
-                          {(result.confidence * 100).toFixed(1)}
-                          <span className="text-base text-surface-400">%</span>
-                        </span>
+                        <div className="flex items-baseline gap-1">
+                          <span className="font-mono text-3xl font-black leading-none text-surface-50">
+                            {(result.confidence * 100).toFixed(1)}
+                          </span>
+                          <span className="text-lg font-bold text-surface-400">%</span>
+                        </div>
                       </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-surface-800">
+                      <div className="h-3 overflow-hidden rounded-full bg-surface-800 shadow-inner">
                         <motion.div
                           initial={{ width: 0 }}
                           animate={{ width: `${result.confidence * 100}%` }}
-                          transition={{ duration: 0.8, ease: 'easeOut' }}
-                          className={`h-full rounded-full ${isFake ? 'bg-danger' : 'bg-accent'}`}
+                          transition={{ duration: 1, ease: [0.25, 1, 0.5, 1] }}
+                          className={`h-full rounded-full ${isFake ? 'bg-gradient-to-r from-red-500 to-rose-500' : 'bg-gradient-to-r from-emerald-500 to-teal-500'}`}
                         />
                       </div>
                     </div>
 
-                    <div className="rounded-xl border border-surface-700 bg-surface-900 p-4">
-                      <h4 className="mb-4 border-b border-surface-700 pb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-surface-500">
-                        Phân tích đa phương thức
+                    {/* Feature Scores */}
+                    <div className="rounded-2xl border border-surface-700/60 bg-surface-900/50 p-5">
+                      <h4 className="mb-5 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] text-surface-500">
+                        <Layers size={14} />
+                        Phân tích Late-Fusion
                       </h4>
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between gap-4">
-                          <span className="text-sm font-medium text-surface-200">Text Semantics</span>
-                          <span className="font-mono text-sm font-semibold text-accent">
-                            {result.textScore}
-                          </span>
+                      <div className="space-y-4">
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-semibold text-surface-200">Text Semantics (NLP)</span>
+                            <span className="font-mono text-sm font-bold text-surface-50">
+                              {result.textScore}
+                            </span>
+                          </div>
+                          <div className="h-1.5 w-full rounded-full bg-surface-700 overflow-hidden">
+                            <div className="h-full bg-surface-400 rounded-full" style={{ width: `${Math.min(Math.abs(result.textScore) * 10, 100)}%` }}></div>
+                          </div>
                         </div>
-                        <div className="flex items-center justify-between gap-4">
-                          <span className="text-sm font-medium text-surface-200">Visual Artifacts</span>
-                          <span className="font-mono text-sm font-semibold text-accent">
-                            {result.imageScore}
-                          </span>
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-semibold text-surface-200">Visual Artifacts (CNN)</span>
+                            <span className="font-mono text-sm font-bold text-surface-50">
+                              {result.imageScore}
+                            </span>
+                          </div>
+                          <div className="h-1.5 w-full rounded-full bg-surface-700 overflow-hidden">
+                            <div className="h-full bg-surface-400 rounded-full" style={{ width: `${Math.min(Math.abs(result.imageScore) * 10, 100)}%` }}></div>
+                          </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
-                      <AlertTriangle size={16} className="mt-0.5 shrink-0 text-warning" />
-                      <p className="text-xs leading-relaxed text-surface-300">
-                        Kết quả AI mang tính xác suất, không phải kết luận cuối cùng.
-                        Hãy xác minh lại thông qua nhiều nguồn tin chính thống.
+                    {/* Disclaimer */}
+                    <div className="flex items-start gap-3 rounded-2xl border border-amber-200/60 bg-amber-50/50 p-4">
+                      <AlertTriangle size={18} className="mt-0.5 shrink-0 text-warning" />
+                      <p className="text-[13px] leading-relaxed font-medium text-surface-400">
+                        Kết quả phân tích dựa trên AI và mang tính tham khảo. Hãy luôn kiểm tra chéo với các nguồn tin tức chính thống.
                       </p>
                     </div>
                   </div>
