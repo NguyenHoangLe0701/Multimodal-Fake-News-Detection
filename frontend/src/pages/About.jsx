@@ -1,82 +1,87 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { Layers, Database, Cpu, ShieldCheck } from 'lucide-react';
 
+const sections = [
+  {
+    icon: Database,
+    iconColor: 'text-blue-600',
+    iconBg: 'bg-blue-50 border-blue-100',
+    title: '1. NLP — Phân tích ngữ nghĩa',
+    body: 'Sử dụng mô hình Transformer (BERT/RoBERTa) được fine-tune trên tập dữ liệu tin thật và tin giả. Hệ thống hiểu ngữ cảnh, cảm xúc, và các mẫu ngôn ngữ thường gặp trong clickbait hoặc thông tin sai lệch.',
+  },
+  {
+    icon: Cpu,
+    iconColor: 'text-purple-600',
+    iconBg: 'bg-purple-50 border-purple-100',
+    title: '2. CNN — Phân tích hình ảnh',
+    body: 'Hình ảnh thường bị chỉnh sửa hoặc sử dụng sai ngữ cảnh. Hệ thống dùng mạng CNN sâu để phát hiện deepfake, các dấu hiệu ghép ảnh, và sự bất nhất về ánh sáng/bóng mà mắt thường khó nhận ra.',
+  },
+  {
+    icon: Layers,
+    iconColor: 'text-accent',
+    iconBg: 'bg-emerald-50 border-emerald-100',
+    title: '3. Late Fusion — Kết hợp đa phương thức',
+    body: 'Sức mạnh thực sự nằm ở fusion. Bằng cách đánh giá text và image độc lập, sau đó cross-reference feature vectors qua dense layer cuối cùng, hệ thống phát hiện được "Out of Context" fakes — nơi ảnh thật đi kèm caption sai lệch.',
+    highlight: true,
+  },
+];
+
 const About = () => {
   return (
-    <div className="min-h-screen pt-24 pb-20 relative overflow-hidden">
-      {/* Glows */}
-      <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#10b981]/5 rounded-full blur-[150px] pointer-events-none" />
-
-      <div className="max-w-4xl mx-auto px-6 relative z-10">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
+    <div className="page-shell pb-20 pt-12 md:pb-24 md:pt-16">
+      <div className="page-container max-w-4xl">
+        <motion.header
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-16"
+          className="page-header text-center"
         >
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/5 border border-white/10 mb-6">
-            <ShieldCheck size={32} className="text-[#10b981]" />
+          <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-surface-700 bg-white shadow-sm">
+            <ShieldCheck size={28} className="text-accent" />
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight">The Technology Behind <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-[#10b981] to-[#06b6d4]">AntiFakeNews</span></h1>
-          <p className="text-xl text-gray-400 leading-relaxed max-w-2xl mx-auto">
-            Discover how our multimodal AI architecture combines natural language processing with computer vision to expose misinformation.
+          <h1 className="page-title">
+            Công nghệ đằng sau
+            <br />
+            <span className="text-gradient">AntiFakeNews</span>
+          </h1>
+          <p className="page-subtitle mx-auto">
+            Kiến trúc AI đa phương thức kết hợp xử lý ngôn ngữ tự nhiên
+            với thị giác máy tính để phát hiện tin giả.
           </p>
-        </motion.div>
+        </motion.header>
 
-        <div className="space-y-12">
-          {/* Section 1 */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="bg-[#0f0f13]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-12"
-          >
-            <div className="flex items-center gap-4 mb-6">
-              <div className="p-3 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20">
-                <Database size={24} />
+        <div className="space-y-8">
+          {sections.map((section, i) => (
+            <motion.article
+              key={section.title}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.08 }}
+              className={`card card-padded md:p-10 ${
+                section.highlight
+                  ? 'border-emerald-200 bg-gradient-to-br from-white to-emerald-50/60'
+                  : 'hover:shadow-md'
+              }`}
+            >
+              <div className="mb-5 flex items-start gap-4">
+                <div
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border ${section.iconBg} ${section.iconColor}`}
+                >
+                  <section.icon size={22} />
+                </div>
+                <h2 className="pt-1 text-xl font-bold text-surface-50 md:text-2xl">
+                  {section.title}
+                </h2>
               </div>
-              <h2 className="text-2xl font-bold text-white">1. NLP for Text Semantics</h2>
-            </div>
-            <p className="text-gray-400 text-lg leading-relaxed mb-6">
-              Our text engine leverages advanced Transformer models (like BERT or RoBERTa) fine-tuned on vast datasets of verified and fabricated news. It doesn't just look for keywords; it understands context, sentiment, and the linguistic patterns commonly used in clickbait or deceptive writing.
-            </p>
-          </motion.div>
-
-          {/* Section 2 */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="bg-[#0f0f13]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-12"
-          >
-            <div className="flex items-center gap-4 mb-6">
-              <div className="p-3 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20">
-                <Cpu size={24} />
-              </div>
-              <h2 className="text-2xl font-bold text-white">2. CNN for Image Forensics</h2>
-            </div>
-            <p className="text-gray-400 text-lg leading-relaxed mb-6">
-              Images are often manipulated or taken out of context to support fake narratives. We use deep Convolutional Neural Networks (CNNs) to detect deepfakes, splice artifacts, and inconsistencies in lighting/shadows that the human eye might miss.
-            </p>
-          </motion.div>
-
-          {/* Section 3 */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="bg-gradient-to-br from-[#0f0f13] to-[#10b981]/10 border border-[#10b981]/20 rounded-3xl p-8 md:p-12 relative overflow-hidden"
-          >
-            <div className="flex items-center gap-4 mb-6 relative z-10">
-              <div className="p-3 bg-[#10b981]/20 text-[#10b981] rounded-xl border border-[#10b981]/30">
-                <Layers size={24} />
-              </div>
-              <h2 className="text-2xl font-bold text-white">3. Multimodal Late Fusion</h2>
-            </div>
-            <p className="text-gray-300 text-lg leading-relaxed relative z-10">
-              The true power lies in fusion. By evaluating the text and image independently and then cross-referencing their feature vectors in a final dense layer, the system can identify "Out of Context" fakes — where a real image is paired with a misleading caption.
-            </p>
-          </motion.div>
+              <p
+                className={`text-base leading-relaxed md:text-[17px] ${
+                  section.highlight ? 'text-surface-200' : 'text-surface-400'
+                }`}
+              >
+                {section.body}
+              </p>
+            </motion.article>
+          ))}
         </div>
       </div>
     </div>

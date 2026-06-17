@@ -1,26 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  PieChart, Pie, Cell, 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
+import { useState, useEffect } from 'react';
+import {
+  PieChart, Pie, Cell,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
 import { ShieldAlert, ShieldCheck, Activity, Users, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { getAdminStats } from '../../services/api';
 
 const AdminDashboard = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch stats from backend
     const fetchStats = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/admin/stats');
-        const result = await response.json();
-        if (result.status === 'success') {
-          setData(result.data);
-        }
+        const response = await getAdminStats();
+        setData(response);
       } catch (error) {
-        console.error("Error fetching stats:", error);
+        console.error('Error fetching stats:', error);
       } finally {
         setLoading(false);
       }
@@ -30,22 +27,50 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-96">
-        <Loader2 className="animate-spin text-[#10b981]" size={40} />
+      <div className="flex h-96 items-center justify-center">
+        <Loader2 className="animate-spin text-accent" size={36} />
       </div>
     );
   }
 
   const stats = [
-    { title: 'Total Checks', value: data?.total_predictions || 0, icon: Activity, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
-    { title: 'Fake Detected', value: data?.fake_count || 0, icon: ShieldAlert, color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/20' },
-    { title: 'Real Verified', value: data?.real_count || 0, icon: ShieldCheck, color: 'text-[#10b981]', bg: 'bg-[#10b981]/10', border: 'border-[#10b981]/20' },
-    { title: 'Total Users', value: data?.total_users || 0, icon: Users, color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
+    {
+      title: 'Tổng lượt kiểm tra',
+      value: data?.total_predictions || 0,
+      icon: Activity,
+      color: 'text-blue-600',
+      bg: 'bg-blue-50',
+      border: 'border-blue-100',
+    },
+    {
+      title: 'Tin giả phát hiện',
+      value: data?.fake_count || 0,
+      icon: ShieldAlert,
+      color: 'text-danger',
+      bg: 'bg-red-50',
+      border: 'border-red-100',
+    },
+    {
+      title: 'Tin thật xác minh',
+      value: data?.real_count || 0,
+      icon: ShieldCheck,
+      color: 'text-accent',
+      bg: 'bg-emerald-50',
+      border: 'border-emerald-100',
+    },
+    {
+      title: 'Tổng người dùng',
+      value: data?.total_users || 0,
+      icon: Users,
+      color: 'text-purple-600',
+      bg: 'bg-purple-50',
+      border: 'border-purple-100',
+    },
   ];
 
   const pieData = [
-    { name: 'Fake', value: data?.fake_count || 0, color: '#ef4444' }, // red-500
-    { name: 'Real', value: data?.real_count || 0, color: '#10b981' }, // emerald-500
+    { name: 'Fake', value: data?.fake_count || 0, color: '#dc2626' },
+    { name: 'Real', value: data?.real_count || 0, color: '#059669' },
   ];
 
   const barData = [
@@ -61,10 +86,10 @@ const AdminDashboard = () => {
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-[#18181d] border border-[#2e2e36] p-3 rounded-lg shadow-xl">
-          <p className="text-gray-300 font-medium mb-1">{label}</p>
+        <div className="rounded-xl border border-surface-700 bg-white p-3 shadow-lg">
+          <p className="mb-1 text-sm font-medium text-surface-100">{label}</p>
           {payload.map((entry, index) => (
-            <p key={index} style={{ color: entry.color }} className="text-sm">
+            <p key={index} style={{ color: entry.color }} className="text-xs">
               {entry.name}: {entry.value}
             </p>
           ))}
@@ -75,39 +100,42 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="admin-page">
+      <div className="admin-page-header">
+        <h2 className="page-title text-2xl md:text-3xl">Tổng quan hệ thống</h2>
+        <p className="page-subtitle !mt-0">Thống kê hoạt động phát hiện tin giả theo thời gian thực.</p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat, index) => (
-          <motion.div 
+          <motion.div
             key={stat.title}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="bg-[#18181d]/80 backdrop-blur-sm rounded-2xl border border-[#2e2e36] p-6 flex items-center relative overflow-hidden group hover:border-gray-500/50 transition-colors"
+            transition={{ delay: index * 0.08 }}
+            className="card flex items-center gap-5 p-7 transition-shadow hover:shadow-md"
           >
-            <div className={`absolute -right-4 -top-4 w-24 h-24 ${stat.bg} rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500`} />
-            <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${stat.bg} ${stat.border} border ${stat.color} mr-4 relative z-10`}>
-              <stat.icon size={28} />
+            <div
+              className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border ${stat.bg} ${stat.border} ${stat.color}`}
+            >
+              <stat.icon size={24} />
             </div>
-            <div className="relative z-10">
-              <p className="text-sm font-medium text-gray-400">{stat.title}</p>
-              <h3 className="text-3xl font-bold text-gray-100 mt-1">{stat.value}</h3>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-surface-400">{stat.title}</p>
+              <h3 className="mt-1 text-3xl font-bold text-surface-50">{stat.value}</h3>
             </div>
           </motion.div>
         ))}
       </div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Pie Chart */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.4 }}
-          className="bg-[#18181d]/80 backdrop-blur-sm rounded-2xl border border-[#2e2e36] p-6 lg:col-span-1"
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="card p-7 lg:col-span-1"
         >
-          <h3 className="text-lg font-semibold text-gray-200 mb-4">Fake vs Real Ratio</h3>
+          <h3 className="mb-5 text-base font-semibold text-surface-50">Tỷ lệ Fake vs Real</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -115,9 +143,9 @@ const AdminDashboard = () => {
                   data={pieData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
+                  innerRadius={55}
+                  outerRadius={75}
+                  paddingAngle={4}
                   dataKey="value"
                   stroke="none"
                 >
@@ -126,33 +154,39 @@ const AdminDashboard = () => {
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ color: '#dadadf' }} />
+                <Legend wrapperStyle={{ color: '#64748b', fontSize: '13px' }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
         </motion.div>
 
-        {/* Bar Chart */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.5 }}
-          className="bg-[#18181d]/80 backdrop-blur-sm rounded-2xl border border-[#2e2e36] p-6 lg:col-span-2"
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+          className="card p-7 lg:col-span-2"
         >
-          <h3 className="text-lg font-semibold text-gray-200 mb-4">Weekly Predictions</h3>
+          <h3 className="mb-5 text-base font-semibold text-surface-50">Dự đoán theo tuần</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={barData}
-                margin={{ top: 5, right: 10, left: -20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#2e2e36" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#8b8b96' }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#8b8b96' }} />
-                <Tooltip cursor={{fill: '#222228'}} content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ color: '#dadadf' }} />
-                <Bar dataKey="fake" name="Fake News" fill="#ef4444" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="real" name="Real News" fill="#10b981" radius={[4, 4, 0, 0]} />
+              <BarChart data={barData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                <XAxis
+                  dataKey="name"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#64748b', fontSize: 12 }}
+                  dy={8}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#64748b', fontSize: 12 }}
+                />
+                <Tooltip cursor={{ fill: 'rgba(15, 23, 42, 0.03)' }} content={<CustomTooltip />} />
+                <Legend wrapperStyle={{ color: '#64748b', fontSize: '13px' }} />
+                <Bar dataKey="fake" name="Tin giả" fill="#dc2626" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="real" name="Tin thật" fill="#059669" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

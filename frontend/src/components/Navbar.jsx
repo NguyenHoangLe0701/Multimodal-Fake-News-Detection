@@ -4,10 +4,10 @@ import { Menu, X, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const navLinks = [
-  { to: '/', label: 'Home' },
-  { to: '/detect', label: 'Verify News' },
-  { to: '/history', label: 'History' },
-  { to: '/about', label: 'Technology' },
+  { to: '/', label: 'Trang chủ' },
+  { to: '/detect', label: 'Kiểm tra tin' },
+  { to: '/history', label: 'Lịch sử' },
+  { to: '/about', label: 'Công nghệ' },
 ];
 
 const Navbar = () => {
@@ -16,50 +16,48 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled 
-          ? 'bg-[#050505]/80 backdrop-blur-xl border-b border-white/5 py-3 shadow-[0_4px_30px_rgba(0,0,0,0.5)]' 
-          : 'bg-transparent py-5'
+      className={`fixed inset-x-0 top-0 z-50 h-16 border-b transition-all duration-300 ${
+        scrolled
+          ? 'border-surface-700 bg-white/95 shadow-sm backdrop-blur-xl'
+          : 'border-surface-700/60 bg-white/90 backdrop-blur-md'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="bg-gradient-to-br from-[#10b981] to-[#059669] p-1.5 rounded-lg shadow-[0_0_15px_rgba(16,185,129,0.3)] group-hover:shadow-[0_0_25px_rgba(16,185,129,0.5)] transition-shadow">
-              <ShieldCheck size={24} className="text-white" />
-            </div>
-            <span className="text-xl font-bold text-white tracking-tight">
-              AntiFake<span className="text-[#10b981]">News</span>
-            </span>
-          </Link>
+      <div className="page-container flex h-full items-center justify-between gap-6">
+        <Link to="/" className="group flex shrink-0 items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent shadow-sm transition-shadow group-hover:shadow-md">
+            <ShieldCheck size={20} className="text-white" />
+          </div>
+          <span className="text-base font-bold tracking-tight text-surface-50 sm:text-lg">
+            AntiFake<span className="text-accent">News</span>
+          </span>
+        </Link>
 
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1 bg-white/5 border border-white/10 rounded-full px-2 py-1.5 backdrop-blur-md">
+        <div className="hidden items-center gap-4 md:flex">
+          <nav className="nav-pills">
             {navLinks.map((link) => {
-              const isActive = location.pathname === link.to;
+              const active = location.pathname === link.to;
               return (
                 <Link
                   key={link.to}
                   to={link.to}
-                  className={`relative px-5 py-2 rounded-full text-sm font-medium transition-colors ${
-                    isActive ? 'text-white' : 'text-gray-400 hover:text-white'
-                  }`}
+                  className={`nav-pill-link ${active ? 'is-active' : ''}`}
                 >
-                  {isActive && (
-                    <motion.div
-                      layoutId="navbar-indicator"
-                      className="absolute inset-0 bg-[#10b981]/20 rounded-full"
-                      transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                  {active && (
+                    <motion.span
+                      layoutId="nav-pill"
+                      className="absolute inset-0 rounded-full bg-white shadow-sm"
+                      transition={{ type: 'spring', bounce: 0.15, duration: 0.45 }}
                     />
                   )}
                   <span className="relative z-10">{link.label}</span>
@@ -68,59 +66,48 @@ const Navbar = () => {
             })}
           </nav>
 
-          {/* Admin CTA / Login */}
-          <div className="hidden md:flex items-center">
-            <Link 
-              to="/admin" 
-              className="px-5 py-2 text-sm font-bold text-black bg-white hover:bg-gray-200 rounded-full transition-colors"
-            >
-              Admin Panel
-            </Link>
-          </div>
-
-          {/* Mobile toggle */}
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden p-2 rounded-lg bg-white/5 border border-white/10 text-gray-300 hover:text-white transition-colors"
-          >
-            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+          <Link to="/admin" className="btn-outline">
+            Admin
+          </Link>
         </div>
+
+        <button
+          type="button"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label={mobileOpen ? 'Đóng menu' : 'Mở menu'}
+          className="btn-icon md:hidden"
+        >
+          {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
       </div>
 
-      {/* Mobile menu */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="absolute top-full left-0 right-0 bg-[#0a0a0c] border-b border-white/10 shadow-2xl md:hidden overflow-hidden"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden border-b border-surface-700 bg-white md:hidden"
           >
-            <nav className="flex flex-col p-4 space-y-2">
+            <nav className="page-container flex flex-col gap-2 py-5">
               {navLinks.map((link) => {
-                const isActive = location.pathname === link.to;
+                const active = location.pathname === link.to;
                 return (
                   <Link
                     key={link.to}
                     to={link.to}
-                    onClick={() => setMobileOpen(false)}
-                    className={`px-4 py-4 rounded-xl text-base font-medium transition-colors ${
-                      isActive 
-                        ? 'bg-[#10b981]/10 text-[#10b981]' 
-                        : 'text-gray-300 hover:bg-white/5'
+                    className={`rounded-full px-5 py-3 text-[15px] font-medium transition-colors ${
+                      active
+                        ? 'bg-accent/10 text-accent'
+                        : 'text-surface-300 hover:bg-surface-800'
                     }`}
                   >
                     {link.label}
                   </Link>
                 );
               })}
-              <div className="h-px bg-white/10 my-2" />
-              <Link 
-                to="/admin" 
-                onClick={() => setMobileOpen(false)}
-                className="px-4 py-4 rounded-xl text-base font-bold bg-[#10b981] text-black text-center"
-              >
+              <div className="my-2 h-px bg-surface-700" />
+              <Link to="/admin" className="btn-primary justify-center">
                 Admin Panel
               </Link>
             </nav>

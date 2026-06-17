@@ -1,6 +1,16 @@
 import { useState, useRef } from 'react';
-import { Upload, X, FileText, Loader2, ShieldCheck, ShieldAlert, AlertTriangle, Sparkles } from 'lucide-react';
+import {
+  Upload,
+  X,
+  FileText,
+  Loader2,
+  ShieldCheck,
+  ShieldAlert,
+  AlertTriangle,
+  Sparkles,
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { predictNews } from '../services/api';
 
 const Detect = () => {
   const [newsText, setNewsText] = useState('');
@@ -8,6 +18,7 @@ const Detect = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
 
   const handleImageChange = (e) => {
@@ -28,69 +39,71 @@ const Detect = () => {
     if (!newsText.trim() && !imageFile) return;
     setIsLoading(true);
     setResult(null);
-    await new Promise((r) => setTimeout(r, 2200));
-    const isFake = Math.random() > 0.45;
-    setResult({
-      label: isFake ? 'FAKE' : 'REAL',
-      confidence: isFake ? 0.78 + Math.random() * 0.15 : 0.82 + Math.random() * 0.12,
-      textScore: (0.6 + Math.random() * 0.35).toFixed(2),
-      imageScore: (0.5 + Math.random() * 0.4).toFixed(2),
-    });
-    setIsLoading(false);
+    setError(null);
+
+    try {
+      const data = await predictNews(newsText, imageFile);
+      setResult({
+        label: data.label,
+        confidence: data.confidence,
+        textScore: Number(data.text_score).toFixed(2),
+        imageScore: Number(data.image_score).toFixed(2),
+      });
+    } catch (err) {
+      setError(err.message || 'Không thể kết nối backend. Hãy chạy Flask server.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const canSubmit = newsText.trim().length > 10 || imageFile;
   const isFake = result?.label === 'FAKE';
 
   return (
-    <div className="min-h-screen pt-24 pb-20 relative overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#10b981]/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
-
-      <div className="max-w-6xl mx-auto px-6 relative z-10">
-        {/* Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
+    <div className="page-shell pb-20 pt-12 md:pb-24 md:pt-16">
+      <div className="page-container">
+        <motion.header
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-12 text-center"
+          className="page-header mx-auto max-w-3xl text-center"
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#10b981]/10 border border-[#10b981]/20 mb-4">
-            <Sparkles size={14} className="text-[#10b981]" />
-            <span className="text-[#10b981] text-xs font-bold uppercase tracking-wider">AI Verification Engine</span>
+          <div className="section-label mx-auto">
+            <Sparkles size={13} />
+            AI Verification Engine
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4">Fake News Detection</h1>
-          <p className="text-gray-400 text-lg">Provide the news content or an image for deep multimodal analysis.</p>
-        </motion.div>
+          <h1 className="page-title">Kiểm tra tin giả</h1>
+          <p className="page-subtitle mx-auto">
+            Nhập nội dung bài viết hoặc hình ảnh để phân tích bằng AI đa phương thức.
+          </p>
+        </motion.header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-8 items-start">
-          {/* ── Input Panel ─────────────── */}
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 }}
-            className="flex flex-col gap-6"
+        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12 lg:gap-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.08 }}
+            className="section-stack lg:col-span-7"
           >
-            {/* Text input */}
-            <div className="bg-[#0f0f13]/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden group focus-within:border-[#10b981]/50 transition-colors shadow-2xl">
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-white/[0.02]">
-                <FileText size={16} className="text-gray-400" />
-                <span className="text-gray-300 text-sm font-semibold">News Content</span>
-                <span className="text-gray-500 text-xs font-mono ml-auto">{newsText.length} chars</span>
+            <div className="card transition-colors focus-within:border-accent/30">
+              <div className="card-header">
+                <FileText size={16} className="text-surface-400" />
+                <span className="text-sm font-semibold text-surface-100">Nội dung bài viết</span>
+                <span className="ml-auto font-mono text-xs text-surface-500">
+                  {newsText.length} ký tự
+                </span>
               </div>
               <textarea
                 value={newsText}
                 onChange={(e) => setNewsText(e.target.value)}
-                placeholder="Paste the full news article or headline here..."
-                className="w-full h-48 p-4 bg-transparent text-gray-200 placeholder-gray-600 resize-none outline-none focus:ring-0"
+                placeholder="Dán toàn bộ nội dung bài viết hoặc tiêu đề vào đây..."
+                className="min-h-52 w-full resize-y bg-transparent p-5 text-sm leading-relaxed text-surface-100 outline-none placeholder:text-surface-500"
               />
             </div>
 
-            {/* Image upload */}
-            <div className="bg-[#0f0f13]/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl transition-colors hover:border-white/20">
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-white/[0.02]">
-                <Upload size={16} className="text-gray-400" />
-                <span className="text-gray-300 text-sm font-semibold">Image Attachment</span>
+            <div className="card">
+              <div className="card-header">
+                <Upload size={16} className="text-surface-400" />
+                <span className="text-sm font-semibold text-surface-100">Hình ảnh đính kèm</span>
               </div>
 
               <AnimatePresence mode="wait">
@@ -100,35 +113,53 @@ const Detect = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    onDrop={(e) => { e.preventDefault(); handleImageChange(e); }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      handleImageChange(e);
+                    }}
                     onDragOver={(e) => e.preventDefault()}
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex flex-col items-center justify-center py-16 px-6 cursor-pointer hover:bg-white/[0.02] transition-colors group"
+                    className="group/drop flex cursor-pointer flex-col items-center justify-center px-6 py-14 transition-colors hover:bg-surface-900/60"
                   >
-                    <div className="w-16 h-16 rounded-2xl border-2 border-dashed border-gray-600 flex items-center justify-center mb-4 group-hover:border-[#10b981] group-hover:bg-[#10b981]/10 transition-colors">
-                      <Upload size={24} className="text-gray-500 group-hover:text-[#10b981] transition-colors" />
+                    <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-dashed border-surface-600 transition-colors group-hover/drop:border-accent group-hover/drop:bg-accent/5">
+                      <Upload
+                        size={22}
+                        className="text-surface-400 transition-colors group-hover/drop:text-accent"
+                      />
                     </div>
-                    <p className="text-gray-300 font-medium mb-1">Drop image here or click to browse</p>
-                    <p className="text-gray-500 text-xs">Supports PNG, JPG, WEBP up to 10MB</p>
-                    <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                    <p className="mb-1 text-sm font-medium text-surface-200">
+                      Kéo thả hoặc nhấn để chọn ảnh
+                    </p>
+                    <p className="text-xs text-surface-500">PNG, JPG, WEBP — tối đa 10MB</p>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
                   </motion.div>
                 ) : (
-                  <motion.div 
+                  <motion.div
                     key="preview"
-                    initial={{ opacity: 0, scale: 0.95 }}
+                    initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="relative p-4"
+                    className="card-body"
                   >
-                    <div className="relative rounded-xl overflow-hidden bg-black/50 border border-white/10">
-                      <img src={imagePreview} alt="Preview" className="w-full h-auto max-h-[300px] object-contain" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
-                      <button 
-                        onClick={removeImage} 
-                        className="absolute top-4 right-4 p-2 bg-black/50 hover:bg-red-500/80 backdrop-blur-md rounded-full text-white transition-colors"
+                    <div className="relative overflow-hidden rounded-xl border border-surface-700 bg-surface-900">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="mx-auto h-auto max-h-72 w-full object-contain"
+                      />
+                      <button
+                        type="button"
+                        onClick={removeImage}
+                        className="absolute right-3 top-3 rounded-full bg-white/90 p-2 text-surface-200 shadow-sm transition-colors hover:bg-danger hover:text-white"
                       >
-                        <X size={16} />
+                        <X size={14} />
                       </button>
-                      <p className="absolute bottom-4 left-4 text-white text-sm font-medium truncate max-w-[80%]">
+                      <p className="border-t border-surface-700 bg-white px-4 py-2 text-sm text-surface-300">
                         {imageFile?.name}
                       </p>
                     </div>
@@ -137,135 +168,165 @@ const Detect = () => {
               </AnimatePresence>
             </div>
 
-            {/* Submit */}
-            <button 
-              onClick={handleSubmit} 
-              disabled={!canSubmit || isLoading} 
-              className={`w-full py-4 rounded-xl text-lg font-bold flex items-center justify-center gap-2 transition-all duration-300 ${
-                canSubmit && !isLoading 
-                  ? 'bg-[#10b981] hover:bg-[#059669] text-black shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)]' 
-                  : 'bg-white/5 text-gray-500 cursor-not-allowed'
-              }`}
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={!canSubmit || isLoading}
+              className={`btn-primary btn-primary-lg w-full ${
+                !canSubmit || isLoading ? 'cursor-not-allowed opacity-50 hover:shadow-none' : ''
+              } ${!canSubmit || isLoading ? '!bg-surface-800 !text-surface-500 hover:!bg-surface-800' : ''}`}
             >
               {isLoading ? (
-                <><Loader2 size={20} className="animate-spin" /> Running AI Analysis...</>
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  Đang phân tích...
+                </>
               ) : (
-                <><Sparkles size={20} /> Analyze Content</>
+                <>
+                  <Sparkles size={18} />
+                  Phân tích nội dung
+                </>
               )}
             </button>
+
+            {error && (
+              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-danger">
+                {error}
+              </div>
+            )}
           </motion.div>
 
-          {/* ── Result Panel ────────────── */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className="sticky top-24"
+          <motion.aside
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.16 }}
+            className="lg:col-span-5 lg:sticky lg:top-24"
           >
             <AnimatePresence mode="wait">
               {!result && !isLoading && (
-                <motion.div 
+                <motion.div
                   key="empty"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="bg-[#0f0f13]/40 backdrop-blur-sm border border-dashed border-white/10 rounded-2xl min-h-[400px] flex flex-col items-center justify-center p-8 text-center"
+                  className="card flex min-h-[420px] flex-col items-center justify-center p-8 text-center"
                 >
-                  <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 border border-white/10">
-                    <ShieldCheck size={24} className="text-gray-500" />
+                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-surface-700 bg-surface-900">
+                    <ShieldCheck size={22} className="text-surface-400" />
                   </div>
-                  <h3 className="text-gray-300 font-medium text-lg mb-2">Awaiting Content</h3>
-                  <p className="text-gray-500 text-sm max-w-xs">Submit text or an image on the left to see the AI verification results here.</p>
+                  <h3 className="mb-2 text-lg font-semibold text-surface-100">Chờ nội dung</h3>
+                  <p className="max-w-xs text-sm leading-relaxed text-surface-400">
+                    Nhập văn bản hoặc ảnh bên trái để xem kết quả phân tích AI tại đây.
+                  </p>
                 </motion.div>
               )}
 
               {isLoading && (
-                <motion.div 
+                <motion.div
                   key="loading"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="bg-[#0f0f13]/80 backdrop-blur-xl border border-white/10 rounded-2xl min-h-[400px] flex flex-col items-center justify-center p-8 text-center shadow-2xl"
+                  className="card flex min-h-[420px] flex-col items-center justify-center p-8 text-center"
                 >
-                  <div className="relative w-20 h-20 flex items-center justify-center mb-6">
-                    <div className="absolute inset-0 border-4 border-[#10b981]/20 rounded-full" />
-                    <div className="absolute inset-0 border-4 border-[#10b981] rounded-full border-t-transparent animate-spin" />
-                    <Sparkles size={24} className="text-[#10b981] animate-pulse" />
+                  <div className="relative mb-6 flex h-16 w-16 items-center justify-center">
+                    <div className="absolute inset-0 rounded-full border-[3px] border-accent/20" />
+                    <div className="absolute inset-0 animate-spin rounded-full border-[3px] border-accent border-t-transparent" />
+                    <Sparkles size={20} className="text-accent" />
                   </div>
-                  <h3 className="text-gray-200 font-bold text-xl mb-2">Analyzing Networks</h3>
-                  <p className="text-gray-400 text-sm">Cross-referencing multimodal datasets...</p>
+                  <h3 className="mb-2 text-lg font-bold text-surface-100">Đang phân tích</h3>
+                  <p className="text-sm text-surface-400">Đối chiếu dữ liệu multimodal...</p>
                 </motion.div>
               )}
 
               {result && !isLoading && (
-                <motion.div 
+                <motion.div
                   key="result"
-                  initial={{ opacity: 0, scale: 0.95 }}
+                  initial={{ opacity: 0, scale: 0.98 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="bg-[#0f0f13]/90 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl relative"
+                  className="card overflow-hidden"
                 >
-                  {/* Glow backdrop based on result */}
-                  <div className={`absolute -top-32 -right-32 w-64 h-64 rounded-full blur-[80px] pointer-events-none opacity-30 ${isFake ? 'bg-red-500' : 'bg-[#10b981]'}`} />
-
-                  {/* Verdict banner */}
-                  <div className={`p-8 border-b border-white/5 ${isFake ? 'bg-red-500/10' : 'bg-[#10b981]/10'}`}>
-                    <div className="flex items-center gap-4 mb-3">
-                      <div className={`p-3 rounded-xl ${isFake ? 'bg-red-500/20 text-red-400' : 'bg-[#10b981]/20 text-[#10b981]'}`}>
-                        {isFake ? <ShieldAlert size={28} /> : <ShieldCheck size={28} />}
+                  <div
+                    className={`border-b border-surface-700 px-6 py-6 ${
+                      isFake ? 'bg-red-50' : 'bg-emerald-50'
+                    }`}
+                  >
+                    <div className="mb-3 flex items-center gap-3">
+                      <div
+                        className={`rounded-xl p-3 ${
+                          isFake ? 'bg-red-100 text-danger' : 'bg-emerald-100 text-accent'
+                        }`}
+                      >
+                        {isFake ? <ShieldAlert size={24} /> : <ShieldCheck size={24} />}
                       </div>
-                      <span className={`text-4xl font-black tracking-tight ${isFake ? 'text-red-400' : 'text-[#10b981]'}`}>
+                      <span
+                        className={`text-3xl font-black tracking-tight ${
+                          isFake ? 'text-danger' : 'text-accent'
+                        }`}
+                      >
                         {result.label}
                       </span>
                     </div>
-                    <p className="text-gray-300 font-medium">
-                      {isFake ? 'This content exhibits strong signs of manipulation and misinformation.' : 'This content appears to be authentic with high reliability.'}
+                    <p className="text-sm font-medium text-surface-200">
+                      {isFake
+                        ? 'Nội dung này có dấu hiệu mạnh của thao túng thông tin và tin giả.'
+                        : 'Nội dung này có vẻ xác thực với độ tin cậy cao.'}
                     </p>
                   </div>
 
-                  <div className="p-8">
-                    {/* Confidence */}
-                    <div className="mb-8">
-                      <div className="flex items-end justify-between mb-3">
-                        <span className="text-gray-400 font-medium uppercase tracking-wider text-xs">AI Confidence</span>
-                        <span className="text-3xl font-mono font-bold text-white leading-none">
-                          {(result.confidence * 100).toFixed(1)}<span className="text-lg text-gray-500">%</span>
+                  <div className="card-body space-y-6">
+                    <div>
+                      <div className="mb-3 flex items-end justify-between gap-4">
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-surface-500">
+                          Độ tin cậy AI
+                        </span>
+                        <span className="font-mono text-2xl font-bold leading-none text-surface-50">
+                          {(result.confidence * 100).toFixed(1)}
+                          <span className="text-base text-surface-400">%</span>
                         </span>
                       </div>
-                      <div className="h-2.5 rounded-full bg-white/5 overflow-hidden">
-                        <motion.div 
+                      <div className="h-2 overflow-hidden rounded-full bg-surface-800">
+                        <motion.div
                           initial={{ width: 0 }}
                           animate={{ width: `${result.confidence * 100}%` }}
-                          transition={{ duration: 1, ease: "easeOut" }}
-                          className={`h-full rounded-full ${isFake ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]' : 'bg-[#10b981] shadow-[0_0_10px_rgba(16,185,129,0.8)]'}`} 
+                          transition={{ duration: 0.8, ease: 'easeOut' }}
+                          className={`h-full rounded-full ${isFake ? 'bg-danger' : 'bg-accent'}`}
                         />
                       </div>
                     </div>
 
-                    {/* Breakdown */}
-                    <div className="bg-white/5 rounded-xl p-5 mb-6">
-                      <h4 className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-4 border-b border-white/10 pb-2">Multimodal Breakdown</h4>
-                      <div className="flex justify-between items-center mb-3">
-                        <span className="text-gray-300 font-medium">Text Semantics</span>
-                        <span className="text-[#10b981] font-mono font-medium">{result.textScore}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-300 font-medium">Visual Artifacts</span>
-                        <span className="text-[#10b981] font-mono font-medium">{result.imageScore}</span>
+                    <div className="rounded-xl border border-surface-700 bg-surface-900 p-4">
+                      <h4 className="mb-4 border-b border-surface-700 pb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-surface-500">
+                        Phân tích đa phương thức
+                      </h4>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between gap-4">
+                          <span className="text-sm font-medium text-surface-200">Text Semantics</span>
+                          <span className="font-mono text-sm font-semibold text-accent">
+                            {result.textScore}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between gap-4">
+                          <span className="text-sm font-medium text-surface-200">Visual Artifacts</span>
+                          <span className="font-mono text-sm font-semibold text-accent">
+                            {result.imageScore}
+                          </span>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Warning */}
-                    <div className="flex items-start gap-3 bg-white/5 rounded-xl p-4 border border-white/5">
-                      <AlertTriangle size={16} className="text-yellow-500 shrink-0 mt-0.5" />
-                      <p className="text-gray-400 text-xs leading-relaxed">
-                        AI predictions are probabilistic and not definitive. Please verify sensitive news through multiple official trusted sources.
+                    <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                      <AlertTriangle size={16} className="mt-0.5 shrink-0 text-warning" />
+                      <p className="text-xs leading-relaxed text-surface-300">
+                        Kết quả AI mang tính xác suất, không phải kết luận cuối cùng.
+                        Hãy xác minh lại thông qua nhiều nguồn tin chính thống.
                       </p>
                     </div>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
-          </motion.div>
+          </motion.aside>
         </div>
       </div>
     </div>

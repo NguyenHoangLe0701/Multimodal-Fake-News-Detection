@@ -6,17 +6,15 @@ import Detect from './pages/Detect';
 import History from './pages/History';
 import About from './pages/About';
 
-// Admin Components
 import AdminLayout from './components/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminLogs from './pages/admin/AdminLogs';
 import AdminUsers from './pages/admin/AdminUsers';
 
-// Client Layout Component
 const ClientLayout = () => (
-  <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+  <div className="flex min-h-screen flex-col bg-surface-900">
     <Navbar />
-    <main style={{ flex: 1, paddingTop: 56 }}>
+    <main className="flex-1 pt-16">
       <Outlet />
     </main>
     <Footer />
@@ -27,7 +25,6 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Client Routes with Navbar and Footer */}
         <Route element={<ClientLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/detect" element={<Detect />} />
@@ -35,7 +32,6 @@ function App() {
           <Route path="/about" element={<About />} />
         </Route>
 
-        {/* Admin Routes with Admin Layout */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
           <Route path="logs" element={<AdminLogs />} />

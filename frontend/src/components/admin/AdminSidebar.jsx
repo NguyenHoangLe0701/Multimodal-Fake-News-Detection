@@ -1,85 +1,82 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  History, 
-  Users, 
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  History,
+  Users,
   LogOut,
-  X,
-  ShieldCheck
+  PanelLeftClose,
+  ShieldCheck,
 } from 'lucide-react';
+
+const navigation = [
+  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+  { name: 'Prediction Logs', href: '/admin/logs', icon: History },
+  { name: 'Users', href: '/admin/users', icon: Users },
+];
 
 const AdminSidebar = ({ isSidebarOpen, toggleSidebar }) => {
   const location = useLocation();
+  const navigate = useNavigate();
 
-  const navigation = [
-    { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-    { name: 'Prediction Logs', href: '/admin/logs', icon: History },
-    { name: 'Users', href: '/admin/users', icon: Users },
-  ];
+  const handleLogout = () => {
+    navigate('/');
+  };
 
   return (
-    <aside 
-      className={`shrink-0 bg-[#0f0f13]/95 backdrop-blur-xl border-r border-[#222228] flex flex-col h-full z-20 relative transition-all duration-300 ease-in-out ${isSidebarOpen ? 'w-64' : 'w-20'}`}
+    <aside
+      className={`relative z-20 flex h-full shrink-0 flex-col border-r border-surface-700 bg-white transition-all duration-300 ease-in-out ${
+        isSidebarOpen ? 'w-72' : 'w-[84px]'
+      }`}
     >
-      {/* Brand & Toggle */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-[#222228] shrink-0">
-        <div className="flex items-center gap-3 overflow-hidden">
-          <div className="shrink-0 bg-gradient-to-br from-[#10b981] to-[#059669] p-1.5 rounded-lg shadow-[0_0_15px_rgba(16,185,129,0.3)]">
-            <ShieldCheck size={20} className="text-white" />
+      <div className="flex h-[4.25rem] shrink-0 items-center justify-between border-b border-surface-700 px-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent shadow-sm">
+            <ShieldCheck size={18} className="text-white" />
           </div>
           {isSidebarOpen && (
-            <span className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-400 whitespace-nowrap">
-              FakeNews
+            <span className="truncate text-base font-bold text-surface-50">
+              AntiFakeNews
             </span>
           )}
         </div>
-        
+
         {isSidebarOpen && (
-          <button 
-            onClick={toggleSidebar} 
-            className="p-1.5 rounded-md hover:bg-[#222228] text-gray-400 transition-colors shrink-0"
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            aria-label="Thu gọn sidebar"
+            className="btn-icon btn-icon-sm shrink-0"
           >
-            <X size={18} />
+            <PanelLeftClose size={16} />
           </button>
         )}
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-6 hide-scrollbar">
-        <ul className="space-y-2 px-3">
+      <nav className="hide-scrollbar flex-1 overflow-y-auto px-4 py-6">
+        {isSidebarOpen && (
+          <p className="admin-sidebar-section">Menu</p>
+        )}
+
+        <ul className="space-y-2">
           {navigation.map((item) => {
-            const isActive = location.pathname === item.href || (location.pathname.startsWith(item.href) && item.href !== '/admin');
+            const isActive =
+              location.pathname === item.href ||
+              (location.pathname.startsWith(item.href) && item.href !== '/admin');
             return (
               <li key={item.name} title={!isSidebarOpen ? item.name : undefined}>
                 <Link
                   to={item.href}
-                  className={`flex items-center px-3 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden ${
-                    isActive 
-                      ? 'bg-gradient-to-r from-[#10b981]/10 to-transparent text-[#10b981]' 
-                      : 'text-gray-400 hover:bg-[#18181d] hover:text-gray-200'
+                  className={`admin-nav-link ${isActive ? 'is-active' : ''} ${
+                    !isSidebarOpen ? 'justify-center px-0' : ''
                   }`}
                 >
-                  {isActive && (
-                    <div 
-                      className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#10b981] rounded-r-md shadow-[0_0_10px_rgba(16,185,129,0.8)]"
-                    />
-                  )}
-                  
-                  <div className="shrink-0 flex items-center justify-center w-6 h-6">
-                    <item.icon 
-                      size={20} 
-                      className={`transition-colors duration-300 ${
-                        isActive ? 'text-[#10b981]' : 'text-gray-500 group-hover:text-gray-300'
-                      }`} 
-                    />
-                  </div>
-
-                  {isSidebarOpen && (
-                    <span className="ml-3 font-medium whitespace-nowrap">
-                      {item.name}
-                    </span>
-                  )}
+                  <item.icon
+                    size={20}
+                    className={`shrink-0 ${
+                      isActive ? 'text-accent' : 'text-surface-400'
+                    }`}
+                  />
+                  {isSidebarOpen && <span className="truncate">{item.name}</span>}
                 </Link>
               </li>
             );
@@ -87,24 +84,31 @@ const AdminSidebar = ({ isSidebarOpen, toggleSidebar }) => {
         </ul>
       </nav>
 
-      {/* Logout */}
-      <div className="p-4 border-t border-[#222228] shrink-0">
-        <button 
-          title={!isSidebarOpen ? 'Logout' : undefined}
-          className={`flex items-center w-full py-3 text-sm font-medium text-gray-400 rounded-xl hover:bg-red-500/10 hover:text-red-500 transition-all duration-200 group ${
-            isSidebarOpen ? 'px-3 justify-start' : 'px-0 justify-center'
-          }`}
-        >
-          <div className="shrink-0 flex items-center justify-center w-6 h-6">
-            <LogOut size={20} className="text-gray-500 group-hover:text-red-500 transition-colors" />
-          </div>
-          
-          {isSidebarOpen && (
-            <span className="ml-3 font-medium whitespace-nowrap">
-              Logout
-            </span>
-          )}
-        </button>
+      <div className="admin-sidebar-footer">
+        {isSidebarOpen ? (
+          <>
+            <div className="admin-user-mini">
+              <div className="admin-user-mini-avatar">A</div>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-surface-100">Admin User</p>
+                <p className="text-xs text-accent">Super Admin</p>
+              </div>
+            </div>
+            <button type="button" onClick={handleLogout} className="admin-logout-btn">
+              <LogOut size={18} />
+              Đăng xuất
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            onClick={handleLogout}
+            title="Đăng xuất"
+            className="admin-logout-btn admin-logout-btn-collapsed"
+          >
+            <LogOut size={18} />
+          </button>
+        )}
       </div>
     </aside>
   );

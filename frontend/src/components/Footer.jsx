@@ -1,73 +1,164 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ShieldCheck, ArrowRight, Mail, GitBranch } from 'lucide-react';
+import { getAdminStats } from '../services/api';
+
+const footerLinks = [
+  { to: '/', label: 'Trang chủ' },
+  { to: '/detect', label: 'Kiểm tra tin' },
+  { to: '/history', label: 'Lịch sử' },
+  { to: '/about', label: 'Công nghệ' },
+];
+
+const techStack = ['React', 'Flask', 'PyTorch', 'Supabase', 'Tailwind'];
 
 const Footer = () => {
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    getAdminStats()
+      .then(setStats)
+      .catch(() => setStats(null));
+  }, []);
+
   return (
-    <footer style={{ borderTop: '1px solid var(--c-800)', backgroundColor: 'var(--c-950)', marginTop: 'auto' }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 24px' }}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Brand */}
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-              <div style={{
-                width: 24, height: 24, borderRadius: 6,
-                background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <span style={{ color: 'var(--accent)', fontFamily: 'var(--font-code)', fontSize: 10, fontWeight: 500 }}>AF</span>
-              </div>
-              <span style={{ color: 'var(--c-200)', fontSize: 14, fontWeight: 600 }}>AntiFakeNews</span>
+    <footer className="site-footer">
+      <div className="site-footer-cta">
+        <div className="page-container">
+          <div className="mx-auto flex max-w-3xl flex-col items-center gap-6 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/15">
+              <ShieldCheck size={28} className="text-emerald-300" />
             </div>
-            <p style={{ color: 'var(--c-400)', fontSize: 12, lineHeight: 1.7, maxWidth: 280 }}>
-              Multimodal learning approach to detect fake news using both text content and images. A final year project.
+            <h2 className="text-2xl font-bold tracking-tight text-white md:text-4xl">
+              Bảo vệ thông tin, bắt đầu từ hôm nay
+            </h2>
+            <p className="max-w-xl text-base leading-relaxed text-slate-300 md:text-lg">
+              Hệ thống AI đa phương thức giúp bạn xác minh tin tức nhanh chóng,
+              chính xác và minh bạch.
             </p>
+            <Link
+              to="/detect"
+              className="btn-primary btn-primary-lg group mt-2 bg-emerald-500 hover:bg-emerald-600"
+            >
+              Kiểm tra ngay
+              <ArrowRight size={18} className="transition-transform group-hover:translate-x-0.5" />
+            </Link>
           </div>
+        </div>
+      </div>
 
-          {/* Navigation */}
-          <div>
-            <h3 style={{ color: 'var(--c-300)', fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>
-              Navigation
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {[
-                { to: '/', label: 'Home' },
-                { to: '/detect', label: 'Detection' },
-                { to: '/history', label: 'History' },
-                { to: '/about', label: 'About' },
-              ].map((link) => (
-                <Link key={link.to} to={link.to} style={{ color: 'var(--c-400)', fontSize: 14, transition: 'color 0.2s' }}
-                  onMouseEnter={e => e.target.style.color = 'var(--c-200)'}
-                  onMouseLeave={e => e.target.style.color = 'var(--c-400)'}>
-                  {link.label}
-                </Link>
-              ))}
+      <div className="site-footer-main bg-white">
+        <div className="page-container">
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-10">
+            <div className="lg:col-span-5">
+              <div className="mb-6 flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent shadow-sm">
+                  <ShieldCheck size={22} className="text-white" />
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-surface-50">AntiFakeNews</p>
+                  <p className="text-sm text-surface-400">Multimodal AI Detection</p>
+                </div>
+              </div>
+              <p className="max-w-md text-base leading-relaxed text-surface-400">
+                Đồ án tốt nghiệp — Phát hiện tin giả bằng học đa phương thức,
+                kết hợp phân tích văn bản và hình ảnh với kiến trúc late-fusion.
+              </p>
+
+              {stats && (
+                <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3">
+                  <div className="rounded-2xl border border-surface-700 bg-surface-900 px-4 py-5">
+                    <p className="text-2xl font-bold text-surface-50">{stats.total_predictions}</p>
+                    <p className="mt-1 text-xs font-medium uppercase tracking-wide text-surface-500">
+                      Lượt kiểm tra
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-surface-700 bg-surface-900 px-4 py-5">
+                    <p className="text-2xl font-bold text-danger">{stats.fake_count}</p>
+                    <p className="mt-1 text-xs font-medium uppercase tracking-wide text-surface-500">
+                      Tin giả
+                    </p>
+                  </div>
+                  <div className="col-span-2 rounded-2xl border border-surface-700 bg-surface-900 px-4 py-5 sm:col-span-1">
+                    <p className="text-2xl font-bold text-accent">{stats.real_count}</p>
+                    <p className="mt-1 text-xs font-medium uppercase tracking-wide text-surface-500">
+                      Tin thật
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
 
-          {/* Tech */}
-          <div>
-            <h3 style={{ color: 'var(--c-300)', fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>
-              Built With
-            </h3>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {['React', 'Flask', 'PyTorch', 'Supabase', 'Tailwind'].map((tech) => (
-                <span key={tech} style={{
-                  padding: '2px 8px', borderRadius: 4,
-                  background: 'var(--c-800)', color: 'var(--c-400)',
-                  fontSize: 12, border: '1px solid var(--c-700)',
-                }}>
-                  {tech}
-                </span>
-              ))}
+            <div className="lg:col-span-3">
+              <h3 className="mb-6 text-sm font-bold uppercase tracking-[0.14em] text-surface-500">
+                Điều hướng
+              </h3>
+              <div className="flex flex-col gap-4">
+                {footerLinks.map((link) => (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    className="text-base text-surface-300 transition-colors hover:text-accent"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+                <Link
+                  to="/admin"
+                  className="text-base text-surface-300 transition-colors hover:text-accent"
+                >
+                  Admin Panel
+                </Link>
+              </div>
+            </div>
+
+            <div className="lg:col-span-4">
+              <h3 className="mb-6 text-sm font-bold uppercase tracking-[0.14em] text-surface-500">
+                Công nghệ
+              </h3>
+              <div className="flex flex-wrap gap-3">
+                {techStack.map((tech) => (
+                  <span
+                    key={tech}
+                    className="rounded-full border border-surface-700 bg-surface-900 px-4 py-2 text-sm font-medium text-surface-300"
+                  >
+                    {tech}
+                  </span>
+                ))}
+              </div>
+
+              <div className="mt-10 space-y-4">
+                <p className="text-sm font-semibold uppercase tracking-wide text-surface-500">
+                  Liên hệ
+                </p>
+                <a
+                  href="mailto:contact@antifakenews.dev"
+                  className="flex items-center gap-3 text-base text-surface-300 transition-colors hover:text-accent"
+                >
+                  <Mail size={18} className="text-surface-400" />
+                  contact@antifakenews.dev
+                </a>
+                <a
+                  href="https://github.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 text-base text-surface-300 transition-colors hover:text-accent"
+                >
+                  <GitBranch size={18} className="text-surface-400" />
+                  GitHub Repository
+                </a>
+              </div>
             </div>
           </div>
         </div>
+      </div>
 
-        <div style={{
-          marginTop: 32, paddingTop: 24, borderTop: '1px solid var(--c-800)',
-          display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 8,
-        }}>
-          <p style={{ color: 'var(--c-500)', fontSize: 12 }}>© {new Date().getFullYear()} AntiFakeNews. All rights reserved.</p>
-          <p style={{ color: 'var(--c-500)', fontSize: 12, fontFamily: 'var(--font-code)' }}>v1.0.0</p>
+      <div className="site-footer-bottom">
+        <div className="page-container flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+          <p className="text-sm text-surface-500">
+            © {new Date().getFullYear()} AntiFakeNews. All rights reserved.
+          </p>
+          <p className="font-mono text-sm text-surface-500">v1.0.0 · Flask + React</p>
         </div>
       </div>
     </footer>
