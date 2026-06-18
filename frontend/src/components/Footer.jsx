@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShieldCheck, ArrowRight, Mail, GitBranch } from 'lucide-react';
-import { getAdminStats } from '../services/api';
+
 
 const footerLinks = [
   { to: '/', label: 'Trang chủ' },
@@ -13,13 +13,6 @@ const footerLinks = [
 const techStack = ['React', 'Flask', 'PyTorch', 'Supabase', 'Tailwind'];
 
 const Footer = () => {
-  const [stats, setStats] = useState(null);
-
-  useEffect(() => {
-    getAdminStats()
-      .then(setStats)
-      .catch(() => setStats(null));
-  }, []);
 
   return (
     <footer className="site-footer w-full">
@@ -64,23 +57,6 @@ const Footer = () => {
                 Hệ thống AI đa phương thức — Phát hiện tin giả bằng học đa phương thức,
                 kết hợp phân tích văn bản và hình ảnh với kiến trúc late-fusion.
               </p>
-
-              {stats && (
-                <div className="mt-8 grid grid-cols-2 gap-4">
-                  <div className="rounded-2xl border border-surface-700 bg-surface-900 px-4 py-4">
-                    <p className="text-xl font-bold text-surface-50">{stats.total_predictions}</p>
-                    <p className="mt-1 text-[10px] font-bold uppercase tracking-wide text-surface-500">
-                      Kiểm tra
-                    </p>
-                  </div>
-                  <div className="rounded-2xl border border-surface-700 bg-surface-900 px-4 py-4">
-                    <p className="text-xl font-bold text-danger">{stats.fake_count}</p>
-                    <p className="mt-1 text-[10px] font-bold uppercase tracking-wide text-surface-500">
-                      Tin giả
-                    </p>
-                  </div>
-                </div>
-              )}
             </div>
 
             <div className="lg:col-span-4 lg:flex lg:justify-center">
@@ -129,14 +105,14 @@ const Footer = () => {
                     Liên hệ
                   </p>
                   <a
-                    href="mailto:contact@antifakenews.dev"
+                    href="mailto:[EMAIL_ADDRESS]"
                     className="flex items-center gap-3 text-sm text-surface-300 transition-colors hover:text-accent"
                   >
                     <Mail size={16} className="text-surface-400" />
-                    contact@antifakenews.dev
+                    nguyenhoangle070105@gmail.com
                   </a>
                   <a
-                    href="https://github.com"
+                    href="https://github.com/NguyenHoangLe0701"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 text-sm text-surface-300 transition-colors hover:text-accent"
