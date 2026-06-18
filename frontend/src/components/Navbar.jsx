@@ -105,7 +105,7 @@ const Navbar = () => {
               </button>
             </div>
           ) : (
-            <Link to="/login" className="px-6 py-2.5 rounded-full bg-surface-100 text-white font-bold text-sm hover:bg-surface-50 hover:shadow-lg transition-all">
+            <Link to="/login" className="btn-primary">
               Đăng nhập
             </Link>
           )}

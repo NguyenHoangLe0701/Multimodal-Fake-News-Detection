@@ -4,7 +4,7 @@ from torchvision import models
 from transformers import AutoModel
 
 class MultimodalFakeNewsModel(nn.Module):
-    def __init__(self, text_model_name='bert-base-uncased', num_classes=2):
+    def __init__(self, text_model_name='vinai/phobert-base', num_classes=2):
         """
         Late Fusion Architecture:
         - Text Branch: Pre-trained Transformer (e.g., BERT, RoBERTa)

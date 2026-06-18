@@ -38,6 +38,31 @@ def _get_client():
         return None
 
 
+# ── Authentication ──────────────────────────────────────────────
+
+def register_user(email, password):
+    """Register a new user via Supabase Auth"""
+    client = _get_client()
+    if not client:
+        return {"id": "mock-uuid", "email": email, "message": "Mock Registration Successful (Dev Mode)"}
+    try:
+        res = client.auth.sign_up({"email": email, "password": password})
+        return {"id": res.user.id, "email": res.user.email}
+    except Exception as e:
+        return {"error": str(e)}
+
+def login_user(email, password):
+    """Log in a user via Supabase Auth"""
+    client = _get_client()
+    if not client:
+        return {"access_token": "mock-jwt-token-12345", "user": {"email": email, "id": "mock-uuid"}}
+    try:
+        res = client.auth.sign_in_with_password({"email": email, "password": password})
+        return {"access_token": res.session.access_token, "user": {"email": res.user.email, "id": res.user.id}}
+    except Exception as e:
+        return {"error": str(e)}
+
+
 # ── Storage ─────────────────────────────────────────────────────
 
 def upload_image(file_path, file_name):

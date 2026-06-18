@@ -62,7 +62,7 @@ const Detect = () => {
   const isFake = result?.label === 'FAKE';
 
   return (
-    <div className="page-shell pb-24 relative overflow-hidden bg-surface-900/30 min-h-screen">
+    <div className="page-shell pb-32 relative overflow-x-hidden bg-surface-900/30 min-h-screen">
       {/* Stronger Ambient Background for Glassmorphism pop */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
         <div className="absolute -top-[10%] -left-[10%] w-[40vw] h-[40vw] rounded-full bg-emerald-300/10 blur-[100px]"></div>
@@ -88,7 +88,7 @@ const Detect = () => {
         </motion.header>
 
         {/* 70/30 Grid Layout */}
-        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-10 xl:gap-10">
+        <div className="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-10 xl:gap-12">
           
           {/* Cột trái (70%) */}
           <motion.div
@@ -98,7 +98,7 @@ const Detect = () => {
             className="lg:col-span-7 flex flex-col gap-8"
           >
             {/* Card 1: Text Input */}
-            <div className="relative z-10 w-full flex flex-col bg-white/80 backdrop-blur-xl p-8 md:p-10 shadow-[0_8px_40px_rgb(0,0,0,0.04)] rounded-[2rem] border border-white/60 overflow-hidden group">
+            <div className="relative w-full flex flex-col bg-white/80 backdrop-blur-xl p-8 shadow-sm rounded-[2rem] border border-white/60 overflow-hidden group">
               <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-50/50 rounded-full blur-[80px] -mr-40 -mt-40 pointer-events-none transition-transform duration-1000 group-hover:scale-110"></div>
               
               <div className="relative z-10 w-full flex flex-col">
@@ -112,12 +112,12 @@ const Detect = () => {
                   </div>
                 </div>
                 
-                <div className="flex flex-col w-full rounded-3xl border border-surface-700/60 bg-white/50 focus-within:border-accent/50 focus-within:bg-white focus-within:shadow-[0_0_0_4px_rgba(16,185,129,0.1)] transition-all overflow-hidden relative">
+                <div className="w-full rounded-3xl border border-surface-700/60 bg-white/50 focus-within:border-accent/50 focus-within:bg-white focus-within:shadow-[0_0_0_4px_rgba(16,185,129,0.1)] transition-all overflow-hidden relative">
                   <textarea
                     value={newsText}
                     onChange={(e) => setNewsText(e.target.value)}
                     placeholder="Nhập hoặc dán nội dung bài viết, tiêu đề tin tức vào đây..."
-                    className="min-h-[240px] w-full resize-y bg-transparent p-6 text-lg leading-relaxed text-surface-100 outline-none placeholder:text-surface-400 block"
+                    className="h-[320px] w-full resize-none bg-transparent p-6 text-lg leading-relaxed text-surface-100 outline-none placeholder:text-surface-400 block"
                   />
                   <div className="absolute bottom-4 right-6 pointer-events-none">
                     <span className={`px-3 py-1.5 rounded-full text-xs font-bold font-mono transition-colors ${newsText.length > 0 ? 'bg-emerald-50 text-accent border border-emerald-100' : 'bg-surface-100/5 text-surface-400 border border-transparent'}`}>
@@ -129,7 +129,7 @@ const Detect = () => {
             </div>
 
             {/* Card 2: Image Input */}
-            <div className="relative z-10 w-full flex flex-col bg-white/80 backdrop-blur-xl p-8 md:p-10 shadow-[0_8px_40px_rgb(0,0,0,0.04)] rounded-[2rem] border border-white/60 overflow-hidden group">
+            <div className="relative w-full flex flex-col bg-white/80 backdrop-blur-xl p-8 shadow-sm rounded-[2rem] border border-white/60 overflow-hidden group">
               <div className="absolute bottom-0 left-0 w-96 h-96 bg-teal-50/50 rounded-full blur-[80px] -ml-40 -mb-40 pointer-events-none transition-transform duration-1000 group-hover:scale-110"></div>
 
               <div className="relative z-10 w-full flex flex-col">
@@ -157,7 +157,7 @@ const Detect = () => {
                         }}
                         onDragOver={(e) => e.preventDefault()}
                         onClick={() => fileInputRef.current?.click()}
-                        className="flex flex-col items-center justify-center w-full rounded-3xl border-2 border-dashed border-surface-400/50 bg-white/30 backdrop-blur-sm px-6 py-16 cursor-pointer transition-all duration-300 hover:border-teal-400 hover:bg-white/60 group/drop shadow-inner"
+                        className="flex flex-col items-center justify-center w-full rounded-3xl border-2 border-dashed border-surface-400/50 bg-white/30 backdrop-blur-sm px-6 h-[320px] cursor-pointer transition-all duration-300 hover:border-teal-400 hover:bg-white/60 group/drop shadow-inner"
                       >
                         <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-white shadow-md ring-1 ring-surface-700/30 transition-transform duration-300 group-hover/drop:-translate-y-2 group-hover/drop:shadow-lg group-hover/drop:ring-teal-200">
                           <Upload size={32} className="text-surface-400 transition-colors group-hover/drop:text-teal-500" />
@@ -179,12 +179,12 @@ const Detect = () => {
                         key="preview"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="relative overflow-hidden rounded-3xl border border-surface-700/50 bg-surface-900 group/img w-full flex flex-col shadow-inner"
+                        className="relative overflow-hidden rounded-3xl border border-surface-700/50 bg-surface-900 group/img w-full flex flex-col shadow-inner h-[320px] justify-center"
                       >
                         <img
                            src={imagePreview}
                            alt="Preview"
-                           className="mx-auto h-auto max-h-[360px] w-full object-contain block bg-surface-900/50"
+                           className="mx-auto h-auto max-h-[320px] w-full object-contain block bg-surface-900/50"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300"></div>
                         <button
@@ -208,12 +208,12 @@ const Detect = () => {
             </div>
 
             {/* Submit Button Section */}
-            <div className="relative z-10 w-full flex flex-col bg-white/80 backdrop-blur-xl p-6 shadow-[0_8px_40px_rgb(0,0,0,0.04)] rounded-[2rem] border border-white/60">
+            <div className="relative w-full flex flex-col bg-white/80 backdrop-blur-xl p-6 shadow-sm rounded-[2rem] border border-white/60">
               <button
                 type="button"
                 onClick={handleSubmit}
                 disabled={!canSubmit || isLoading}
-                className={`relative flex items-center justify-center gap-4 w-full h-20 rounded-[1.5rem] text-lg font-black uppercase tracking-[0.1em] transition-all duration-300 overflow-hidden ${
+                className={`relative flex items-center justify-center gap-3 w-full h-16 rounded-[1.5rem] text-lg font-black uppercase tracking-[0.1em] transition-all duration-300 overflow-hidden ${
                   !canSubmit || isLoading 
                     ? 'cursor-not-allowed bg-surface-200 text-surface-400 shadow-none' 
                     : 'bg-gradient-to-r from-accent to-teal-500 text-white shadow-xl hover:shadow-accent/30 hover:-translate-y-1 active:translate-y-0'
@@ -256,7 +256,7 @@ const Detect = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="lg:col-span-3 lg:sticky lg:top-24"
+            className="lg:col-span-3 h-full"
           >
             <AnimatePresence mode="wait">
               {!result && !isLoading && (
@@ -265,7 +265,7 @@ const Detect = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="relative rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl p-8 min-h-[560px] flex flex-col items-center justify-center text-center shadow-[0_8px_40px_rgb(0,0,0,0.05)] overflow-hidden"
+                  className="sticky top-32 flex flex-col items-center justify-center rounded-[2.5rem] border border-surface-700/50 bg-white/50 backdrop-blur-2xl p-10 text-center shadow-lg h-[calc(100vh-10rem)] min-h-[600px] overflow-hidden"
                 >
                   <div className="absolute top-0 right-0 w-48 h-48 bg-teal-50 rounded-full blur-3xl opacity-60 mix-blend-multiply"></div>
                   <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-50 rounded-full blur-3xl opacity-60 mix-blend-multiply"></div>
@@ -283,10 +283,10 @@ const Detect = () => {
               {isLoading && (
                 <motion.div
                   key="loading"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="relative rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl p-8 min-h-[560px] flex flex-col items-center justify-center text-center shadow-[0_8px_40px_rgb(0,0,0,0.05)] overflow-hidden"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="sticky top-32 flex flex-col items-center justify-center rounded-[2.5rem] border border-surface-700/50 bg-white/50 backdrop-blur-2xl p-10 text-center shadow-lg h-[calc(100vh-10rem)] min-h-[600px] overflow-hidden"
                 >
                   <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent/5 to-transparent animate-pulse"></div>
                   
@@ -304,9 +304,9 @@ const Detect = () => {
               {result && !isLoading && (
                 <motion.div
                   key="result"
-                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  className="rounded-[2rem] border border-white/60 bg-white/80 backdrop-blur-xl shadow-[0_20px_60px_rgb(0,0,0,0.08)] overflow-hidden flex flex-col"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="sticky top-32 flex flex-col rounded-[2.5rem] border border-surface-700/50 bg-white/80 backdrop-blur-2xl p-8 shadow-lg overflow-hidden"
                 >
                   <div
                     className={`p-8 relative overflow-hidden ${

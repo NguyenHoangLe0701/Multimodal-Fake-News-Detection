@@ -19,11 +19,13 @@ def create_app():
     from app.routes.predict import predict_bp
     from app.routes.history import history_bp
     from app.routes.admin import admin_bp
+    from app.routes.auth import auth_bp
     
     # Register Blueprints
     app.register_blueprint(predict_bp, url_prefix='/api/predict')
     app.register_blueprint(history_bp, url_prefix='/api/history')
     app.register_blueprint(admin_bp, url_prefix='/api/admin')
+    app.register_blueprint(auth_bp, url_prefix='/api/auth')
     
     # Health check
     @app.route('/api/health', methods=['GET'])

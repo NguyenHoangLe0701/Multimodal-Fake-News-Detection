@@ -15,19 +15,19 @@ def train_model():
     BATCH_SIZE = 16
     EPOCHS = 3
     LEARNING_RATE = 2e-5
-    TEXT_MODEL_NAME = 'bert-base-uncased'
+    TEXT_MODEL_NAME = 'vinai/phobert-base'
     
     # ── Paths ──
     # Adjust these paths if running on Colab or if your data structure differs
-    TRAIN_CSV = 'datasets/processed/train.csv'
-    VAL_CSV = 'datasets/processed/val.csv'
-    IMG_DIR = 'datasets/raw/images/'
-    SAVE_DIR = '../backend/model_weights/'
+    TRAIN_CSV = 'train.csv'
+    VAL_CSV = 'val.csv'
+    IMG_DIR = 'images/'
+    SAVE_DIR = 'model_weights/'
     
     # Check if data exists
     if not os.path.exists(TRAIN_CSV):
         print(f"Error: Could not find training data at {TRAIN_CSV}")
-        print("Please run create_mock_data.py first to generate sample data.")
+        print("Vui lòng tải các file train.csv, val.csv và thư mục images/ lên Colab cho đúng đường dẫn.")
         return
 
     os.makedirs(SAVE_DIR, exist_ok=True)

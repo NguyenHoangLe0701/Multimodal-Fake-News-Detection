@@ -5,3 +5,10 @@ requests==2.32.3
 supabase==2.11.0
 Pillow==11.1.0
 Werkzeug>=3.0.0
+
+# --- Thư viện cần thiết khi tích hợp AI thật (Giai đoạn 3) ---
+#thư viện torch rất nặng tầm 2GB
+torch>=2.0.0
+opencv-python>=4.8.0
+numpy>=1.24.0
+transformers>=4.30.0

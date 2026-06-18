@@ -82,11 +82,13 @@ def predict_fake_news():
 
     # 6. Return response
     return success_response({
-        "id": db_record.get('id'),
+        "id": db_record.get('id') if db_record else None,
         "label": ai_result['label'],
         "confidence": ai_result['confidence'],
         "text_score": ai_result['text_score'],
         "image_score": ai_result['image_score'],
+        "reason": ai_result.get('reason'),
+        "details": ai_result.get('details'),
         "image_url": image_url,
-        "created_at": db_record.get('created_at')
+        "created_at": db_record.get('created_at') if db_record else None
     })
