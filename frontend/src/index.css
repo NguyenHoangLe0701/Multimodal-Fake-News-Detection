@@ -13,28 +13,49 @@
   --color-surface-100: #1e293b;
   --color-surface-50: #0f172a;
 
-  --color-accent: #059669;
-  --color-accent-light: #10b981;
-  --color-accent-dark: #047857;
+  --color-accent: #10b981; /* Emerald Green */
+  --color-accent-light: #34d399;
+  --color-accent-dark: #059669;
 
-  --color-danger: #dc2626;
-  --color-warning: #d97706;
+  --color-teal: #14b8a6; /* Teal */
+  --color-teal-light: #2dd4bf;
+  --color-teal-dark: #0d9488;
+
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
 
   --font-body: "Inter", system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
   --animate-fade-up: fade-up 0.45s ease-out both;
+  --animate-shimmer: shimmer 2s linear infinite;
+  --animate-float: float 6s ease-in-out infinite;
 }
 
 @keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
 }
 
 /* ── Reset & Base ─────────────────────────────── */

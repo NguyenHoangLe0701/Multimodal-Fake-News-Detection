@@ -44,19 +44,19 @@ const Navbar = () => {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 h-16 border-b transition-all duration-300 ${
+      className={`sticky inset-x-0 top-0 z-50 h-20 border-b transition-all duration-500 ${
         scrolled
-          ? 'border-surface-700 bg-white/95 shadow-sm backdrop-blur-xl'
-          : 'border-surface-700/60 bg-white/90 backdrop-blur-md'
+          ? 'border-white/20 bg-white/80 shadow-[0_4px_30px_rgba(0,0,0,0.05)] backdrop-blur-2xl'
+          : 'border-transparent bg-white/40 backdrop-blur-lg'
       }`}
     >
       <div className="page-container flex h-full items-center justify-between gap-6">
         <Link to="/" className="group flex shrink-0 items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent shadow-sm transition-shadow group-hover:shadow-md">
-            <ShieldCheck size={20} className="text-white" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-accent to-teal-500 shadow-lg shadow-accent/20 transition-all duration-300 group-hover:scale-105 group-hover:shadow-accent/40">
+            <ShieldCheck size={24} className="text-white" />
           </div>
-          <span className="text-base font-bold tracking-tight text-surface-50 sm:text-lg">
-            AntiFake<span className="text-accent">News</span>
+          <span className="text-xl font-black tracking-tight text-surface-100">
+            AntiFake<span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-teal-500">News</span>
           </span>
         </Link>
 
@@ -84,28 +84,28 @@ const Navbar = () => {
           </nav>
 
           {user ? (
-            <div className="flex items-center gap-4 ml-2 border-l border-surface-700/60 pl-6">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#2563EB] to-[#9333EA] text-white font-bold text-base shadow-md ring-2 ring-white">
+            <div className="flex items-center gap-4 ml-4 border-l border-surface-700/40 pl-6">
+              <div className="flex items-center gap-3 bg-white/50 px-3 py-1.5 rounded-full border border-white shadow-sm">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 text-white font-bold text-sm shadow-inner">
                   {(user.name || user.email || 'U').charAt(0).toUpperCase()}
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-semibold text-surface-50">
+                <div className="flex flex-col pr-2">
+                  <span className="text-[13px] font-bold text-surface-100 leading-tight">
                     {user.name || user.email.split('@')[0]}
                   </span>
-                  <span className="text-[11px] text-surface-400">Người dùng</span>
+                  <span className="text-[10px] font-semibold text-accent uppercase tracking-wider">Admin</span>
                 </div>
               </div>
               <button 
                 onClick={handleLogout}
-                className="btn-icon text-surface-400 hover:text-danger hover:bg-red-50"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-white/50 border border-white shadow-sm text-surface-400 hover:text-danger hover:bg-red-50 hover:border-red-100 transition-all"
                 title="Đăng xuất"
               >
                 <LogOut size={18} />
               </button>
             </div>
           ) : (
-            <Link to="/login" className="btn-primary">
+            <Link to="/login" className="px-6 py-2.5 rounded-full bg-surface-100 text-white font-bold text-sm hover:bg-surface-50 hover:shadow-lg transition-all">
               Đăng nhập
             </Link>
           )}
