@@ -1,0 +1,41 @@
+# Tổng kết triển khai CI/CD & Testing
+
+Cấu trúc CI/CD chuyên nghiệp theo tiêu chuẩn Production đã được triển khai thành công vào dự án **Multimodal Fake News Detection**! 
+
+Hệ thống của bạn bây giờ không chỉ dừng lại ở code chạy được ở localhost, mà đã tự động kiểm thử và bảo vệ bạn khỏi các lỗi ngớ ngẩn (regressions), lỗ hổng bảo mật, và sẵn sàng tung lên Kubernetes.
+
+Dưới đây là tóm tắt những tính năng "vũ khí" đã được kích hoạt:
+
+---
+
+## 1. ⚙️ Containerization (Docker)
+Cả Backend và Frontend đều đã được đóng gói cẩn thận để bạn có thể mang hệ thống này đi chạy ở bất cứ server nào:
+- **Backend (`backend/Dockerfile`)**: Chạy bản Python 3.10 mỏng nhẹ, có cài sẵn các thư viện C++ (OpenCV/OpenGL) để support xử lý ảnh AI. Đã thay thế Flask server mặc định bằng **Gunicorn** để tăng sức chịu tải đa luồng trên Production.
+- **Frontend (`frontend/Dockerfile`)**: Build bằng kỹ thuật **Multi-stage** (dùng Node build, rồi ném file tĩnh sang Nginx). Cấu hình **Nginx (`nginx.conf`)** được tối ưu riêng biệt cho React Router (chống lỗi 404 khi F5 trang) và nén tĩnh Gzip.
+
+## 2. 🧪 Testing & Code Quality
+Hệ thống tự động chấm điểm code của bạn trước khi đưa ra ngoài:
+- **Pytest (Backend)**: Sẵn sàng file cấu hình `pytest.ini` với một test mẫu (API Health check) chạy trơn tru. Sẽ tự động đo lượng % code (Coverage) mà bạn đã test.
+- **Vitest (Frontend)**: Sẵn sàng cấu hình `vitest.config.js` và React Testing Library thay thế Jest cũ kỹ cồng kềnh.
+- **SonarCloud**: Cấu hình `sonar-project.properties` đã được viết ra. Github Actions sẽ đẩy report lên Sonar để chấm điểm (A,B,C,D) cho code của bạn.
+
+## 3. 🚀 GitHub Actions Pipelines
+Thay vì manual bằng tay, bot GitHub sẽ làm mọi thứ tự động qua 2 workflows:
+- **`.github/workflows/react-doctor.yml`**: Bác sĩ tự động "bắt bệnh" kiến trúc code React mỗi khi bạn mở Pull Request.
+- **`.github/workflows/ci-cd.yml`**: 4 giai đoạn vàng (4 Stages Pipeline) giống y hệt dự án **DealWear** xịn sò của bạn:
+  1. Build & Test Python (với công cụ bảo mật `Bandit` & linter `Ruff`).
+  2. Build & Test Node.js.
+  3. Xây dựng Docker Image và ném vào kho `ghcr.io` của GitHub (chỉ trên nhánh `main`).
+  4. Cập nhật mã GitOps (ArgoCD) thẳng vào thư mục `infrastructure/helm` để Server tự động kéo bản mới về.
+
+## 4. 🎛️ Cơ sở hạ tầng GitOps (Helm)
+Chúng ta đã chọn Option A (lưu chung chung trong 1 kho).
+Tôi đã cấu trúc một Chart Helm chuẩn hóa ở `infrastructure/helm/multimodal-fake-news/`. Nơi chứa sẵn bản thiết kế của `Deployment` và `Service` cho Kubernetes.
+
+---
+
+> [!TIP]
+> **Các việc CẦN LÀM TIẾP THEO (Để CI/CD xanh lét):**
+> 1. Truy cập vào phần Repository Settings của GitHub trên trình duyệt.
+> 2. Đảm bảo bot GitHub có quyền Read/Write ở tab **Actions > General > Workflow permissions** (chọn *Read and write permissions*).
+> 3. Để SonarCloud có thể hoạt động, hãy tạo dự án trên trang SonarCloud.io, sau đó thêm Token vào **Settings > Secrets and variables > Actions** với tên biến là `SONAR_TOKEN` (Sau đó mở lại file `ci-cd.yml` và bỏ comment phần quét Sonar).

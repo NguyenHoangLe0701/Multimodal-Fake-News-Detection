@@ -9,7 +9,9 @@ import {
   AlertTriangle,
   Sparkles,
   Layers,
-  Image as ImageIcon
+  Image as ImageIcon,
+  ScanSearch,
+  CheckCircle2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { predictNews } from '../services/api';
@@ -62,350 +64,311 @@ const Detect = () => {
   const isFake = result?.label === 'FAKE';
 
   return (
-    <div className="page-shell pb-32 relative overflow-x-hidden bg-surface-900/30 min-h-screen">
-      {/* Stronger Ambient Background for Glassmorphism pop */}
-      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute -top-[10%] -left-[10%] w-[40vw] h-[40vw] rounded-full bg-emerald-300/10 blur-[100px]"></div>
-        <div className="absolute top-[20%] -right-[10%] w-[50vw] h-[50vw] rounded-full bg-teal-300/10 blur-[120px]"></div>
+    <div className="detect-page">
+      {/* Ambient bg blobs */}
+      <div className="detect-ambient">
+        <div className="detect-blob detect-blob--1" />
+        <div className="detect-blob detect-blob--2" />
+        <div className="detect-blob detect-blob--3" />
       </div>
-      
-      <div className="page-container relative z-10 py-10 md:py-16">
+
+      <div className="page-container detect-container">
+        {/* ─── Header ─── */}
         <motion.header
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full flex flex-col items-center justify-center text-center mb-16"
+          transition={{ duration: 0.5 }}
+          className="detect-header"
         >
-          <div className="inline-flex items-center justify-center gap-2 mb-6 px-4 py-1.5 rounded-full border border-emerald-200/60 bg-white/60 backdrop-blur-md text-xs font-bold uppercase tracking-[0.15em] text-emerald-600 shadow-sm mx-auto">
-            <Sparkles size={14} className="text-emerald-500 animate-pulse" />
+          <div className="detect-badge">
+            <ScanSearch size={14} />
             AI Verification Engine
           </div>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-surface-50 mb-6 w-full text-center leading-tight">
-            Kiểm tra <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-teal-500">tin giả</span>
+          <h1 className="detect-title">
+            Kiểm tra <span className="detect-title-accent">tin giả</span>
           </h1>
-          <p className="text-lg text-surface-400 text-center max-w-2xl leading-relaxed mx-auto">
-            Hệ thống phân tích đa phương thức kết hợp NLP và Computer Vision để phát hiện tin giả với độ chính xác cao nhất.
+          <p className="detect-subtitle">
+            Hệ thống phân tích đa phương thức kết hợp NLP và Computer Vision
+            để phát hiện tin giả với độ chính xác cao nhất.
           </p>
         </motion.header>
 
-        {/* 70/30 Grid Layout (Balanced) */}
-        <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-10 xl:gap-8 w-full max-w-7xl mx-auto">
-          
-          {/* Cột trái (70%) */}
+        {/* ─── Main grid ─── */}
+        <div className="detect-grid">
+          {/* === LEFT COLUMN: inputs === */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: -24 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1, duration: 0.5 }}
-            className="lg:col-span-6 xl:col-span-7 flex flex-col gap-6"
+            className="detect-left"
           >
-            {/* Card 1: Text Input */}
-            <div className="relative w-full flex flex-col bg-white/80 backdrop-blur-xl p-6 shadow-sm rounded-[2rem] border border-white/60 overflow-hidden group">
-              <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-50/50 rounded-full blur-[80px] -mr-40 -mt-40 pointer-events-none transition-transform duration-1000 group-hover:scale-110"></div>
-              
-              <div className="relative z-10 w-full flex flex-col">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100/50 text-accent shadow-inner border border-emerald-100">
-                    <FileText size={24} />
+            {/* Card: Text Input */}
+            <div className="detect-card">
+              <div className="detect-card__glow detect-card__glow--emerald" />
+              <div className="detect-card__inner">
+                <div className="detect-card__head">
+                  <div className="detect-card__icon detect-card__icon--emerald">
+                    <FileText size={22} />
                   </div>
                   <div>
-                    <h2 className="text-xl font-extrabold text-surface-50 tracking-tight">NỘI DUNG BÀI VIẾT</h2>
-                    <p className="text-sm font-medium text-surface-400">Dán nội dung văn bản cần kiểm chứng</p>
+                    <h2 className="detect-card__title">Nội dung bài viết</h2>
+                    <p className="detect-card__desc">Dán nội dung văn bản cần kiểm chứng</p>
                   </div>
                 </div>
-                
-                <div className="w-full rounded-3xl border border-surface-700/60 bg-white/50 focus-within:border-accent/50 focus-within:bg-white focus-within:shadow-[0_0_0_4px_rgba(16,185,129,0.1)] transition-all overflow-hidden relative">
+
+                <div className="detect-textarea-wrap">
                   <textarea
                     value={newsText}
                     onChange={(e) => setNewsText(e.target.value)}
                     placeholder="Nhập hoặc dán nội dung bài viết, tiêu đề tin tức vào đây..."
-                    className="h-[180px] w-full resize-none bg-transparent p-5 text-lg leading-relaxed text-surface-100 outline-none placeholder:text-surface-400 block"
+                    className="detect-textarea"
+                    maxLength={5000}
                   />
-                  <div className="absolute bottom-3 right-5 pointer-events-none">
-                    <span className={`px-3 py-1.5 rounded-full text-[10px] font-bold font-mono transition-colors ${newsText.length > 0 ? 'bg-emerald-50 text-accent border border-emerald-100' : 'bg-surface-100/5 text-surface-400 border border-transparent'}`}>
-                      {newsText.length} / 5000 ký tự
-                    </span>
-                  </div>
+                  <span className={`detect-textarea-count ${newsText.length > 0 ? 'is-active' : ''}`}>
+                    {newsText.length} / 5000
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Card 2: Image Input */}
-            <div className="relative w-full flex flex-col bg-white/80 backdrop-blur-xl p-6 shadow-sm rounded-[2rem] border border-white/60 overflow-hidden group">
-              <div className="absolute bottom-0 left-0 w-96 h-96 bg-teal-50/50 rounded-full blur-[80px] -ml-40 -mb-40 pointer-events-none transition-transform duration-1000 group-hover:scale-110"></div>
-
-              <div className="relative z-10 w-full flex flex-col">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-100/50 text-teal-600 shadow-inner border border-teal-100">
-                    <ImageIcon size={24} />
+            {/* Card: Image Input */}
+            <div className="detect-card">
+              <div className="detect-card__glow detect-card__glow--teal" />
+              <div className="detect-card__inner">
+                <div className="detect-card__head">
+                  <div className="detect-card__icon detect-card__icon--teal">
+                    <ImageIcon size={22} />
                   </div>
                   <div>
-                    <h2 className="text-xl font-extrabold text-surface-50 tracking-tight">HÌNH ẢNH ĐÍNH KÈM</h2>
-                    <p className="text-sm font-medium text-surface-400">Hình ảnh minh họa cho bài viết (Tùy chọn)</p>
+                    <h2 className="detect-card__title">Hình ảnh đính kèm</h2>
+                    <p className="detect-card__desc">Hình ảnh minh họa cho bài viết (Tùy chọn)</p>
                   </div>
                 </div>
-                
-                <div className="w-full flex flex-col">
-                  <AnimatePresence mode="wait">
-                    {!imagePreview ? (
-                      <motion.div
-                        key="upload"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onDrop={(e) => {
-                          e.preventDefault();
-                          handleImageChange(e);
-                        }}
-                        onDragOver={(e) => e.preventDefault()}
-                        onClick={() => fileInputRef.current?.click()}
-                        className="flex flex-col items-center justify-center w-full rounded-3xl border-2 border-dashed border-surface-400/50 bg-white/30 backdrop-blur-sm px-6 h-[180px] cursor-pointer transition-all duration-300 hover:border-teal-400 hover:bg-white/60 group/drop shadow-inner"
-                      >
-                        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-md ring-1 ring-surface-700/30 transition-transform duration-300 group-hover/drop:-translate-y-2 group-hover/drop:shadow-lg group-hover/drop:ring-teal-200">
-                          <Upload size={28} className="text-surface-400 transition-colors group-hover/drop:text-teal-500" />
-                        </div>
-                        <p className="mb-1 text-base font-bold text-surface-100">
-                          Kéo thả ảnh hoặc <span className="text-teal-600 underline decoration-teal-200 underline-offset-4 hover:decoration-teal-500 transition-colors">duyệt qua máy tính</span>
-                        </p>
-                        <p className="text-[11px] font-medium text-surface-400">Định dạng hỗ trợ: PNG, JPG, WEBP (Max 10MB)</p>
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageChange}
-                          className="hidden"
-                        />
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        key="preview"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="relative overflow-hidden rounded-3xl border border-surface-700/50 bg-surface-900 group/img w-full flex flex-col shadow-inner h-[180px] justify-center"
-                      >
-                        <img
-                           src={imagePreview}
-                           alt="Preview"
-                           className="mx-auto h-auto max-h-[180px] w-full object-contain block bg-surface-900/50"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300"></div>
-                        <button
-                          type="button"
-                          onClick={removeImage}
-                          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-surface-500 shadow-sm backdrop-blur-md transition-all hover:bg-danger hover:text-white hover:scale-110"
-                        >
-                          <X size={16} />
-                        </button>
-                        <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-4 opacity-0 group-hover/img:translate-y-0 group-hover/img:opacity-100 transition-all duration-300">
-                          <p className="truncate text-sm font-bold text-white drop-shadow-md">
-                            {imageFile?.name}
-                          </p>
-                          <p className="text-[10px] text-white/70 mt-0.5 font-medium">{(imageFile?.size / 1024 / 1024).toFixed(2)} MB</p>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
+
+                <AnimatePresence mode="wait">
+                  {!imagePreview ? (
+                    <motion.div
+                      key="upload"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      onDrop={(e) => { e.preventDefault(); handleImageChange(e); }}
+                      onDragOver={(e) => e.preventDefault()}
+                      onClick={() => fileInputRef.current?.click()}
+                      className="detect-dropzone"
+                    >
+                      <div className="detect-dropzone__icon">
+                        <Upload size={26} />
+                      </div>
+                      <p className="detect-dropzone__text">
+                        Kéo thả ảnh hoặc{' '}
+                        <span className="detect-dropzone__link">duyệt qua máy tính</span>
+                      </p>
+                      <p className="detect-dropzone__hint">PNG, JPG, WEBP — Tối đa 10 MB</p>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="hidden"
+                      />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="preview"
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="detect-preview"
+                    >
+                      <img src={imagePreview} alt="Preview" className="detect-preview__img" />
+                      <div className="detect-preview__overlay" />
+                      <button type="button" onClick={removeImage} className="detect-preview__remove">
+                        <X size={16} />
+                      </button>
+                      <div className="detect-preview__meta">
+                        <p className="detect-preview__name">{imageFile?.name}</p>
+                        <p className="detect-preview__size">{(imageFile?.size / 1024 / 1024).toFixed(2)} MB</p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
 
-            {/* Submit Button Section */}
-            <div className="relative w-full flex flex-col bg-white/80 backdrop-blur-xl p-5 shadow-sm rounded-[2rem] border border-white/60">
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={!canSubmit || isLoading}
-                className={`relative flex items-center justify-center gap-3 w-full h-14 rounded-[1.25rem] text-base font-black uppercase tracking-[0.1em] transition-all duration-300 overflow-hidden ${
-                  !canSubmit || isLoading 
-                    ? 'cursor-not-allowed bg-surface-200 text-surface-400 shadow-none' 
-                    : 'bg-gradient-to-r from-accent to-teal-500 text-white shadow-xl hover:shadow-accent/30 hover:-translate-y-1 active:translate-y-0'
-                }`}
-              >
-                {!canSubmit && !isLoading ? null : (
-                  <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[shimmer_2s_infinite]"></div>
+            {/* Submit */}
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={!canSubmit || isLoading}
+              className={`detect-submit ${canSubmit && !isLoading ? 'is-ready' : ''}`}
+            >
+              {canSubmit && !isLoading && <div className="detect-submit__shimmer" />}
+              <span className="detect-submit__content">
+                {isLoading ? (
+                  <>
+                    <Loader2 size={20} className="animate-spin" />
+                    Đang phân tích AI…
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={20} />
+                    Tiến hành kiểm tra
+                  </>
                 )}
-                
-                <span className="relative flex items-center justify-center gap-3 z-10 drop-shadow-sm">
-                  {isLoading ? (
-                    <>
-                      <Loader2 size={22} className="animate-spin text-white" />
-                      <span>Đang phân tích AI...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles size={22} className={!canSubmit ? "opacity-50" : ""} />
-                      TIẾN HÀNH KIỂM TRA
-                    </>
-                  )}
-                </span>
-              </button>
-              
-              {error && (
-                <motion.div 
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="mt-4 flex items-center justify-center gap-3 rounded-2xl border border-red-200/60 bg-red-50/80 backdrop-blur p-4 text-sm font-bold text-danger shadow-sm text-center"
-                >
-                  <AlertTriangle size={18} className="shrink-0" />
-                  {error}
-                </motion.div>
-              )}
-            </div>
+              </span>
+            </button>
+
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="detect-error"
+              >
+                <AlertTriangle size={16} />
+                {error}
+              </motion.div>
+            )}
           </motion.div>
 
-          {/* Cột phải (30%) */}
+          {/* === RIGHT COLUMN: result === */}
           <motion.aside
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, x: 24 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="lg:col-span-4 xl:col-span-3 flex flex-col"
+            className="detect-right"
           >
             <AnimatePresence mode="wait">
+              {/* Empty state */}
               {!result && !isLoading && (
                 <motion.div
                   key="empty"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="flex-1 flex flex-col items-center justify-center rounded-[2.5rem] border border-surface-700/50 bg-white/50 backdrop-blur-2xl p-8 text-center shadow-lg overflow-hidden relative"
+                  className="detect-result-empty"
                 >
-                  <div className="absolute top-0 right-0 w-48 h-48 bg-teal-50 rounded-full blur-3xl opacity-60 mix-blend-multiply pointer-events-none"></div>
-                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-50 rounded-full blur-3xl opacity-60 mix-blend-multiply pointer-events-none"></div>
-                  
-                  <div className="relative z-10 mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-white shadow-sm ring-1 ring-surface-700/30">
-                    <ShieldCheck size={36} className="text-surface-300" strokeWidth={1.5} />
+                  <div className="detect-result-empty__glow" />
+                  <div className="detect-result-empty__icon">
+                    <ShieldCheck size={40} strokeWidth={1.4} />
                   </div>
-                  <h3 className="relative z-10 mb-2 text-xl font-extrabold text-surface-100 tracking-tight">Chờ nội dung</h3>
-                  <p className="relative z-10 max-w-xs text-sm leading-relaxed text-surface-400 font-medium">
-                    Hệ thống đã sẵn sàng. Hãy nhập dữ liệu ở bên trái để AI tiến hành phân tích và đối chiếu.
+                  <h3 className="detect-result-empty__title">Chờ nội dung</h3>
+                  <p className="detect-result-empty__desc">
+                    Hệ thống đã sẵn sàng. Hãy nhập dữ liệu ở bên trái
+                    để AI tiến hành phân tích và đối chiếu.
                   </p>
+                  <div className="detect-result-empty__steps">
+                    <div className="detect-result-empty__step">
+                      <FileText size={14} />
+                      <span>Nhập văn bản</span>
+                    </div>
+                    <div className="detect-result-empty__step">
+                      <ImageIcon size={14} />
+                      <span>Đính kèm ảnh</span>
+                    </div>
+                    <div className="detect-result-empty__step">
+                      <CheckCircle2 size={14} />
+                      <span>Xem kết quả</span>
+                    </div>
+                  </div>
                 </motion.div>
               )}
 
+              {/* Loading state */}
               {isLoading && (
                 <motion.div
                   key="loading"
-                  initial={{ opacity: 0, scale: 0.95 }}
+                  initial={{ opacity: 0, scale: 0.96 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="flex-1 flex flex-col items-center justify-center rounded-[2.5rem] border border-surface-700/50 bg-white/50 backdrop-blur-2xl p-8 text-center shadow-lg overflow-hidden relative"
+                  exit={{ opacity: 0, scale: 0.96 }}
+                  className="detect-result-loading"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent/5 to-transparent animate-pulse pointer-events-none"></div>
-                  
-                  <div className="relative z-10 mb-8 flex h-24 w-24 items-center justify-center">
-                    <div className="absolute inset-0 rounded-full border-4 border-emerald-500/10" />
-                    <div className="absolute inset-0 animate-spin rounded-full border-4 border-accent border-t-transparent border-r-transparent" />
-                    <div className="absolute inset-2 animate-spin-reverse rounded-full border-4 border-teal-400/40 border-b-transparent border-l-transparent" />
-                    <Sparkles size={28} className="text-accent" />
+                  <div className="detect-result-loading__pulse" />
+                  <div className="detect-result-loading__spinner">
+                    <div className="detect-spinner-ring detect-spinner-ring--outer" />
+                    <div className="detect-spinner-ring detect-spinner-ring--inner" />
+                    <Sparkles size={24} className="detect-spinner-icon" />
                   </div>
-                  <h3 className="relative z-10 mb-2 text-xl font-extrabold text-surface-100 tracking-tight">Đang quét AI</h3>
-                  <p className="relative z-10 text-sm text-surface-400 font-medium">Đang xử lý mạng neural đa phương thức...</p>
+                  <h3 className="detect-result-loading__title">Đang quét AI</h3>
+                  <p className="detect-result-loading__desc">Đang xử lý mạng neural đa phương thức…</p>
                 </motion.div>
               )}
 
+              {/* Result state */}
               {result && !isLoading && (
                 <motion.div
                   key="result"
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex-1 flex flex-col rounded-[2.5rem] border border-surface-700/50 bg-white/80 backdrop-blur-2xl p-6 shadow-lg overflow-hidden"
+                  className="detect-result"
                 >
-                  <div
-                    className={`p-6 relative overflow-hidden rounded-3xl mb-4 shrink-0 ${
-                      isFake ? 'bg-gradient-to-br from-red-50 to-rose-100/50' : 'bg-gradient-to-br from-emerald-50 to-teal-100/50'
-                    }`}
-                  >
-                    <div className={`absolute -right-8 -top-8 w-32 h-32 rounded-full blur-[30px] opacity-60 pointer-events-none ${isFake ? 'bg-red-400' : 'bg-emerald-400'}`}></div>
-                    
-                    <div className="relative z-10 flex flex-col items-center text-center">
-                      <div
-                        className={`mb-4 flex h-16 w-16 items-center justify-center rounded-[1.25rem] shadow-md bg-white ${
-                          isFake ? 'text-danger ring-2 ring-red-200' : 'text-accent ring-2 ring-emerald-200'
-                        }`}
-                      >
-                        {isFake ? <ShieldAlert size={32} /> : <ShieldCheck size={32} />}
+                  {/* Verdict */}
+                  <div className={`detect-verdict ${isFake ? 'is-fake' : 'is-real'}`}>
+                    <div className="detect-verdict__glow" />
+                    <div className="detect-verdict__icon">
+                      {isFake ? <ShieldAlert size={32} /> : <ShieldCheck size={32} />}
+                    </div>
+                    <span className="detect-verdict__label">Kết quả AI</span>
+                    <h3 className="detect-verdict__value">{result.label}</h3>
+                    <span className="detect-verdict__tag">
+                      {isFake ? 'Cảnh báo nội dung rác' : 'Nội dung tin cậy'}
+                    </span>
+                  </div>
+
+                  {/* Confidence bar */}
+                  <div className="detect-confidence">
+                    <div className="detect-confidence__header">
+                      <span className="detect-confidence__label">Độ tin cậy</span>
+                      <div className="detect-confidence__value">
+                        <span className="detect-confidence__num">
+                          {(result.confidence * 100).toFixed(1)}
+                        </span>
+                        <span className="detect-confidence__pct">%</span>
                       </div>
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-surface-500 mb-1.5">
-                        KẾT QUẢ AI
-                      </span>
-                      <h3
-                        className={`text-4xl font-black tracking-tighter mb-3 ${
-                          isFake ? 'text-danger' : 'text-accent'
-                        }`}
-                      >
-                        {result.label}
-                      </h3>
-                      <div className={`px-3 py-1.5 rounded-xl text-xs font-bold border ${
-                        isFake ? 'bg-red-100/50 border-red-200 text-red-700' : 'bg-emerald-100/50 border-emerald-200 text-emerald-700'
-                      }`}>
-                        {isFake ? 'Cảnh báo nội dung rác' : 'Nội dung tin cậy'}
-                      </div>
+                    </div>
+                    <div className="detect-confidence__track">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${result.confidence * 100}%` }}
+                        transition={{ duration: 1.5, ease: [0.25, 1, 0.5, 1] }}
+                        className={`detect-confidence__fill ${isFake ? 'is-fake' : 'is-real'}`}
+                      />
                     </div>
                   </div>
 
-                  <div className="flex-grow flex flex-col justify-between min-h-[200px]">
-                    {/* Confidence Score */}
-                    <div className="mb-4 shrink-0">
-                      <div className="mb-2 flex items-end justify-between px-2">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-surface-500">
-                          Độ tin cậy
-                        </span>
-                        <div className="flex items-baseline gap-1">
-                          <span className="font-mono text-3xl font-black tracking-tight text-surface-100">
-                            {(result.confidence * 100).toFixed(1)}
-                          </span>
-                          <span className="text-sm font-bold text-surface-400">%</span>
-                        </div>
+                  {/* Score breakdown */}
+                  <div className="detect-scores">
+                    <h4 className="detect-scores__head">
+                      <Layers size={14} />
+                      Phân tích chi tiết
+                    </h4>
+
+                    <div className="detect-score-row">
+                      <div className="detect-score-row__top">
+                        <span className="detect-score-row__name">Text (NLP)</span>
+                        <span className="detect-score-row__val">{result.textScore}</span>
                       </div>
-                      <div className="h-3 w-full rounded-full bg-surface-800 shadow-inner overflow-hidden p-0.5">
+                      <div className="detect-score-row__track">
                         <motion.div
                           initial={{ width: 0 }}
-                          animate={{ width: `${result.confidence * 100}%` }}
-                          transition={{ duration: 1.5, ease: [0.25, 1, 0.5, 1] }}
-                          className={`h-full rounded-full relative overflow-hidden ${isFake ? 'bg-gradient-to-r from-red-500 to-rose-500' : 'bg-gradient-to-r from-accent to-teal-400'}`}
-                        >
-                          <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.2)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px] animate-[shimmer_1s_linear_infinite]"></div>
-                        </motion.div>
+                          animate={{ width: `${Math.min(Math.abs(result.textScore) * 10, 100)}%` }}
+                          transition={{ duration: 1, delay: 0.5 }}
+                          className="detect-score-row__fill"
+                        />
                       </div>
                     </div>
 
-                    {/* Feature Scores */}
-                    <div className="rounded-2xl border border-surface-700/40 bg-surface-900/30 p-4 shrink-0">
-                      <h4 className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.1em] text-surface-500">
-                        <Layers size={14} />
-                        Phân tích chi tiết
-                      </h4>
-                      <div className="space-y-3">
-                        <div className="flex flex-col gap-1.5">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-semibold text-surface-200">Text (NLP)</span>
-                            <span className="font-mono text-xs font-bold text-surface-100 bg-white px-2 py-0.5 rounded shadow-sm">
-                              {result.textScore}
-                            </span>
-                          </div>
-                          <div className="h-1.5 w-full rounded-full bg-surface-700/50 overflow-hidden shadow-inner">
-                            <motion.div 
-                              initial={{ width: 0 }}
-                              animate={{ width: `${Math.min(Math.abs(result.textScore) * 10, 100)}%` }}
-                              transition={{ duration: 1, delay: 0.5 }}
-                              className="h-full bg-surface-400 rounded-full"
-                            ></motion.div>
-                          </div>
-                        </div>
-                        <div className="flex flex-col gap-1.5">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-semibold text-surface-200">Visual (CNN)</span>
-                            <span className="font-mono text-xs font-bold text-surface-100 bg-white px-2 py-0.5 rounded shadow-sm">
-                              {result.imageScore}
-                            </span>
-                          </div>
-                          <div className="h-1.5 w-full rounded-full bg-surface-700/50 overflow-hidden shadow-inner">
-                            <motion.div 
-                              initial={{ width: 0 }}
-                              animate={{ width: `${Math.min(Math.abs(result.imageScore) * 10, 100)}%` }}
-                              transition={{ duration: 1, delay: 0.7 }}
-                              className="h-full bg-surface-400 rounded-full"
-                            ></motion.div>
-                          </div>
-                        </div>
+                    <div className="detect-score-row">
+                      <div className="detect-score-row__top">
+                        <span className="detect-score-row__name">Visual (CNN)</span>
+                        <span className="detect-score-row__val">{result.imageScore}</span>
+                      </div>
+                      <div className="detect-score-row__track">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min(Math.abs(result.imageScore) * 10, 100)}%` }}
+                          transition={{ duration: 1, delay: 0.7 }}
+                          className="detect-score-row__fill"
+                        />
                       </div>
                     </div>
                   </div>

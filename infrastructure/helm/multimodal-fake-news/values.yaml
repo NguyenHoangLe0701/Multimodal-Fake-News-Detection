@@ -1,0 +1,19 @@
+frontend:
+  replicaCount: 1
+  image:
+    repository: ghcr.io/nguyenhoangle070105/multimodal-fake-news-frontend
+    tag: "latest" # Github Action sẽ dùng `sed` thay thế chuỗi này
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+
+backend:
+  replicaCount: 1
+  image:
+    repository: ghcr.io/nguyenhoangle070105/multimodal-fake-news-backend
+    tag: "latest" # Github Action sẽ dùng `sed` thay thế chuỗi này
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 5000

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: multimodal-fake-news
+description: A Helm chart for deploying Multimodal Fake News Detection platform
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
