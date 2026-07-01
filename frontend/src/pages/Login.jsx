@@ -29,7 +29,11 @@ const Login = () => {
 
     try {
       if ((email === 'admin' || email === 'admin@gmail.com') && password === 'admin@12345') {
-        localStorage.setItem('user', JSON.stringify({ email: 'admin', role: 'admin' }));
+        localStorage.setItem('user', JSON.stringify({ 
+          email: 'admin', 
+          role: 'admin',
+          avatar_url: 'https://api.dicebear.com/7.x/bottts/svg?seed=Admin&backgroundColor=10B981'
+        }));
         navigate('/admin');
         return;
       }

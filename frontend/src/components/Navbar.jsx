@@ -86,8 +86,12 @@ const Navbar = () => {
           {user ? (
             <div className="flex items-center gap-4 ml-4 border-l border-surface-700/40 pl-6">
               <div className="flex items-center gap-3 bg-white/50 px-3 py-1.5 rounded-full border border-white shadow-sm">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 text-white font-bold text-sm shadow-inner">
-                  {(user.name || user.email || 'U').charAt(0).toUpperCase()}
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 text-white font-bold text-sm shadow-inner overflow-hidden">
+                  {user.avatar_url ? (
+                    <img src={user.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
+                  ) : (
+                    (user.name || user.email || 'U').charAt(0).toUpperCase()
+                  )}
                 </div>
                 <div className="flex flex-col pr-2">
                   <span className="text-[13px] font-bold text-surface-100 leading-tight">
@@ -150,8 +154,12 @@ const Navbar = () => {
               {user ? (
                 <div className="flex flex-col gap-3 px-2">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#2563EB] to-[#9333EA] text-white font-bold text-lg shadow-md ring-2 ring-white">
-                      {(user.name || user.email || 'U').charAt(0).toUpperCase()}
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#2563EB] to-[#9333EA] text-white font-bold text-lg shadow-md ring-2 ring-white overflow-hidden">
+                      {user.avatar_url ? (
+                        <img src={user.avatar_url} alt="Avatar" className="h-full w-full object-cover bg-white" />
+                      ) : (
+                        (user.name || user.email || 'U').charAt(0).toUpperCase()
+                      )}
                     </div>
                     <div>
                       <div className="text-sm font-bold text-surface-50">{user.name || user.email.split('@')[0]}</div>
