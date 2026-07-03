@@ -1173,8 +1173,8 @@ img {
 
 .detect-textarea-count {
   position: absolute;
-  bottom: 0.625rem;
-  right: 0.875rem;
+  bottom: 0.75rem;
+  right: 3rem;
   font-size: 0.6875rem;
   font-weight: 600;
   font-family: var(--font-mono);

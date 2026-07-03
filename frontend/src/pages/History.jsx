@@ -20,7 +20,10 @@ const History = () => {
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    getHistory(50)
+    const savedUser = localStorage.getItem('user:v1') || localStorage.getItem('user');
+    const user = savedUser ? JSON.parse(savedUser) : null;
+
+    getHistory(50, user?.email)
       .then(setRecords)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
@@ -45,7 +48,7 @@ const History = () => {
           <div>
             <h1 className="page-title">Lịch sử kiểm tra</h1>
             <p className="page-subtitle">
-              Xem lại các kết quả phân tích và xác minh trước đó từ backend.
+              Nơi lưu trữ toàn bộ các phiên kiểm chứng tin tức của riêng bạn. Dễ dàng tra cứu lại kết quả phân tích AI và bằng chứng xác thực bất cứ lúc nào.
             </p>
           </div>
 
@@ -77,13 +80,7 @@ const History = () => {
           </div>
         )}
 
-        {error && !loading && (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-danger">
-            {error}
-          </div>
-        )}
-
-        {!loading && !error && (
+        {!loading && (
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -154,9 +151,24 @@ const History = () => {
                   })}
                 </tbody>
               </table>
-              {filtered.length === 0 && (
-                <div className="p-12 text-center text-surface-400">
-                  Chưa có dữ liệu lịch sử.
+              {!error && filtered.length === 0 && (
+                <div className="flex flex-col items-center justify-center p-16 text-center">
+                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-surface-800 text-surface-400">
+                    <Search size={28} />
+                  </div>
+                  <h3 className="mb-2 text-lg font-bold text-surface-200">Không có dữ liệu</h3>
+                  <p className="text-sm text-surface-500">
+                    Bạn chưa thực hiện kiểm tra tin tức nào, hoặc không tìm thấy kết quả phù hợp.
+                  </p>
+                </div>
+              )}
+              {error && (
+                <div className="flex flex-col items-center justify-center p-16 text-center">
+                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-500/10 text-danger">
+                    <ShieldAlert size={28} />
+                  </div>
+                  <h3 className="mb-2 text-lg font-bold text-danger">Không thể tải dữ liệu</h3>
+                  <p className="text-sm text-surface-500">{error}</p>
                 </div>
               )}
             </div>

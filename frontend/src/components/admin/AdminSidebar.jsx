@@ -20,7 +20,7 @@ const AdminSidebar = ({ isSidebarOpen, toggleSidebar }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [user] = useState(() => {
-    const savedUser = localStorage.getItem('user');
+    const savedUser = localStorage.getItem('user:v1') || localStorage.getItem('user');
     try {
       return savedUser ? JSON.parse(savedUser) : null;
     } catch {

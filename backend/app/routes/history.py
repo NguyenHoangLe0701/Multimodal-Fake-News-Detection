@@ -5,11 +5,12 @@ router = APIRouter()
 
 @router.get("/", summary="Lấy danh sách lịch sử kiểm tra tin giả")
 async def get_history(
-    limit: int = Query(20, description="Số lượng bản ghi tối đa trả về", ge=1, le=100)
+    limit: int = Query(20, description="Số lượng bản ghi tối đa trả về", ge=1, le=100),
+    email: str = Query(None, description="Email của user để lọc lịch sử")
 ):
     try:
         # Gọi service lấy dữ liệu từ Supabase
-        history_data = supabase_service.get_predictions(limit=limit)
+        history_data = supabase_service.get_predictions(limit=limit, user_email=email)
         
         return {
             "status": "success",

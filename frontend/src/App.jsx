@@ -13,6 +13,7 @@ import AdminLayout from './components/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminLogs from './pages/admin/AdminLogs';
 import AdminUsers from './pages/admin/AdminUsers';
+import { Toaster } from 'react-hot-toast';
 
 const ClientLayout = () => (
   <div className="flex min-h-screen flex-col bg-surface-900">
@@ -46,6 +47,7 @@ function App() {
           </Route>
         </Routes>
       </Router>
+      <Toaster position="top-right" />
       </MotionConfig>
     </LazyMotion>
   );

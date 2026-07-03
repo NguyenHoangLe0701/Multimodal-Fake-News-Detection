@@ -75,7 +75,7 @@ def upload_image_bytes(file_bytes: bytes, file_name: str):
 
 
 # ── Database (Bảng Predictions) ─────────────────────────────────
-def save_prediction(news_text, image_url, label, confidence, text_score, image_score):
+def save_prediction(news_text, image_url, label, confidence, text_score, image_score, user_email=""):
     record = {
         "news_text": news_text[:2000] if news_text else "no text context",
         "image_url": image_url,
@@ -83,6 +83,7 @@ def save_prediction(news_text, image_url, label, confidence, text_score, image_s
         "confidence_score": confidence,
         "text_score": text_score,
         "image_score": image_score,
+        "user_email": user_email,
     }
 
     client = _get_client()
@@ -102,13 +103,13 @@ def save_prediction(news_text, image_url, label, confidence, text_score, image_s
         print(f"[supabase_service] Lỗi lưu Database: {e}")
         return {**record, "id": "error", "created_at": datetime.now(timezone.utc).isoformat()}
 
-def get_predictions(limit=20):
+def get_predictions(limit=20, user_email=None):
     client = _get_client()
     if not client:
         return [
             {
                 "id": "mock-1",
-                "news_text": "Chuyên gia phát hiện UFO tại Hóc Môn...",
+                "news_text": f"Lịch sử giả lập của {user_email or 'bạn'}: Chuyên gia phát hiện UFO...",
                 "prediction_label": "FAKE",
                 "confidence_score": 0.98,
                 "created_at": datetime.now(timezone.utc).isoformat()
@@ -116,7 +117,10 @@ def get_predictions(limit=20):
         ]
 
     try:
-        result = client.table("predictions").select("*").order("created_at", desc=True).limit(limit).execute()
+        query = client.table("predictions").select("*")
+        if user_email:
+            query = query.eq("user_email", user_email)
+        result = query.order("created_at", desc=True).limit(limit).execute()
         return result.data if result.data else []
     except Exception as e:
         print(f"[supabase_service] Lỗi truy vấn Database: {e}")

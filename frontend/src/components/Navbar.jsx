@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ShieldCheck, LogOut } from 'lucide-react';
+import { Menu, X, ShieldCheck, LogOut, LayoutDashboard } from 'lucide-react';
 import { m as motion, AnimatePresence } from 'framer-motion';
+import adminAvatar from '../assets/admin.jpg';
 
 const navLinks = [
   { to: '/', label: 'Trang chủ' },
@@ -15,7 +16,7 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem('user');
+    const savedUser = localStorage.getItem('user:v1') || localStorage.getItem('user');
     try {
       return savedUser ? JSON.parse(savedUser) : null;
     } catch {
@@ -35,6 +36,7 @@ const Navbar = () => {
   }, [location.pathname]);
 
   const handleLogout = () => {
+    localStorage.removeItem('user:v1');
     localStorage.removeItem('user');
     setUser(null);
     window.location.reload();
@@ -84,20 +86,35 @@ const Navbar = () => {
           {user ? (
             <div className="flex items-center gap-4 ml-4 border-l border-surface-700/40 pl-6">
               <div className="flex items-center gap-3 bg-white/50 px-3 py-1.5 rounded-full border border-white shadow-sm">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 text-white font-bold text-sm shadow-inner overflow-hidden">
-                  {user.avatar_url ? (
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 text-white font-bold text-sm shadow-inner overflow-hidden border border-white">
+                  {user.role === 'admin' ? (
+                    <img src={adminAvatar} alt="Admin" className="h-full w-full object-cover" />
+                  ) : user.avatar_url ? (
                     <img src={user.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
                   ) : (
                     (user.name || user.email || 'U').charAt(0).toUpperCase()
                   )}
                 </div>
                 <div className="flex flex-col pr-2">
-                  <span className="text-[13px] font-bold text-surface-100 leading-tight">
-                    {user.name || user.email.split('@')[0]}
-                  </span>
-                  <span className="text-[10px] font-semibold text-accent uppercase tracking-wider">Admin</span>
+                  {!(user.role === 'admin' && ['admin', 'administrator'].includes((user.name || '').toLowerCase())) && (
+                    <span className="text-[13px] font-bold text-surface-100 leading-tight">
+                      {user.name || user.email.split('@')[0]}
+                    </span>
+                  )}
+                  {user.role === 'admin' && (
+                    <span className="text-[10px] font-semibold text-accent uppercase tracking-wider">Admin</span>
+                  )}
                 </div>
               </div>
+              {user.role === 'admin' && (
+                <Link
+                  to="/admin"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white/50 border border-white shadow-sm text-surface-400 hover:text-accent hover:bg-accent/5 hover:border-accent/20 transition-all"
+                  title="Trang quản trị"
+                >
+                  <LayoutDashboard size={18} />
+                </Link>
+              )}
               <button 
                 type="button"
                 onClick={handleLogout}
@@ -165,6 +182,11 @@ const Navbar = () => {
                       <div className="text-xs text-surface-400">{user.email}</div>
                     </div>
                   </div>
+                  {user.role === 'admin' && (
+                    <Link to="/admin" className="btn-secondary w-full justify-center text-accent border-accent/20 hover:bg-accent/5 mt-2">
+                      <LayoutDashboard size={18} /> Trang quản trị
+                    </Link>
+                  )}
                   <button type="button" onClick={handleLogout} className="btn-secondary w-full justify-center text-danger border-red-100 hover:bg-red-50 mt-2">
                     <LogOut size={18} /> Đăng xuất
                   </button>

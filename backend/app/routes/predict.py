@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Form
 from PIL import Image
 import io
 import uuid
@@ -9,7 +9,7 @@ from app.services import ai_service, supabase_service
 router = APIRouter()
 
 @router.post("/")
-async def predict_fake_news(image: UploadFile = File(...)):
+async def predict_fake_news(image: UploadFile = File(...), user_email: str = Form("")):
     """API Endpoint nhận duy nhất 1 bức ảnh từ Frontend"""
     
     ext = image.filename.split('.')[-1].lower()
@@ -44,7 +44,8 @@ async def predict_fake_news(image: UploadFile = File(...)):
         label=ai_result['label'],
         confidence=ai_result['confidence'],
         text_score=ai_result['text_score'],
-        image_score=ai_result['image_score']
+        image_score=ai_result['image_score'],
+        user_email=user_email
     )
 
     return {

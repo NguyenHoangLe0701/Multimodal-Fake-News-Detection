@@ -46,7 +46,9 @@ const Detect = () => {
     setError(null);
 
     try {
-      const data = await predictNews(newsText, imageFile);
+      const savedUser = localStorage.getItem('user:v1') || localStorage.getItem('user');
+      const user = savedUser ? JSON.parse(savedUser) : null;
+      const data = await predictNews(newsText, imageFile, user?.email);
       setResult({
         label: data.label,
         confidence: data.confidence,
@@ -122,7 +124,7 @@ const Detect = () => {
                     value={newsText}
                     onChange={(e) => setNewsText(e.target.value)}
                     placeholder="Dán nội dung tin tức, bài đăng mạng xã hội hoặc bất kỳ đoạn văn bản nào bạn nghi ngờ..."
-                    className="input-field w-full resize-none py-4 text-base min-h-[140px]"
+                    className="detect-textarea"
                     maxLength={5000}
                   />
                   <span className={`detect-textarea-count ${newsText.length > 0 ? 'is-active' : ''}`}>

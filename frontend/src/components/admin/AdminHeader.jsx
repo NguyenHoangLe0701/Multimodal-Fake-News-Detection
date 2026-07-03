@@ -10,7 +10,7 @@ const AdminHeader = ({ isSidebarOpen, toggleSidebar, title }) => {
   const navigate = useNavigate();
 
   const [user] = useState(() => {
-    const savedUser = localStorage.getItem('user');
+    const savedUser = localStorage.getItem('user:v1') || localStorage.getItem('user');
     try {
       return savedUser ? JSON.parse(savedUser) : null;
     } catch {
@@ -29,8 +29,9 @@ const AdminHeader = ({ isSidebarOpen, toggleSidebar, title }) => {
   }, []);
 
   const handleLogout = () => {
-    setIsProfileOpen(false);
-    navigate('/');
+    localStorage.removeItem('user:v1');
+    localStorage.removeItem('user');
+    navigate('/login');
   };
 
   return (
@@ -72,12 +73,14 @@ const AdminHeader = ({ isSidebarOpen, toggleSidebar, title }) => {
             onClick={() => setIsProfileOpen(!isProfileOpen)}
             className="admin-profile-btn"
           >
-            <div className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-br from-[#2563EB] to-[#9333EA] p-[2px] shadow-md">
-              <img
-                className="h-full w-full rounded-full border-2 border-white object-cover bg-white"
-                src={adminAvatar}
-                alt="Admin avatar"
-              />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#2563EB] to-[#9333EA] text-white font-bold text-sm shadow-md overflow-hidden border-2 border-white">
+              {user?.role === 'admin' ? (
+                <img src={adminAvatar} alt="Admin" className="h-full w-full object-cover" />
+              ) : user?.avatar_url ? (
+                <img src={user.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
+              ) : (
+                (user?.name || user?.email || 'U').charAt(0).toUpperCase()
+              )}
             </div>
             <div className="hidden text-left sm:block">
               <p className="text-sm font-semibold leading-tight text-surface-100">
