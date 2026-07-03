@@ -31,6 +31,6 @@ jobs:
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
-      - uses: millionco/react-doctor@9f170c8aef9cfbbec625291a26d2dff8e09f7a77 # v2
+      - uses: millionco/react-doctor@1e16a4928149f6996e451c6f449941f968bfb76d # v2
         with:
           directory: frontend
