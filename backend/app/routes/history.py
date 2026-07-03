@@ -1,26 +1,20 @@
-from flask import Blueprint, request
-from app.utils.helpers import success_response, error_response
+from fastapi import APIRouter, Query, HTTPException
 from app.services import supabase_service
 
-history_bp = Blueprint('history', __name__)
+router = APIRouter()
 
-@history_bp.route('/', methods=['GET'])
-def get_history():
-    """
-    Endpoint to retrieve prediction history.
-    """
+@router.get("/", summary="Lấy danh sách lịch sử kiểm tra tin giả")
+async def get_history(
+    limit: int = Query(20, description="Số lượng bản ghi tối đa trả về", ge=1, le=100)
+):
     try:
-        # Get limit from query params, default to 20
-        limit_str = request.args.get('limit', '20')
-        limit = int(limit_str) if limit_str.isdigit() else 20
+        # Gọi service lấy dữ liệu từ Supabase
+        history_data = supabase_service.get_predictions(limit=limit)
         
-        # Max limit to prevent large queries
-        if limit > 100:
-            limit = 100
-            
-        records = supabase_service.get_predictions(limit=limit)
-        return success_response(records)
-        
+        return {
+            "status": "success",
+            "count": len(history_data),
+            "data": history_data
+        }
     except Exception as e:
-        print(f"[history_route] Error: {e}")
-        return error_response("Failed to retrieve history.", 500)
+        raise HTTPException(status_code=500, detail=f"Lỗi truy xuất dữ liệu: {str(e)}")

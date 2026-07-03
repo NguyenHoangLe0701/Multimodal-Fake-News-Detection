@@ -1,27 +1,36 @@
-from flask import Blueprint, request
-from app.utils.helpers import success_response, error_response
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, EmailStr
 from app.services import supabase_service
 
-auth_bp = Blueprint('auth', __name__)
+router = APIRouter()
 
-@auth_bp.route('/register', methods=['POST'])
-def register():
-    data = request.json
-    if not data or 'email' not in data or 'password' not in data:
-        return error_response("Email and password are required.", 400)
+# Định nghĩa cấu trúc dữ liệu gửi lên
+class UserCredentials(BaseModel):
+    email: EmailStr # Tự động kiểm tra định dạng email hợp lệ
+    password: str
+
+@router.post("/register", summary="Đăng ký tài khoản mới")
+async def register(credentials: UserCredentials):
+    result = supabase_service.register_user(credentials.email, credentials.password)
     
-    result = supabase_service.register_user(data['email'], data['password'])
     if "error" in result:
-        return error_response(result["error"], 400)
-    return success_response(result)
-
-@auth_bp.route('/login', methods=['POST'])
-def login():
-    data = request.json
-    if not data or 'email' not in data or 'password' not in data:
-        return error_response("Email and password are required.", 400)
+        raise HTTPException(status_code=400, detail=result["error"])
         
-    result = supabase_service.login_user(data['email'], data['password'])
+    return {
+        "status": "success",
+        "message": "Đăng ký thành công",
+        "data": result
+    }
+
+@router.post("/login", summary="Đăng nhập hệ thống")
+async def login(credentials: UserCredentials):
+    result = supabase_service.login_user(credentials.email, credentials.password)
+    
     if "error" in result:
-        return error_response("Invalid login credentials.", 401)
-    return success_response(result)
+        raise HTTPException(status_code=401, detail="Email hoặc mật khẩu không chính xác")
+        
+    return {
+        "status": "success",
+        "message": "Đăng nhập thành công",
+        "data": result
+    }

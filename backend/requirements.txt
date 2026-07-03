@@ -1,14 +1,21 @@
-Flask==3.0.3
-Flask-Cors==4.0.1
-python-dotenv==1.0.1
-requests==2.32.3
-supabase==2.11.0
-Pillow==11.1.0
-Werkzeug>=3.0.0
+# --- Web Framework & Server ---
+fastapi
+uvicorn
+python-multipart
+pydantic[email]
 
-# --- Thư viện cần thiết khi tích hợp AI thật (Giai đoạn 3) ---
-#thư viện torch rất nặng tầm 2GB
-torch>=2.0.0
-opencv-python>=4.8.0
-numpy>=1.24.0
-transformers>=4.30.0
+# --- AI & Machine Learning ---
+torch
+torchvision
+transformers
+
+# --- Image Processing & OCR ---
+pytesseract
+Pillow
+
+# --- Database & Config ---
+supabase
+python-dotenv
+
+# Tải này về để sử dụng tesseract OCR, bạn cần cài đặt tesseract trên hệ thống của mình. Bạn có thể tải về từ:
+# winget install -e --id UB-Mannheim.TesseractOCR

@@ -1,7 +1,57 @@
-from app import create_app
+import os
+import sys
 
-app = create_app()
+# 1. Cố định đường dẫn gốc để Python luôn tìm thấy file config.py (Quan trọng!)
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
-if __name__ == '__main__':
-    # Run the app in debug mode on port 5000
-    app.run(host='0.0.0.0', port=5000, debug=True)
+import uvicorn
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+
+from config import Config
+from app.services.ai_service import _load_model
+
+# 2. Import các Router (Đã dọn dẹp các dòng trùng lặp)
+from app.routes.predict import router as predict_router
+from app.routes.auth import router as auth_router
+from app.routes.history import router as history_router
+from app.routes.admin import router as admin_router
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("🚀 Đang khởi động Server FastAPI...")
+    # Tải mô hình AI vào RAM ngay khi bật server
+    _load_model()
+    print("✅ Server đã sẵn sàng nhận Request!")
+    yield
+    print("🛑 Đang tắt Server và giải phóng RAM...")
+
+app = FastAPI(
+    title="Multimodal Fake News API",
+    description="Hệ thống phát hiện tin giả bằng AI Đa phương thức",
+    lifespan=lifespan,
+    debug=Config.DEBUG
+)
+
+# Cấu hình CORS cho Frontend React
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# 3. Đăng ký Router (Mỗi router 1 đường dẫn duy nhất)
+app.include_router(predict_router, prefix="/api/predict", tags=["AI Prediction"])
+app.include_router(auth_router, prefix="/api/auth", tags=["Authentication"])
+app.include_router(history_router, prefix="/api/history", tags=["History"])
+app.include_router(admin_router, prefix="/api/admin", tags=["Admin Dashboard"])
+
+@app.get("/")
+def health_check():
+    return {"status": "ok", "message": "FastAPI Backend is running!"}
+
+if __name__ == "__main__":
+    uvicorn.run("run:app", host="0.0.0.0", port=8000, reload=True)
