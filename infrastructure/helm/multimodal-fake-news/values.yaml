@@ -2,7 +2,7 @@ frontend:
   replicaCount: 1
   image:
     repository: ghcr.io/nguyenhoangle070105/multimodal-fake-news-frontend
-    tag: "latest" # Github Action sẽ dùng `sed` thay thế chuỗi này
+    tag: 8128ab5ece0b85e3dc5ce0fa65a8520cffa65e99
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
@@ -12,7 +12,7 @@ backend:
   replicaCount: 1
   image:
     repository: ghcr.io/nguyenhoangle070105/multimodal-fake-news-backend
-    tag: "latest" # Github Action sẽ dùng `sed` thay thế chuỗi này
+    tag: 8128ab5ece0b85e3dc5ce0fa65a8520cffa65e99
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
