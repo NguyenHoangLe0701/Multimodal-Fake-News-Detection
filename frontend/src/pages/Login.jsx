@@ -39,12 +39,12 @@ const Login = () => {
 
       const userEmail = data.user.email;
       const userMeta = data.user.user_metadata || {};
-      localStorage.setItem('user', JSON.stringify({ email: userEmail, name: userMeta.full_name || '' }));
+      localStorage.setItem('user:v1', JSON.stringify({ email: userEmail, name: userMeta.full_name || '' }));
       
       // Lưu log local để hiển thị tạm
-      const logs = JSON.parse(localStorage.getItem('login_logs') || '[]');
+      const logs = JSON.parse(localStorage.getItem('login_logs:v1') || '[]');
       logs.unshift({ email: userEmail, time: new Date().toISOString() });
-      localStorage.setItem('login_logs', JSON.stringify(logs));
+      localStorage.setItem('login_logs:v1', JSON.stringify(logs));
 
       // Truyền dữ liệu xuống Database (Supabase)
       try {
@@ -88,7 +88,9 @@ const Login = () => {
 
         <div className="flex flex-col gap-1.5">
           <div className="flex justify-between items-center">
-            <label className="text-sm font-semibold text-[#1E293B]">Mật khẩu</label>
+              <label htmlFor="password" className="text-sm font-semibold text-[#1E293B]">
+                Mật khẩu
+              </label>
             <Link to="#" className="text-sm font-semibold text-[#2563EB] hover:text-blue-700 transition-colors">Quên mật khẩu?</Link>
           </div>
           <AuthInput 

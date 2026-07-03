@@ -4,7 +4,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
 import { ShieldAlert, ShieldCheck, Activity, Users, Loader2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 import { getAdminStats } from '../../services/api';
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -12,8 +12,8 @@ const CustomTooltip = ({ active, payload, label }) => {
     return (
       <div className="rounded-xl border border-surface-700 bg-white p-3 shadow-lg">
         <p className="mb-1 text-sm font-medium text-surface-100">{label}</p>
-        {payload.map((entry, index) => (
-          <p key={index} style={{ color: entry.color }} className="text-xs">
+        {payload.map((entry) => (
+          <p key={entry.name} style={{ color: entry.color }} className="text-xs">
             {entry.name}: {entry.value}
           </p>
         ))}
@@ -22,6 +22,16 @@ const CustomTooltip = ({ active, payload, label }) => {
   }
   return null;
 };
+
+const barData = [
+  { name: 'Mon', fake: 120, real: 50 },
+  { name: 'Tue', fake: 98, real: 45 },
+  { name: 'Wed', fake: 150, real: 60 },
+  { name: 'Thu', fake: 110, real: 55 },
+  { name: 'Fri', fake: 140, real: 70 },
+  { name: 'Sat', fake: 180, real: 85 },
+  { name: 'Sun', fake: 44, real: 41 },
+];
 
 const AdminDashboard = () => {
   const [data, setData] = useState(null);
@@ -89,16 +99,6 @@ const AdminDashboard = () => {
     { name: 'Real', value: data?.real_count || 0, color: '#059669' },
   ];
 
-  const barData = [
-    { name: 'Mon', fake: 120, real: 50 },
-    { name: 'Tue', fake: 98, real: 45 },
-    { name: 'Wed', fake: 150, real: 60 },
-    { name: 'Thu', fake: 110, real: 55 },
-    { name: 'Fri', fake: 140, real: 70 },
-    { name: 'Sat', fake: 180, real: 85 },
-    { name: 'Sun', fake: 44, real: 41 },
-  ];
-
 
 
   return (
@@ -151,8 +151,8 @@ const AdminDashboard = () => {
                   dataKey="value"
                   stroke="none"
                 >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  {pieData.map((entry) => (
+                    <Cell key={entry.name} fill={entry.color} />
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />

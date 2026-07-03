@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
-import { MotionConfig } from 'framer-motion';
+import { MotionConfig, LazyMotion, domAnimation } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -26,8 +26,9 @@ const ClientLayout = () => (
 
 function App() {
   return (
-    <MotionConfig reducedMotion="user">
-      <Router>
+    <LazyMotion features={domAnimation}>
+      <MotionConfig reducedMotion="user">
+        <Router>
         <Routes>
           <Route element={<ClientLayout />}>
             <Route path="/" element={<Home />} />
@@ -35,11 +36,9 @@ function App() {
             <Route path="/history" element={<History />} />
             <Route path="/about" element={<About />} />
           </Route>
-
           {/* Standalone Auth Pages */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="logs" element={<AdminLogs />} />
@@ -47,7 +46,8 @@ function App() {
           </Route>
         </Routes>
       </Router>
-    </MotionConfig>
+      </MotionConfig>
+    </LazyMotion>
   );
 }
 

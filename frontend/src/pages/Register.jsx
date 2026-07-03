@@ -62,11 +62,12 @@ const Register = () => {
         throw signUpError;
       }
 
-      const userEmail = data.user?.email || email;
-      localStorage.setItem('user', JSON.stringify({ email: userEmail, name }));
-      const logs = JSON.parse(localStorage.getItem('login_logs') || '[]');
+      const userEmail = data.user.email;
+      localStorage.setItem('user:v1', JSON.stringify({ email: userEmail }));
+      
+      const logs = JSON.parse(localStorage.getItem('login_logs:v1') || '[]');
       logs.unshift({ email: userEmail, time: new Date().toISOString() });
-      localStorage.setItem('login_logs', JSON.stringify(logs));
+      localStorage.setItem('login_logs:v1', JSON.stringify(logs));
 
       try {
         await supabase.from('login_logs').insert([{ 

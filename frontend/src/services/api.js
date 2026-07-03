@@ -59,16 +59,3 @@ export async function submitPredictionFeedback(id, feedback) {
   return json.data;
 }
 
-export async function getAdminUsers() {
-  const response = await fetch(`${API_BASE}/admin/users`);
-  if (!response.ok) throw new Error('Không thể tải users');
-  const json = await response.json();
-  if (json.status !== 'success') throw new Error(json.message || 'Lỗi users');
-  return json.data;
-}
-
-export async function checkHealth() {
-  const response = await fetch(`${API_BASE}/health`);
-  if (!response.ok) return null;
-  return response.json();
-}

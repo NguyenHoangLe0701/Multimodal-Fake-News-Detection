@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ShieldCheck, LogOut } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m as motion, AnimatePresence } from 'framer-motion';
 
 const navLinks = [
   { to: '/', label: 'Trang chủ' },
@@ -25,8 +25,8 @@ const Navbar = () => {
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll, { passive: true });
   }, []);
 
   useEffect(() => {
@@ -99,6 +99,7 @@ const Navbar = () => {
                 </div>
               </div>
               <button 
+                type="button"
                 onClick={handleLogout}
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-white/50 border border-white shadow-sm text-surface-400 hover:text-danger hover:bg-red-50 hover:border-red-100 transition-all"
                 title="Đăng xuất"
@@ -164,7 +165,7 @@ const Navbar = () => {
                       <div className="text-xs text-surface-400">{user.email}</div>
                     </div>
                   </div>
-                  <button onClick={handleLogout} className="btn-secondary w-full justify-center text-danger border-red-100 hover:bg-red-50 mt-2">
+                  <button type="button" onClick={handleLogout} className="btn-secondary w-full justify-center text-danger border-red-100 hover:bg-red-50 mt-2">
                     <LogOut size={18} /> Đăng xuất
                   </button>
                 </div>

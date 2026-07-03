@@ -1,7 +1,17 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Search, Filter, ShieldAlert, ShieldCheck, Loader2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 import { getHistory } from '../services/api';
+
+const formatDate = (iso) => {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString('vi-VN');
+};
+
+const getTitle = (text) => {
+  if (!text) return 'Không có nội dung';
+  return text.length > 80 ? `${text.slice(0, 80)}…` : text;
+};
 
 const History = () => {
   const [records, setRecords] = useState([]);
@@ -23,16 +33,6 @@ const History = () => {
       (item.news_text || '').toLowerCase().includes(q)
     );
   }, [records, search]);
-
-  const formatDate = (iso) => {
-    if (!iso) return '—';
-    return new Date(iso).toLocaleString('vi-VN');
-  };
-
-  const getTitle = (text) => {
-    if (!text) return 'Không có nội dung';
-    return text.length > 80 ? `${text.slice(0, 80)}…` : text;
-  };
 
   return (
     <div className="page-shell pb-20 pt-12 md:pb-24 md:pt-16">
@@ -57,6 +57,7 @@ const History = () => {
               />
               <input
                 type="text"
+                aria-label="Tìm kiếm lịch sử"
                 placeholder="Tìm kiếm..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}

@@ -128,7 +128,7 @@ const Footer = () => {
       <div className="site-footer-bottom w-full flex justify-center">
         <div className="page-container mx-auto flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <p className="text-sm text-surface-500">
-            © {new Date().getFullYear()} AntiFakeNews. All rights reserved.
+            © <span suppressHydrationWarning>{new Date().getFullYear()}</span> AntiFakeNews. All rights reserved.
           </p>
           <p className="font-mono text-sm text-surface-500">v1.0.0 · Flask + React</p>
         </div>

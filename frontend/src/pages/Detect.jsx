@@ -13,7 +13,7 @@ import {
   ScanSearch,
   CheckCircle2
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m as motion, AnimatePresence } from 'framer-motion';
 import { predictNews } from '../services/api';
 
 const Detect = () => {
@@ -118,10 +118,11 @@ const Detect = () => {
 
                 <div className="detect-textarea-wrap">
                   <textarea
+                    aria-label="Nội dung bài viết cần kiểm tra"
                     value={newsText}
                     onChange={(e) => setNewsText(e.target.value)}
-                    placeholder="Nhập hoặc dán nội dung bài viết, tiêu đề tin tức vào đây..."
-                    className="detect-textarea"
+                    placeholder="Dán nội dung tin tức, bài đăng mạng xã hội hoặc bất kỳ đoạn văn bản nào bạn nghi ngờ..."
+                    className="input-field w-full resize-none py-4 text-base min-h-[140px]"
                     maxLength={5000}
                   />
                   <span className={`detect-textarea-count ${newsText.length > 0 ? 'is-active' : ''}`}>
