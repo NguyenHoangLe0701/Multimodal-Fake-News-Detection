@@ -4,7 +4,8 @@ import { Mail, Lock, User } from 'lucide-react';
 import AuthLayout from '../components/auth/AuthLayout';
 import AuthInput from '../components/auth/AuthInput';
 import SocialButton from '../components/auth/SocialButton';
-import PasswordStrength, { validatePassword } from '../components/auth/PasswordStrength';
+import PasswordStrength from '../components/auth/PasswordStrength';
+import { validatePassword } from '../utils/validators';
 import { supabase } from '../lib/supabaseClient';
 
 const GoogleIcon = () => (
