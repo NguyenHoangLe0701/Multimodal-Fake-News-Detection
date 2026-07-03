@@ -130,7 +130,7 @@ const Register = () => {
         }
       });
       setTimeout(() => navigate('/'), 1000);
-    } catch (err) {
+    } catch {
       toast.error('Có lỗi xảy ra, vui lòng thử lại sau', {
         style: {
           borderRadius: '10px',

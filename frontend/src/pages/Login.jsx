@@ -91,7 +91,7 @@ const Login = () => {
       });
       // Delay chút để toast hiện ra
       setTimeout(() => navigate('/'), 1000);
-    } catch (err) {
+    } catch {
       // Trường hợp catch cuối
       toast.error('Có lỗi xảy ra, vui lòng thử lại sau', {
         style: {

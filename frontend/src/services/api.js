@@ -23,7 +23,7 @@ export async function predictNews(text, imageFile, userEmail = null) {
       throw new Error(`Lỗi máy chủ (${response.status})`);
     }
     return await parseResponse(response);
-  } catch (err) {
+  } catch {
     console.warn("Backend lỗi hoặc chưa bật, trả về dữ liệu giả lập (Mock Data)");
     const mockResult = {
       id: "mock-predict-" + Date.now(),
@@ -52,7 +52,7 @@ export async function getHistory(limit = 50, userEmail = null) {
     const response = await fetch(url);
     if (!response.ok) throw new Error('Không thể tải lịch sử');
     return await parseResponse(response);
-  } catch (err) {
+  } catch {
     console.warn("Backend lỗi, lấy lịch sử từ localStorage (Mock)");
     const saved = JSON.parse(localStorage.getItem('mock_history_logs') || '[]');
     if (userEmail) {
@@ -69,7 +69,7 @@ export async function getAdminStats() {
     const json = await response.json();
     if (json.status !== 'success') throw new Error(json.message || 'Lỗi thống kê');
     return json.data;
-  } catch (err) {
+  } catch {
     return { total: 156, fake_count: 89, real_count: 67, this_week: 24 };
   }
 }
@@ -81,7 +81,7 @@ export async function getAdminPredictions(limit = 50) {
     const json = await response.json();
     if (json.status !== 'success') throw new Error(json.message || 'Lỗi logs');
     return json.data;
-  } catch (err) {
+  } catch {
     return JSON.parse(localStorage.getItem('mock_history_logs') || '[]');
   }
 }
