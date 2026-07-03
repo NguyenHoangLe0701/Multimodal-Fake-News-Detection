@@ -13,8 +13,12 @@ if not SUPABASE_URL or not SUPABASE_KEY:
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-email = "admin@gmail.com"
-password = "Admin@12345"
+email = os.environ.get("ADMIN_EMAIL", "admin@gmail.com")
+password = os.environ.get("ADMIN_PASSWORD")
+
+if not password:
+    print("Missing ADMIN_PASSWORD in .env. Please set it before running this script.")
+    exit(1)
 
 print(f"Creating/Checking admin user: {email}")
 
