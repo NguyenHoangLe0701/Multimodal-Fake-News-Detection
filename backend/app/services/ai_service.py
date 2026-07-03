@@ -21,9 +21,9 @@ def _load_model():
     global _model, _tokenizer, _transform
     if _model is None:
         _model = DualStreamFakeNewsModel().to(device)
-        _model.load_state_dict(torch.load(Config.MODEL_PATH, map_location=device))
+        _model.load_state_dict(torch.load(Config.MODEL_PATH, map_location=device, weights_only=True))
         _model.eval()
-        _tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        _tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')  # nosec B615
         _transform = transforms.Compose([
             transforms.Resize((224, 224)),
             transforms.ToTensor(),

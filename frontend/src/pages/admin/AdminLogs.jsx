@@ -7,10 +7,6 @@ const AdminLogs = () => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchLogs();
-  }, []);
-
   const fetchLogs = async () => {
     try {
       const data = await getAdminPredictions();
@@ -21,6 +17,11 @@ const AdminLogs = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchLogs();
+  }, []);
+
 
   const submitFeedback = async (id, feedback) => {
     try {

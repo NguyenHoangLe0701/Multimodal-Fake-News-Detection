@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ShieldCheck, ChevronLeft, Globe, Zap } from 'lucide-react';
 
-const AuthLayout = ({ children, title, subtitle, illustration = 'ai' }) => {
+const AuthLayout = ({ children, title, subtitle }) => {
   return (
     <div className="flex min-h-screen w-full bg-[#F8FAFC]">
       {/* Left Pane: Hero Section (Hidden on Mobile) */}

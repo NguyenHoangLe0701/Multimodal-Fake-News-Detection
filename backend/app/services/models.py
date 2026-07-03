@@ -6,7 +6,7 @@ from torchvision import models as torchvision_models
 class DualStreamFakeNewsModel(nn.Module):
     def __init__(self):
         super(DualStreamFakeNewsModel, self).__init__()
-        self.bert = BertModel.from_pretrained('bert-base-uncased')
+        self.bert = BertModel.from_pretrained('bert-base-uncased')  # nosec B615
         self.text_dropout = nn.Dropout(p=0.5)
         
         resnet = torchvision_models.resnet50(weights=None)

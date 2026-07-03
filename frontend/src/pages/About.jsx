@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Layers, Database, Cpu, ShieldCheck } from 'lucide-react';
+import { Layers, Database, Cpu } from 'lucide-react';
 
 const sections = [
   {

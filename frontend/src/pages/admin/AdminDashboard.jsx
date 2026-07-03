@@ -7,6 +7,22 @@ import { ShieldAlert, ShieldCheck, Activity, Users, Loader2 } from 'lucide-react
 import { motion } from 'framer-motion';
 import { getAdminStats } from '../../services/api';
 
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="rounded-xl border border-surface-700 bg-white p-3 shadow-lg">
+        <p className="mb-1 text-sm font-medium text-surface-100">{label}</p>
+        {payload.map((entry, index) => (
+          <p key={index} style={{ color: entry.color }} className="text-xs">
+            {entry.name}: {entry.value}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
+
 const AdminDashboard = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -83,21 +99,7 @@ const AdminDashboard = () => {
     { name: 'Sun', fake: 44, real: 41 },
   ];
 
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="rounded-xl border border-surface-700 bg-white p-3 shadow-lg">
-          <p className="mb-1 text-sm font-medium text-surface-100">{label}</p>
-          {payload.map((entry, index) => (
-            <p key={index} style={{ color: entry.color }} className="text-xs">
-              {entry.name}: {entry.value}
-            </p>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
+
 
   return (
     <div className="admin-page">
