@@ -22,8 +22,13 @@ COPY run.py config.py pytest.ini ./
 COPY app ./app
 COPY model_weights ./model_weights
 
-# Tạo thư mục uploads nếu chưa có
-RUN mkdir -p uploads
+# Tạo thư mục uploads nếu chưa có và phân quyền cho non-root user
+RUN mkdir -p uploads && \
+    adduser --disabled-password --gecos '' appuser && \
+    chown -R appuser:appuser /app
+
+# Switch sang non-root user (docker:S6471)
+USER appuser
 
 # Expose port (Backend chạy cổng 5000)
 EXPOSE 5000

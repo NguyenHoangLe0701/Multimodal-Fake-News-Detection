@@ -18,7 +18,7 @@ COPY src ./src
 RUN npm run build
 
 # Stage 2: Serve bằng Nginx
-FROM nginx:alpine
+FROM nginxinc/nginx-unprivileged:alpine
 
 # Xóa cấu hình mặc định của Nginx
 RUN rm -rf /usr/share/nginx/html/*
@@ -29,8 +29,8 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # Copy cấu hình Nginx custom (để support React Router SPA)
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port 80 cho container
-EXPOSE 80
+# Expose port 8080 cho container (vì user thường không được bind port 80)
+EXPOSE 8080
 
 # Chạy Nginx ở foreground
 CMD ["nginx", "-g", "daemon off;"]
