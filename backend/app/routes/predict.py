@@ -8,7 +8,7 @@ from app.services import ai_service, supabase_service
 
 router = APIRouter()
 
-@router.post("/")
+@router.post("/", responses={400: {"description": "Lỗi định dạng ảnh hoặc dung lượng vượt mức"}, 500: {"description": "Lỗi hệ thống khi xử lý AI"}})
 async def predict_fake_news(image: UploadFile = File(...), user_email: str = Form("")):
     """API Endpoint nhận duy nhất 1 bức ảnh từ Frontend"""
     

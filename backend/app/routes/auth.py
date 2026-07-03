@@ -9,7 +9,7 @@ class UserCredentials(BaseModel):
     email: EmailStr # Tự động kiểm tra định dạng email hợp lệ
     password: str
 
-@router.post("/register", summary="Đăng ký tài khoản mới")
+@router.post("/register", summary="Đăng ký tài khoản mới", responses={400: {"description": "Lỗi đăng ký (email đã tồn tại, v.v.)"}})
 async def register(credentials: UserCredentials):
     result = supabase_service.register_user(credentials.email, credentials.password)
     
@@ -22,7 +22,7 @@ async def register(credentials: UserCredentials):
         "data": result
     }
 
-@router.post("/login", summary="Đăng nhập hệ thống")
+@router.post("/login", summary="Đăng nhập hệ thống", responses={401: {"description": "Email hoặc mật khẩu không chính xác"}})
 async def login(credentials: UserCredentials):
     result = supabase_service.login_user(credentials.email, credentials.password)
     

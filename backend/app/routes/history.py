@@ -3,7 +3,7 @@ from app.services import supabase_service
 
 router = APIRouter()
 
-@router.get("/", summary="Lấy danh sách lịch sử kiểm tra tin giả")
+@router.get("/", summary="Lấy danh sách lịch sử kiểm tra tin giả", responses={500: {"description": "Lỗi truy xuất dữ liệu từ Database"}})
 async def get_history(
     limit: int = Query(20, description="Số lượng bản ghi tối đa trả về", ge=1, le=100),
     email: str = Query(None, description="Email của user để lọc lịch sử")
