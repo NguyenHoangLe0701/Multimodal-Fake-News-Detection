@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import adminAvatar from '../../assets/admin.jpg';
 import {
@@ -19,7 +19,7 @@ const navigation = [
 const AdminSidebar = ({ isSidebarOpen, toggleSidebar }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [user, setUser] = useState(() => {
+  const [user] = useState(() => {
     const savedUser = localStorage.getItem('user');
     try {
       return savedUser ? JSON.parse(savedUser) : null;
@@ -27,9 +27,6 @@ const AdminSidebar = ({ isSidebarOpen, toggleSidebar }) => {
       return null;
     }
   });
-
-  useEffect(() => {
-  }, []);
 
   const handleLogout = () => {
     navigate('/');

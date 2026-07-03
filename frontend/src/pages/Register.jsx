@@ -4,7 +4,7 @@ import { Mail, Lock, User } from 'lucide-react';
 import AuthLayout from '../components/auth/AuthLayout';
 import AuthInput from '../components/auth/AuthInput';
 import SocialButton from '../components/auth/SocialButton';
-import PasswordStrength from '../components/auth/PasswordStrength';
+import PasswordStrength, { validatePassword } from '../components/auth/PasswordStrength';
 import { supabase } from '../lib/supabaseClient';
 
 const GoogleIcon = () => (
@@ -25,6 +25,11 @@ const Register = () => {
     e.preventDefault();
     if (!name || !email || !password || !confirmPassword) {
       setError('Vui lòng điền đầy đủ thông tin');
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      setError('Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt');
       return;
     }
 
@@ -66,15 +71,14 @@ const Register = () => {
           await supabase.from('users').insert([{
             id: userId,
             email: userEmail,
-            full_name: name,
-            status: 'Active'
+            full_name: name
           }]);
         } catch (dbError) {
           console.error("Lỗi khi tạo user profile:", dbError);
         }
       }
       const logs = JSON.parse(localStorage.getItem('login_logs') || '[]');
-      logs.unshift({ email: userEmail, role: 'user', time: new Date().toISOString() });
+      logs.unshift({ email: userEmail, time: new Date().toISOString() });
       localStorage.setItem('login_logs', JSON.stringify(logs));
 
       try {

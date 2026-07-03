@@ -12,10 +12,16 @@ transformers
 # --- Image Processing & OCR ---
 pytesseract
 Pillow
+opencv-python-headless
 
 # --- Database & Config ---
 supabase
 python-dotenv
+
+# --- Testing ---
+pytest
+pytest-cov
+httpx2
 
 # Tải này về để sử dụng tesseract OCR, bạn cần cài đặt tesseract trên hệ thống của mình. Bạn có thể tải về từ:
 # winget install -e --id UB-Mannheim.TesseractOCR

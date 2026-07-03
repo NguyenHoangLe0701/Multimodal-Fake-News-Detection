@@ -10,8 +10,10 @@ File này liệt kê chi tiết các lỗi từ công cụ kiểm tra mã nguồ
   - `src/components/Navbar.jsx`: Component icon `User`.
   - `src/components/auth/AuthLayout.jsx`: Prop `illustration`.
   - `src/pages/About.jsx`: Component icon `ShieldCheck`.
+  - `src/components/admin/AdminHeader.jsx`: Biến `setUser`.
+  - `src/components/admin/AdminSidebar.jsx`: Biến `setUser`.
 - **Nguyên nhân:** Import các modules, hàm, hoặc khai báo props nhưng không áp dụng ở bất kỳ dòng code nào trong file.
-- **Cách khắc phục:** Xóa bỏ hoàn toàn những imports và props thừa để giữ mã nguồn sạch sẽ và tránh làm tăng dung lượng gói tin.
+- **Cách khắc phục:** Xóa bỏ hoàn toàn những imports và props thừa để giữ mã nguồn sạch sẽ và tránh làm tăng dung lượng gói tin. Với `setUser`, do user chỉ đọc 1 lần từ localStorage khi khởi tạo nên chuyển sang `const [user] = useState(...)` thay vì `const [user, setUser] = useState(...)`.
 
 ## 2. Lỗi kích hoạt render liên tiếp bằng `setState` trong `useEffect` (`react-hooks/set-state-in-effect`)
 
@@ -19,10 +21,11 @@ File này liệt kê chi tiết các lỗi từ công cụ kiểm tra mã nguồ
   - `src/components/Navbar.jsx` (Lấy User từ localStorage và đóng Mobile Menu)
   - `src/components/admin/AdminHeader.jsx` (Lấy User từ localStorage)
   - `src/components/admin/AdminSidebar.jsx` (Lấy User từ localStorage)
+  - `src/pages/admin/AdminLogs.jsx` (Gọi fetchLogs trong useEffect)
 - **Nguyên nhân:** Gọi hàm `setState` một cách đồng bộ bên trong `useEffect` khiến React phải thực hiện chuỗi re-render không cần thiết (cascading renders), làm ảnh hưởng tới hiệu năng và có thể sinh ra nháy (flickering) UI.
 - **Cách khắc phục:**
   - Khởi tạo giá trị trực tiếp ngay trong `useState`: Chuyển logic đọc `localStorage.getItem('user')` vào thẳng hàm callback khởi tạo của `useState`, ví dụ: `useState(() => JSON.parse(...))`. Việc này giúp loại bỏ `useEffect` vô nghĩa.
-  - Về tính năng đóng Menu khi URL thay đổi: Có thể dùng comment `// eslint-disable-next-line react-hooks/set-state-in-effect` để tắt cảnh báo cục bộ, do logic ẩn Menu khi định tuyến là có chủ đích.
+  - Về tính năng đóng Menu khi URL thay đổi và fetch dữ liệu: Dùng comment `// eslint-disable-next-line react-hooks/set-state-in-effect` để tắt cảnh báo cục bộ, do logic này là có chủ đích và không có cách thay thế phù hợp hơn.
 
 ## 3. Lỗi tạo Component lồng nhau bên trong hàm render (`react-hooks/static-components`)
 

@@ -52,7 +52,7 @@ const Login = () => {
       
       // Lưu log local để hiển thị tạm
       const logs = JSON.parse(localStorage.getItem('login_logs') || '[]');
-      logs.unshift({ email: userEmail, role: 'user', time: new Date().toISOString() });
+      logs.unshift({ email: userEmail, time: new Date().toISOString() });
       localStorage.setItem('login_logs', JSON.stringify(logs));
 
       // Truyền dữ liệu xuống Database (Supabase)

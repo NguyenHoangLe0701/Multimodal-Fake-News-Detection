@@ -9,7 +9,7 @@ const AdminHeader = ({ isSidebarOpen, toggleSidebar, title }) => {
   const profileRef = useRef(null);
   const navigate = useNavigate();
 
-  const [user, setUser] = useState(() => {
+  const [user] = useState(() => {
     const savedUser = localStorage.getItem('user');
     try {
       return savedUser ? JSON.parse(savedUser) : null;
