@@ -28,16 +28,6 @@ const Login = () => {
     setError('');
 
     try {
-      if ((email === 'admin' || email === 'admin@gmail.com') && password === 'admin@12345') {
-        localStorage.setItem('user', JSON.stringify({ 
-          email: 'admin', 
-          role: 'admin',
-          avatar_url: 'https://api.dicebear.com/7.x/bottts/svg?seed=Admin&backgroundColor=10B981'
-        }));
-        navigate('/admin');
-        return;
-      }
-
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -48,7 +38,8 @@ const Login = () => {
       }
 
       const userEmail = data.user.email;
-      localStorage.setItem('user', JSON.stringify({ email: userEmail }));
+      const userMeta = data.user.user_metadata || {};
+      localStorage.setItem('user', JSON.stringify({ email: userEmail, name: userMeta.full_name || '' }));
       
       // Lưu log local để hiển thị tạm
       const logs = JSON.parse(localStorage.getItem('login_logs') || '[]');
