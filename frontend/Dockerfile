@@ -9,8 +9,10 @@ COPY package*.json ./
 # Cài đặt dependencies (sử dụng ci để cài đặt chính xác các versions)
 RUN npm ci
 
-# Copy toàn bộ source code vào
-COPY . .
+# Tránh copy đệ quy theo chuẩn bảo mật (docker:S6470)
+COPY index.html vite.config.js vitest.config.js eslint.config.js ./
+COPY public ./public
+COPY src ./src
 
 # Build Vite app thành các file static
 RUN npm run build

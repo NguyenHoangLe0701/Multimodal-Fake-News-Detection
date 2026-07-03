@@ -17,8 +17,10 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir gunicorn
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy toàn bộ mã nguồn vào image
-COPY . .
+# Tránh copy đệ quy theo chuẩn bảo mật (docker:S6470)
+COPY run.py config.py pytest.ini ./
+COPY app ./app
+COPY model_weights ./model_weights
 
 # Tạo thư mục uploads nếu chưa có
 RUN mkdir -p uploads
