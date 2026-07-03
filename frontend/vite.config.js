@@ -5,7 +5,9 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      jsxRuntime: 'automatic',
+    }),
     tailwindcss(),
   ],
   server: {
@@ -14,6 +16,15 @@ export default defineConfig({
         target: 'http://localhost:5000',
         changeOrigin: true,
       },
+    },
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/setupTests.js',
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov'],
     },
   },
 })

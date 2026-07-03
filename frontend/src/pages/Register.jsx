@@ -63,21 +63,7 @@ const Register = () => {
       }
 
       const userEmail = data.user?.email || email;
-      const userId = data.user?.id;
       localStorage.setItem('user', JSON.stringify({ email: userEmail, name }));
-      
-      // Lưu thông tin người dùng vào bảng users
-      if (userId) {
-        try {
-          await supabase.from('users').insert([{
-            id: userId,
-            email: userEmail,
-            full_name: name
-          }]);
-        } catch (dbError) {
-          console.error("Lỗi khi tạo user profile:", dbError);
-        }
-      }
       const logs = JSON.parse(localStorage.getItem('login_logs') || '[]');
       logs.unshift({ email: userEmail, time: new Date().toISOString() });
       localStorage.setItem('login_logs', JSON.stringify(logs));
