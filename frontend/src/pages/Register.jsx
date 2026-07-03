@@ -67,7 +67,6 @@ const Register = () => {
             id: userId,
             email: userEmail,
             full_name: name,
-            role: 'user',
             status: 'Active'
           }]);
         } catch (dbError) {
@@ -81,7 +80,6 @@ const Register = () => {
       try {
         await supabase.from('login_logs').insert([{ 
           email: userEmail, 
-          role: 'user',
           login_time: new Date().toISOString()
         }]);
       } catch (logError) {

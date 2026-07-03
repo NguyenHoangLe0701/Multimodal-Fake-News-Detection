@@ -59,7 +59,6 @@ const Login = () => {
       try {
         await supabase.from('login_logs').insert([{ 
           email: userEmail, 
-          role: 'user',
           login_time: new Date().toISOString()
         }]);
       } catch (logError) {
