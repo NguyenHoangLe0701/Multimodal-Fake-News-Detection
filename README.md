@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/NguyenHoangLe0701/Multimodal-Fake-News-Detection/main/frontend/public/favicon.ico" alt="Logo" width="100" height="100" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2065/2065224.png'">
+  <img src="https://raw.githubusercontent.com/NguyenHoangLe0701/Multimodal-Fake-News-Detection/main/frontend/public/favicon.svg" alt="Logo" width="100" height="100">
   
   # 🕵️‍♂️ Multimodal Fake News Detection
   
