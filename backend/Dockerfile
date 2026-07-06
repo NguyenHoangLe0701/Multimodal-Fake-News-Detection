@@ -20,7 +20,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Tránh copy đệ quy theo chuẩn bảo mật (docker:S6470)
 COPY run.py config.py pytest.ini ./
 COPY app ./app
-COPY model_weights ./model_weights
 
 # Tạo thư mục uploads nếu chưa có và phân quyền cho non-root user
 RUN mkdir -p uploads && \
