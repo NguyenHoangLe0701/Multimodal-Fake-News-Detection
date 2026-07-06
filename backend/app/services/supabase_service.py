@@ -125,3 +125,81 @@ def get_predictions(limit=20, user_email=None):
     except Exception as e:
         print(f"[supabase_service] Lỗi truy vấn Database: {e}")
         return []
+
+def update_prediction_feedback(prediction_id, feedback):
+    client = _get_client()
+    if not client:
+        return True # Mock success
+    try:
+        result = client.table("predictions").update({"admin_feedback": feedback}).eq("id", prediction_id).execute()
+        return True
+    except Exception as e:
+        print(f"[supabase_service] Lỗi cập nhật feedback: {e}")
+        return False
+
+def get_dashboard_stats():
+    client = _get_client()
+    if not client:
+        return {
+            "total_users": 0,
+            "total_predictions": 0,
+            "fake_count": 0,
+            "real_count": 0,
+            "weekly_stats": []
+        }
+    
+    try:
+        # Count users
+        res_users = client.table("users").select("*", count="exact").execute()
+        total_users = res_users.count if res_users.count is not None else 0
+
+        # Count predictions & labels
+        res_preds = client.table("predictions").select("prediction_label", count="exact").execute()
+        total_predictions = res_preds.count if res_preds.count is not None else 0
+        
+        fake_count = sum(1 for p in res_preds.data if p.get("prediction_label") == "FAKE")
+        real_count = sum(1 for p in res_preds.data if p.get("prediction_label") == "REAL")
+
+        # Get last 7 days for chart
+        from datetime import datetime, timedelta, timezone
+        seven_days_ago = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
+        weekly_preds = client.table("predictions").select("prediction_label, created_at").gte("created_at", seven_days_ago).execute()
+        
+        # Group by day name (Mon, Tue, Wed, etc.)
+        import collections
+        weekly_data = collections.defaultdict(lambda: {"fake": 0, "real": 0})
+        
+        # Initialize last 7 days so they always show up
+        for i in range(6, -1, -1):
+            day_date = datetime.now(timezone.utc) - timedelta(days=i)
+            day_name = day_date.strftime("%a")
+            weekly_data[day_name] = {"fake": 0, "real": 0}
+
+        for p in weekly_preds.data:
+            dt = datetime.fromisoformat(p["created_at"].replace("Z", "+00:00"))
+            day_name = dt.strftime("%a")
+            label = p.get("prediction_label")
+            if label == "FAKE":
+                weekly_data[day_name]["fake"] += 1
+            elif label == "REAL":
+                weekly_data[day_name]["real"] += 1
+
+        weekly_stats_list = [{"name": day, "fake": counts["fake"], "real": counts["real"]} for day, counts in weekly_data.items()]
+
+        return {
+            "total_users": total_users,
+            "total_predictions": total_predictions,
+            "fake_count": fake_count,
+            "real_count": real_count,
+            "weekly_stats": weekly_stats_list
+        }
+
+    except Exception as e:
+        print(f"[supabase_service] Lỗi lấy thống kê: {e}")
+        return {
+            "total_users": 0,
+            "total_predictions": 0,
+            "fake_count": 0,
+            "real_count": 0,
+            "weekly_stats": []
+        }

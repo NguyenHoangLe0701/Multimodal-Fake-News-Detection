@@ -39,13 +39,17 @@ const AdminUsers = () => {
     );
     // Update Database
     try {
-      await supabase.from('users').update({ status: newStatus }).eq('id', id);
+      const { error } = await supabase.from('users').update({ status: newStatus }).eq('id', id);
+      if (error) throw error;
+      
+      // Optional: Add toast success here if you import toast
     } catch (e) {
       console.error("Lỗi cập nhật trạng thái:", e);
       // Revert if error
       setUsers((prevUsers) => 
         prevUsers.map((u) => (u.id === id ? { ...u, status: currentStatus } : u))
       );
+      alert('Không thể cập nhật trạng thái. Vui lòng kiểm tra quyền truy cập hoặc cấu hình RLS.');
     }
   };
 
@@ -167,7 +171,7 @@ const AdminUsers = () => {
                           : 'Bỏ chặn'
                       }
                     >
-                      <Ban size={16} />
+                      {(user.status || 'Active') === 'Active' ? <Ban size={16} /> : <Shield size={16} />}
                     </button>
                   </td>
                 </tr>

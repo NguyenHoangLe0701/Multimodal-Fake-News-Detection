@@ -20,12 +20,12 @@ from app.routes.admin import router as admin_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("🚀 Đang khởi động Server FastAPI...")
+    print("Dang khoi dong Server FastAPI...")
     # Tải mô hình AI vào RAM ngay khi bật server
     _load_model()
-    print("✅ Server đã sẵn sàng nhận Request!")
+    print("Server da san sang nhan Request!")
     yield
-    print("🛑 Đang tắt Server và giải phóng RAM...")
+    print("Dang tat Server và giai phong RAM...")
 
 app = FastAPI(
     title="Multimodal Fake News API",

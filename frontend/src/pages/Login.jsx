@@ -57,8 +57,29 @@ const Login = () => {
       const userEmail = data.user.email;
       const userMeta = data.user.user_metadata || {};
       
-      // Dev bypass: Cấp quyền admin cho tài khoản admin@gmail.com
-      const userRole = userEmail === 'admin@gmail.com' ? 'admin' : 'user';
+      // Kiểm tra trạng thái tài khoản trong bảng users
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('status, role')
+        .eq('id', data.user.id)
+        .single();
+
+      if (!userError && userData && userData.status === 'Blocked') {
+        await supabase.auth.signOut();
+        toast.error('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin.', {
+          style: {
+            borderRadius: '10px',
+            background: '#FEF2F2',
+            color: '#EF4444',
+            border: '1px solid #FCA5A5'
+          }
+        });
+        setIsLoading(false);
+        return;
+      }
+      
+      // Dev bypass: Lấy role từ database hoặc cứng quyền admin
+      const userRole = (userData && userData.role) ? userData.role : (userEmail === 'admin@gmail.com' ? 'admin' : 'user');
       
       localStorage.setItem('user:v1', JSON.stringify({ 
         email: userEmail, 
