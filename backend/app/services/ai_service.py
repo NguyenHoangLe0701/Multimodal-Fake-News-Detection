@@ -13,6 +13,8 @@ from .translation_service import translate_to_english, translate_reason_to_vietn
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
+NO_TEXT_CONTEXT = "no text context"
+
 _model = None
 _text_model = None
 _text_model_available = False
@@ -58,7 +60,7 @@ def clean_extracted_text(raw_text: str) -> str:
     # Giong ban cu nhung KHONG xoa tieng Viet, giu lai chu va so, loai bo ky tu dac biet
     text = re.sub(r'[^\w\s]', '', text) 
     clean_text = " ".join(text.split())
-    return clean_text if clean_text else "no text context"
+    return clean_text if clean_text else NO_TEXT_CONTEXT
 
 def separate_pixels_and_text(pil_image: Image.Image):
     """Thuật toán: Nhận 1 ảnh gốc -> Trả về (Ảnh đã tẩy chữ, Text đã cạo)"""
@@ -83,7 +85,7 @@ def separate_pixels_and_text(pil_image: Image.Image):
         return Image.fromarray(clean_cv_img), clean_extracted_text(extracted_text)
     except Exception as e:
         print(f"[OCR Warning] Tesseract khong kha dung, bo qua OCR: {e}")
-        return pil_image, "no text context"
+        return pil_image, NO_TEXT_CONTEXT
 
 def verify_text_only(pure_text: str):
     """Xy ly text-only bang TextOnlyFakeNewsModel"""
@@ -168,7 +170,7 @@ def _analyze_text(original_text, translated_text):
     if not _text_model_available:
         return {"error": "Text model is not available", "text_model_available": False}
     
-    result = verify_text_only(translated_text or "no text context")
+    result = verify_text_only(translated_text or NO_TEXT_CONTEXT)
     return {
             "label": result["label"],
             "confidence": round(result["confidence"], 4),

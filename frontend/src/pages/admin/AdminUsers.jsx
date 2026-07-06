@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Shield, User, Ban, Loader2, Search, ChevronLeft, ChevronRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 import { supabase } from '../../lib/supabaseClient';
 
 const AdminUsers = () => {

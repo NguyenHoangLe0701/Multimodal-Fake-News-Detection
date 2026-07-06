@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Menu, Bell, Search, ChevronDown, LogOut, Home } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m as motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import adminAvatar from '../../assets/admin.jpg';
 

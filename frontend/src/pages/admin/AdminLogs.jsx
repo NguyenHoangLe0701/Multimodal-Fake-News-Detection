@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { ShieldAlert, ShieldCheck, Loader2, CheckCircle2, XCircle, ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m as motion, AnimatePresence } from 'framer-motion';
 import { getAdminPredictions, submitPredictionFeedback } from '../../services/api';
 
 const AdminLogs = () => {
@@ -103,17 +103,10 @@ const AdminLogs = () => {
             {logs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((log) => (
               <tr key={log.id} className="group">
                 <td>
-                  <div 
-                    className={`flex h-11 w-11 items-center justify-center overflow-hidden rounded-lg border border-surface-700 bg-surface-900 ${log.image_url ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+                  <button
+                    type="button"
+                    className={`flex h-11 w-11 p-0 m-0 items-center justify-center overflow-hidden rounded-lg border border-surface-700 bg-surface-900 ${log.image_url ? 'cursor-pointer hover:opacity-80 transition-opacity' : 'cursor-default'}`}
                     onClick={() => log.image_url && setSelectedImage(log.image_url)}
-                    onKeyDown={(e) => {
-                      if ((e.key === 'Enter' || e.key === ' ') && log.image_url) {
-                        e.preventDefault();
-                        setSelectedImage(log.image_url);
-                      }
-                    }}
-                    role={log.image_url ? "button" : undefined}
-                    tabIndex={log.image_url ? 0 : undefined}
                     title={log.image_url ? "Nhấn để xem ảnh phóng to" : ""}
                   >
                     {log.image_url ? (
@@ -125,7 +118,7 @@ const AdminLogs = () => {
                     ) : (
                       <span className="text-[10px] text-surface-500">No Image</span>
                     )}
-                  </div>
+                  </button>
                 </td>
                 <td>
                   <p className="line-clamp-2 max-w-xs text-sm text-surface-100">
