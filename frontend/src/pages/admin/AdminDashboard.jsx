@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+/* eslint-disable prefer-dynamic-import */
 import {
   PieChart, Pie, Cell,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,

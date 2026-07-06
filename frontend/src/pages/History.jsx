@@ -213,6 +213,7 @@ const History = () => {
                 
                 <div className="flex items-center gap-2">
                   <button
+                    type="button"
                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
                     className="flex h-9 w-9 items-center justify-center rounded-lg border border-surface-700 bg-surface-900 text-surface-300 transition-colors hover:bg-surface-700 disabled:opacity-30 disabled:hover:bg-surface-900"
@@ -225,6 +226,7 @@ const History = () => {
                   </div>
                   
                   <button
+                    type="button"
                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                     disabled={currentPage === totalPages}
                     className="flex h-9 w-9 items-center justify-center rounded-lg border border-surface-700 bg-surface-900 text-surface-300 transition-colors hover:bg-surface-700 disabled:opacity-30 disabled:hover:bg-surface-900"
