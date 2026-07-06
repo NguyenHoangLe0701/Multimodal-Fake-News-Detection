@@ -1,4 +1,4 @@
-/* eslint-disable no-giant-component */
+
 import { useState, useRef, useEffect } from 'react';
 import {
   Upload,
