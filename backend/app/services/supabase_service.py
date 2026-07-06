@@ -70,8 +70,17 @@ def upload_image_bytes(file_bytes: bytes, file_name: str):
         )
         return client.storage.from_(Config.SUPABASE_BUCKET).get_public_url(file_name)
     except Exception as e:
-        print(f"[supabase_service] Lỗi Upload ảnh: {e}")
-        return ""
+        print(f"[supabase_service] Lỗi Upload ảnh lên Supabase: {e}. Đang dùng Local Storage.")
+        try:
+            os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
+            local_path = os.path.join(Config.UPLOAD_FOLDER, file_name)
+            with open(local_path, "wb") as f:
+                f.write(file_bytes)
+            # Trả về đường dẫn local tĩnh (đã được mount trong run.py)
+            return f"/api/uploads/{file_name}"
+        except Exception as local_e:
+            print(f"[supabase_service] Lỗi lưu ảnh local: {local_e}")
+            return ""
 
 
 # ── Database (Bảng Predictions) ─────────────────────────────────

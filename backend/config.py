@@ -13,9 +13,10 @@ class Config:
     SUPABASE_BUCKET = os.getenv('SUPABASE_BUCKET', 'images')
 
     # ── AI Model ───────────────────────────────
-    # Đường dẫn tương đối trỏ về file pth
-    MODEL_PATH = os.getenv('MODEL_PATH', '../training/models/best_model.pth')
+    MODEL_PATH = os.getenv('MODEL_PATH', 'model_weights/best_model.pth')
+    TEXT_MODEL_PATH = os.getenv('TEXT_MODEL_PATH', 'model_weights/text_model.pth')
 
     # ── File Upload ────────────────────────────
     MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
+    UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', 'uploads')

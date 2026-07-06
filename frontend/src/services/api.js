@@ -8,11 +8,12 @@ async function parseResponse(response) {
   return json.data;
 }
 
-export async function predictNews(text, imageFile, userEmail = null) {
+export async function predictNews(text, imageFile, userEmail = null, mode = 'auto') {
   const formData = new FormData();
   if (text?.trim()) formData.append('text', text.trim());
   if (imageFile) formData.append('image', imageFile);
   if (userEmail) formData.append('user_email', userEmail);
+  formData.append('mode', mode);
 
   const response = await fetch(`${API_BASE}/predict/`, {
     method: 'POST',

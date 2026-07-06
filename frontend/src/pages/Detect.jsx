@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   Upload,
   X,
@@ -11,7 +11,9 @@ import {
   Layers,
   Image as ImageIcon,
   ScanSearch,
-  CheckCircle2
+  CheckCircle2,
+  FileSearch,
+  Info
 } from 'lucide-react';
 import { m as motion, AnimatePresence } from 'framer-motion';
 import { predictNews } from '../services/api';
@@ -21,6 +23,7 @@ const Detect = () => {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingMode, setLoadingMode] = useState(null);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
@@ -33,41 +36,73 @@ const Detect = () => {
     }
   };
 
+  useEffect(() => {
+    const handlePaste = (e) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') !== -1) {
+          const file = items[i].getAsFile();
+          if (file) {
+            setImageFile(file);
+            setImagePreview(URL.createObjectURL(file));
+          }
+          break;
+        }
+      }
+    };
+
+    window.addEventListener('paste', handlePaste);
+    return () => window.removeEventListener('paste', handlePaste);
+  }, []);
+
   const removeImage = () => {
     setImageFile(null);
     setImagePreview(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const handleSubmit = async () => {
-    if (!newsText.trim() && !imageFile) return;
+  const handleSubmit = async (mode) => {
+    if (mode === 'text' && !newsText.trim()) return;
+    if (mode === 'multimodal' && !newsText.trim() && !imageFile) return;
+    
     setIsLoading(true);
+    setLoadingMode(mode);
     setResult(null);
     setError(null);
 
     try {
       const savedUser = localStorage.getItem('user:v1') || localStorage.getItem('user');
       const user = savedUser ? JSON.parse(savedUser) : null;
-      const data = await predictNews(newsText, imageFile, user?.email);
+      const data = await predictNews(newsText, imageFile, user?.email, mode);
       setResult({
         label: data.label,
         confidence: data.confidence,
-        textScore: Number(data.text_score).toFixed(2),
-        imageScore: Number(data.image_score).toFixed(2),
+        textScore: data.text_score !== "N/A" ? Number(data.text_score).toFixed(2) : "N/A",
+        imageScore: data.image_score !== "N/A" ? Number(data.image_score).toFixed(2) : "N/A",
+        reason: data.reason,
+        mode: data.mode,
+        textModelAvailable: data.text_model_available,
+        originalText: data.original_text,
+        translatedText: data.translated_text,
+        extractedText: data.extracted_text,
+        imageUrl: data.image_url || imagePreview
       });
     } catch (err) {
-      setError(err.message || 'Không thể kết nối backend. Hãy chạy Flask server.');
+      setError(err.message || 'Không thể kết nối backend. Hãy kiểm tra server.');
     } finally {
       setIsLoading(false);
+      setLoadingMode(null);
     }
   };
 
-  const canSubmit = newsText.trim().length > 10 || imageFile;
+  const canSubmitText = newsText.trim().length > 10;
+  const canSubmitMultimodal = imageFile !== null;
   const isFake = result?.label === 'FAKE';
 
   return (
     <div className="detect-page">
-      {/* Ambient bg blobs */}
       <div className="detect-ambient">
         <div className="detect-blob detect-blob--1" />
         <div className="detect-blob detect-blob--2" />
@@ -75,7 +110,6 @@ const Detect = () => {
       </div>
 
       <div className="page-container detect-container">
-        {/* ─── Header ─── */}
         <motion.header
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -95,7 +129,6 @@ const Detect = () => {
           </p>
         </motion.header>
 
-        {/* ─── Main grid ─── */}
         <div className="detect-grid">
           {/* === LEFT COLUMN: inputs === */}
           <motion.div
@@ -131,6 +164,28 @@ const Detect = () => {
                     {newsText.length} / 5000
                   </span>
                 </div>
+                
+                {/* Submit Text Only */}
+                <button
+                  type="button"
+                  onClick={() => handleSubmit('text')}
+                  disabled={!canSubmitText || isLoading}
+                  className={`detect-submit detect-submit--text mt-6 ${canSubmitText && !isLoading ? 'is-ready' : ''}`}
+                >
+                  <span className="detect-submit__content">
+                    {isLoading && loadingMode === 'text' ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        Đang phân tích NLP…
+                      </>
+                    ) : (
+                      <>
+                        <FileSearch size={18} />
+                        Kiểm tra Văn bản
+                      </>
+                    )}
+                  </span>
+                </button>
               </div>
             </div>
 
@@ -198,24 +253,24 @@ const Detect = () => {
               </div>
             </div>
 
-            {/* Submit */}
+            {/* Submit Multimodal */}
             <button
               type="button"
-              onClick={handleSubmit}
-              disabled={!canSubmit || isLoading}
-              className={`detect-submit ${canSubmit && !isLoading ? 'is-ready' : ''}`}
+              onClick={() => handleSubmit('multimodal')}
+              disabled={!canSubmitMultimodal || isLoading}
+              className={`detect-submit ${canSubmitMultimodal && !isLoading ? 'is-ready' : ''}`}
             >
-              {canSubmit && !isLoading && <div className="detect-submit__shimmer" />}
+              {canSubmitMultimodal && !isLoading && <div className="detect-submit__shimmer" />}
               <span className="detect-submit__content">
-                {isLoading ? (
+                {isLoading && loadingMode === 'multimodal' ? (
                   <>
                     <Loader2 size={20} className="animate-spin" />
-                    Đang phân tích AI…
+                    Đang phân tích Đa phương thức…
                   </>
                 ) : (
                   <>
-                    <Sparkles size={20} />
-                    Tiến hành kiểm tra
+                    <Layers size={20} />
+                    Kiểm tra Đa phương thức
                   </>
                 )}
               </span>
@@ -302,20 +357,40 @@ const Detect = () => {
                   key="result"
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="detect-result"
+                  className={`detect-result ${result.imageUrl ? 'has-bg-image' : ''}`}
                 >
-                  {/* Verdict */}
-                  <div className={`detect-verdict ${isFake ? 'is-fake' : 'is-real'}`}>
-                    <div className="detect-verdict__glow" />
-                    <div className="detect-verdict__icon">
-                      {isFake ? <ShieldAlert size={32} /> : <ShieldCheck size={32} />}
+                  {result.imageUrl && (
+                    <>
+                      <div 
+                        className="detect-result__bg" 
+                        style={{ backgroundImage: `url(${result.imageUrl})` }}
+                      />
+                      <div className="detect-result__overlay" />
+                    </>
+                  )}
+                  
+                  <div className="detect-result__content">
+                    {/* Mode Badge */}
+                    <div className="detect-mode-badge mb-4 flex justify-center">
+                      <span className={`text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full inline-flex items-center gap-2 ${result.imageUrl ? 'text-white/90 bg-white/20 backdrop-blur-md' : 'text-surface-500 bg-surface-700/50'}`}>
+                        {result.mode === 'text' && <><FileSearch size={14} /> Chế độ Text-Only</>}
+                        {result.mode === 'image' && <><ImageIcon size={14} /> Chế độ Image-Only</>}
+                        {result.mode === 'multimodal' && <><Layers size={14} /> Chế độ Đa phương thức</>}
+                      </span>
                     </div>
-                    <span className="detect-verdict__label">Kết quả AI</span>
-                    <h3 className="detect-verdict__value">{result.label}</h3>
-                    <span className="detect-verdict__tag">
-                      {isFake ? 'Cảnh báo nội dung rác' : 'Nội dung tin cậy'}
-                    </span>
-                  </div>
+
+                    {/* Verdict */}
+                    <div className={`detect-verdict ${isFake ? 'is-fake' : 'is-real'} ${result.imageUrl ? 'is-transparent' : ''}`}>
+                      <div className="detect-verdict__glow" />
+                      <div className="detect-verdict__icon">
+                        {isFake ? <ShieldAlert size={36} /> : <ShieldCheck size={36} />}
+                      </div>
+                      <span className="detect-verdict__label">Kết quả AI</span>
+                      <h3 className="detect-verdict__value">{result.label}</h3>
+                      <span className="detect-verdict__tag">
+                        {isFake ? 'Cảnh báo nội dung rác' : 'Nội dung tin cậy'}
+                      </span>
+                    </div>
 
                   {/* Confidence bar */}
                   <div className="detect-confidence">
@@ -338,6 +413,17 @@ const Detect = () => {
                     </div>
                   </div>
 
+                  {/* AI Reason */}
+                  {result.reason && (
+                    <div className={`detect-reason mt-2 p-4 rounded-xl border ${result.imageUrl ? 'bg-white/10 border-white/20 backdrop-blur-md' : 'bg-surface-800 border-surface-700/50'}`}>
+                      <div className={`flex items-center gap-2 mb-2 ${result.imageUrl ? 'text-white' : 'text-surface-200'}`}>
+                        <Info size={16} className={result.imageUrl ? 'text-white' : 'text-accent'} />
+                        <h4 className="text-sm font-bold">Lý do AI</h4>
+                      </div>
+                      <p className={`text-sm italic ${result.imageUrl ? 'text-white/90 shadow-black' : 'text-surface-400'}`} style={result.imageUrl ? {textShadow: '0 1px 3px rgba(0,0,0,0.8)'} : {}}>"{result.reason}"</p>
+                    </div>
+                  )}
+
                   {/* Score breakdown */}
                   <div className="detect-scores">
                     <h4 className="detect-scores__head">
@@ -345,35 +431,40 @@ const Detect = () => {
                       Phân tích chi tiết
                     </h4>
 
-                    <div className="detect-score-row">
-                      <div className="detect-score-row__top">
-                        <span className="detect-score-row__name">Text (NLP)</span>
-                        <span className="detect-score-row__val">{result.textScore}</span>
+                    {result.textScore !== "N/A" && (
+                      <div className="detect-score-row">
+                        <div className="detect-score-row__top">
+                          <span className="detect-score-row__name">Text (NLP)</span>
+                          <span className="detect-score-row__val">{result.textScore}</span>
+                        </div>
+                        <div className="detect-score-row__track">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${Math.min(Math.abs(result.textScore) * 10, 100)}%` }}
+                            transition={{ duration: 1, delay: 0.5 }}
+                            className="detect-score-row__fill"
+                          />
+                        </div>
                       </div>
-                      <div className="detect-score-row__track">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${Math.min(Math.abs(result.textScore) * 10, 100)}%` }}
-                          transition={{ duration: 1, delay: 0.5 }}
-                          className="detect-score-row__fill"
-                        />
-                      </div>
-                    </div>
+                    )}
 
-                    <div className="detect-score-row">
-                      <div className="detect-score-row__top">
-                        <span className="detect-score-row__name">Visual (CNN)</span>
-                        <span className="detect-score-row__val">{result.imageScore}</span>
+                    {result.imageScore !== "N/A" && (
+                      <div className="detect-score-row">
+                        <div className="detect-score-row__top">
+                          <span className="detect-score-row__name">Visual (CNN)</span>
+                          <span className="detect-score-row__val">{result.imageScore}</span>
+                        </div>
+                        <div className="detect-score-row__track">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${Math.min(Math.abs(result.imageScore) * 10, 100)}%` }}
+                            transition={{ duration: 1, delay: 0.7 }}
+                            className="detect-score-row__fill"
+                          />
+                        </div>
                       </div>
-                      <div className="detect-score-row__track">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${Math.min(Math.abs(result.imageScore) * 10, 100)}%` }}
-                          transition={{ duration: 1, delay: 0.7 }}
-                          className="detect-score-row__fill"
-                        />
-                      </div>
-                    </div>
+                    )}
+                  </div>
                   </div>
                 </motion.div>
               )}

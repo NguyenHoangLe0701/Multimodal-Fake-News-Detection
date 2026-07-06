@@ -13,7 +13,8 @@ router = APIRouter()
 async def predict_fake_news(
     text: Optional[str] = Form(""), 
     image: Optional[UploadFile] = File(None), 
-    user_email: str = Form("")
+    user_email: str = Form(""),
+    mode: str = Form("auto")
 ):
     """API Endpoint nhận văn bản hoặc ảnh hoặc cả 2 từ Frontend"""
     
@@ -41,21 +42,35 @@ async def predict_fake_news(
         if upload_result:
             image_url = upload_result
 
+    # Xac dinh mode
+    resolved_mode = mode
+    if resolved_mode == "auto":
+        if text.strip() and pil_image:
+            resolved_mode = "multimodal"
+        elif text.strip():
+            resolved_mode = "text"
+        elif pil_image:
+            resolved_mode = "image"
+
     # Giao dữ liệu cho Pipeline phân tích
     try:
-        ai_result = ai_service.analyze_multimodal(text, pil_image)
+        ai_result = ai_service.analyze(resolved_mode, text, pil_image)
+        if "error" in ai_result:
+            raise HTTPException(status_code=400, detail=ai_result["error"])
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"[predict_route] Lỗi xử lý AI: {e}")
-        raise HTTPException(status_code=500, detail="Lỗi xử lý AI.")
+        raise HTTPException(status_code=500, detail="Lỗi hệ thống khi xử lý AI.")
 
     # Lưu kết quả xuống database
     db_record = supabase_service.save_prediction(
-        news_text=ai_result['extracted_text'],
+        news_text=ai_result.get('original_text', '') or ai_result.get('extracted_text', ''),
         image_url=image_url,
         label=ai_result['label'],
         confidence=ai_result['confidence'],
-        text_score=ai_result['text_score'],
-        image_score=ai_result['image_score'],
+        text_score=ai_result['text_score'] if isinstance(ai_result['text_score'], (int, float)) else None,
+        image_score=ai_result['image_score'] if isinstance(ai_result['image_score'], (int, float)) else None,
         user_email=user_email
     )
 
@@ -66,9 +81,13 @@ async def predict_fake_news(
             "label": ai_result['label'],
             "confidence": ai_result['confidence'],
             "reason": ai_result['reason'],
-            "extracted_text": ai_result['extracted_text'],
+            "extracted_text": ai_result.get('extracted_text', ''),
+            "original_text": ai_result.get('original_text', ''),
+            "translated_text": ai_result.get('translated_text', ''),
             "text_score": ai_result['text_score'],
             "image_score": ai_result['image_score'],
-            "image_url": image_url
+            "image_url": image_url,
+            "mode": resolved_mode,
+            "text_model_available": ai_result.get('text_model_available', False)
         }
     }

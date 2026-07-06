@@ -43,11 +43,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from fastapi.staticfiles import StaticFiles
+
 # 3. Đăng ký Router (Mỗi router 1 đường dẫn duy nhất)
 app.include_router(predict_router, prefix="/api/predict", tags=["AI Prediction"])
 app.include_router(auth_router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(history_router, prefix="/api/history", tags=["History"])
 app.include_router(admin_router, prefix="/api/admin", tags=["Admin Dashboard"])
+
+# Mount folder lưu ảnh local fallback
+os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
+app.mount("/api/uploads", StaticFiles(directory=Config.UPLOAD_FOLDER), name="uploads")
 
 @app.get("/")
 def health_check():

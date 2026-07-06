@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
-import { ShieldAlert, ShieldCheck, Loader2, CheckCircle2, XCircle } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { createPortal } from 'react-dom';
+import { ShieldAlert, ShieldCheck, Loader2, CheckCircle2, XCircle, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getAdminPredictions, submitPredictionFeedback } from '../../services/api';
 
 const AdminLogs = () => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const itemsPerPage = 5;
 
   const fetchLogs = async () => {
     try {
@@ -48,12 +52,42 @@ const AdminLogs = () => {
         <p className="page-subtitle !mt-0">Theo dõi và đánh giá các kết quả dự đoán của hệ thống.</p>
       </div>
 
+      {createPortal(
+        <AnimatePresence>
+          {selectedImage && (
+            <motion.div
+              key="lightbox"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedImage(null)}
+              className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+              style={{ position: 'fixed' }}
+            >
+              <button className="absolute top-6 right-6 text-white hover:text-gray-300 p-2 bg-white/10 rounded-full backdrop-blur-md transition-colors z-50">
+                 <X size={24} />
+              </button>
+              <motion.img
+                initial={{ scale: 0.95 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0.95 }}
+                src={selectedImage}
+                alt="Preview"
+                className="relative z-10 max-h-[90vh] max-w-full rounded-xl object-contain shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="card overflow-hidden"
       >
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto overflow-y-auto max-h-[65vh]">
         <table className="data-table min-w-[980px]">
           <thead>
             <tr>
@@ -66,10 +100,14 @@ const AdminLogs = () => {
             </tr>
           </thead>
           <tbody>
-            {logs.map((log) => (
+            {logs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((log) => (
               <tr key={log.id} className="group">
                 <td>
-                  <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-lg border border-surface-700 bg-surface-900">
+                  <div 
+                    className={`flex h-11 w-11 items-center justify-center overflow-hidden rounded-lg border border-surface-700 bg-surface-900 ${log.image_url ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+                    onClick={() => log.image_url && setSelectedImage(log.image_url)}
+                    title={log.image_url ? "Nhấn để xem ảnh phóng to" : ""}
+                  >
                     {log.image_url ? (
                       <img
                         src={log.image_url}
@@ -161,6 +199,57 @@ const AdminLogs = () => {
         </table>
         {logs.length === 0 && (
           <div className="p-8 text-center text-surface-400">Không có dữ liệu dự đoán.</div>
+        )}
+        {logs.length > itemsPerPage && (
+          <div className="flex items-center justify-between border-t border-surface-700 bg-surface-900 px-4 py-3 sm:px-6">
+            <div className="flex flex-1 justify-between sm:hidden">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+                className="relative inline-flex items-center rounded-md px-4 py-2 text-sm font-medium text-surface-300 ring-1 ring-inset ring-surface-700 hover:bg-surface-800 disabled:opacity-50"
+              >
+                Trước
+              </button>
+              <button
+                onClick={() => setCurrentPage(p => Math.min(p + 1, Math.ceil(logs.length / itemsPerPage)))}
+                disabled={currentPage === Math.ceil(logs.length / itemsPerPage)}
+                className="relative inline-flex items-center rounded-md px-4 py-2 text-sm font-medium text-surface-300 ring-1 ring-inset ring-surface-700 hover:bg-surface-800 disabled:opacity-50"
+              >
+                Sau
+              </button>
+            </div>
+            <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm text-surface-300">
+                  Hiển thị <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> đến{' '}
+                  <span className="font-medium">
+                    {Math.min(currentPage * itemsPerPage, logs.length)}
+                  </span>{' '}
+                  trên tổng số <span className="font-medium">{logs.length}</span> kết quả
+                </p>
+              </div>
+              <div>
+                <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="relative inline-flex items-center rounded-l-md px-2 py-2 text-surface-400 ring-1 ring-inset ring-surface-700 hover:bg-surface-800 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
+                  >
+                    <span className="sr-only">Previous</span>
+                    <ChevronLeft size={16} aria-hidden="true" />
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(p + 1, Math.ceil(logs.length / itemsPerPage)))}
+                    disabled={currentPage === Math.ceil(logs.length / itemsPerPage)}
+                    className="relative inline-flex items-center rounded-r-md px-2 py-2 text-surface-400 ring-1 ring-inset ring-surface-700 hover:bg-surface-800 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
+                  >
+                    <span className="sr-only">Next</span>
+                    <ChevronRight size={16} aria-hidden="true" />
+                  </button>
+                </nav>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </motion.div>

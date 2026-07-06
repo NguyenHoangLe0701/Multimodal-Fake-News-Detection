@@ -27,3 +27,17 @@ class DualStreamFakeNewsModel(nn.Module):
         x = self.fusion_dropout(self.relu(self.fc1(combined_features)))
         logits = self.fc2(x)
         return logits
+
+
+class TextOnlyFakeNewsModel(nn.Module):
+    """BERT Classifier — Chi xu ly van ban (text-only)"""
+    def __init__(self):
+        super(TextOnlyFakeNewsModel, self).__init__()
+        self.bert = BertModel.from_pretrained('bert-base-uncased')  # nosec B615
+        self.dropout = nn.Dropout(p=0.3)
+        self.fc = nn.Linear(768, 2)  # 2 class: REAL / FAKE
+
+    def forward(self, input_ids, attention_mask):
+        outputs = self.bert(input_ids=input_ids, attention_mask=attention_mask)
+        pooled = self.dropout(outputs.pooler_output)
+        return self.fc(pooled)

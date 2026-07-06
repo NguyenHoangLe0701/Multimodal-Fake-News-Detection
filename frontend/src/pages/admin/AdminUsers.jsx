@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Shield, User, Ban, Loader2, Search } from 'lucide-react';
+import { Shield, User, Ban, Loader2, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '../../lib/supabaseClient';
 
@@ -7,6 +7,8 @@ const AdminUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -62,6 +64,11 @@ const AdminUsers = () => {
     });
   }, [users, searchTerm]);
 
+  // Reset to first page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
   if (loading) {
     return (
       <div className="flex h-96 items-center justify-center">
@@ -98,7 +105,7 @@ const AdminUsers = () => {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto overflow-y-auto max-h-[65vh]">
           <table className="data-table min-w-[860px]">
             <thead>
               <tr>
@@ -110,7 +117,7 @@ const AdminUsers = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.map((user) => (
+              {filteredUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((user) => (
                 <tr key={user.id} className="group">
                   <td>
                     <div className="flex items-center gap-3">
@@ -185,6 +192,57 @@ const AdminUsers = () => {
               </div>
               <p className="text-surface-100 font-semibold mb-1">Không tìm thấy người dùng</p>
               <p className="text-surface-400 text-sm">Chưa có người dùng nào khớp với tìm kiếm của bạn.</p>
+            </div>
+          )}
+          {filteredUsers.length > itemsPerPage && (
+            <div className="flex items-center justify-between border-t border-surface-700 bg-surface-900 px-4 py-3 sm:px-6">
+              <div className="flex flex-1 justify-between sm:hidden">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="relative inline-flex items-center rounded-md px-4 py-2 text-sm font-medium text-surface-300 ring-1 ring-inset ring-surface-700 hover:bg-surface-800 disabled:opacity-50"
+                >
+                  Trước
+                </button>
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(p + 1, Math.ceil(filteredUsers.length / itemsPerPage)))}
+                  disabled={currentPage === Math.ceil(filteredUsers.length / itemsPerPage)}
+                  className="relative inline-flex items-center rounded-md px-4 py-2 text-sm font-medium text-surface-300 ring-1 ring-inset ring-surface-700 hover:bg-surface-800 disabled:opacity-50"
+                >
+                  Sau
+                </button>
+              </div>
+              <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm text-surface-300">
+                    Hiển thị <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> đến{' '}
+                    <span className="font-medium">
+                      {Math.min(currentPage * itemsPerPage, filteredUsers.length)}
+                    </span>{' '}
+                    trên tổng số <span className="font-medium">{filteredUsers.length}</span> người dùng
+                  </p>
+                </div>
+                <div>
+                  <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                    <button
+                      onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+                      disabled={currentPage === 1}
+                      className="relative inline-flex items-center rounded-l-md px-2 py-2 text-surface-400 ring-1 ring-inset ring-surface-700 hover:bg-surface-800 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
+                    >
+                      <span className="sr-only">Previous</span>
+                      <ChevronLeft size={16} aria-hidden="true" />
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage(p => Math.min(p + 1, Math.ceil(filteredUsers.length / itemsPerPage)))}
+                      disabled={currentPage === Math.ceil(filteredUsers.length / itemsPerPage)}
+                      className="relative inline-flex items-center rounded-r-md px-2 py-2 text-surface-400 ring-1 ring-inset ring-surface-700 hover:bg-surface-800 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
+                    >
+                      <span className="sr-only">Next</span>
+                      <ChevronRight size={16} aria-hidden="true" />
+                    </button>
+                  </nav>
+                </div>
+              </div>
             </div>
           )}
         </div>
