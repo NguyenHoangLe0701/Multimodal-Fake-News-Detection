@@ -20,6 +20,9 @@ RUN npm run build
 # Stage 2: Serve bằng Nginx
 FROM nginxinc/nginx-unprivileged:alpine
 
+# Chuyển sang root để có quyền xóa file và copy file
+USER root
+
 # Xóa cấu hình mặc định của Nginx
 RUN rm -rf /usr/share/nginx/html/*
 
@@ -28,6 +31,12 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Copy cấu hình Nginx custom (để support React Router SPA)
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Phân quyền lại cho user nginx (UID 101)
+RUN chown -R 101:101 /usr/share/nginx/html /etc/nginx/conf.d
+
+# Chuyển lại sang non-root user
+USER 101
 
 # Expose port 8080 cho container (vì user thường không được bind port 80)
 EXPOSE 8080

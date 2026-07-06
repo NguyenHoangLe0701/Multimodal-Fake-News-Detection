@@ -10,6 +10,7 @@ env:
   PYTHON_VERSION: '3.10'
   NODE_VERSION: '22'
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  REPO_LC: '' # Placeholder for lowercase repo name, set dynamically in jobs
 
 jobs:
   # ═══════════════════════════════════════════════════════
