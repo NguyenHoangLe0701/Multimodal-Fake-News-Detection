@@ -26,7 +26,7 @@ export async function predictNews(text, imageFile, userEmail = null, mode = 'aut
       const errJson = await response.json();
       if (errJson.detail) errorMsg = errJson.detail;
     } catch (e) {
-      // ignore JSON parse error, fallback to default error message
+      console.debug('Failed to parse error response:', e);
     }
     throw new Error(errorMsg);
   }

@@ -123,7 +123,6 @@ const Register = () => {
           id: data.user.id,
           email: userEmail,
           full_name: name,
-          // eslint-disable-next-line
           role: userRole,
           status: 'Active',
           created_at: new Date().toISOString()
