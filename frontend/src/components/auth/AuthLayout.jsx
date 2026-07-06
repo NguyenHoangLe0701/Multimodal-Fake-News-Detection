@@ -20,8 +20,8 @@ const AuthLayout = ({ children, title, subtitle }) => {
         {/* Logo - Absolutely positioned */}
         <div className="absolute top-12 left-12 xl:top-16 xl:left-16 z-20">
           <Link to="/" className="inline-flex items-center gap-3 transition-transform hover:scale-105 w-fit">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#3B82F6] to-[#2563EB] shadow-lg shadow-blue-900/50">
-              <ShieldCheck size={24} className="text-white" />
+            <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-surface-800 shadow-lg shadow-blue-900/50 border border-surface-700">
+              <img src="/app-logo.png" alt="Logo" className="h-full w-full object-cover" />
             </div>
             <span className="text-2xl font-bold tracking-tight text-white">
               AntiFake<span className="text-[#3B82F6]">News</span>
@@ -133,8 +133,8 @@ const AuthLayout = ({ children, title, subtitle }) => {
         >
           <div className="mb-10 text-center mt-8 lg:mt-0">
             <div className="flex justify-center lg:hidden mb-6">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#3B82F6] to-[#2563EB] shadow-xl">
-                <ShieldCheck size={28} className="text-white" />
+              <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-surface-800 shadow-xl border border-surface-700">
+                <img src="/app-logo.png" alt="Logo" className="h-full w-full object-cover" />
               </div>
             </div>
             <h1 className="text-3xl font-bold text-[#1E293B] tracking-tight xl:text-4xl">

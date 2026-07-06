@@ -52,8 +52,8 @@ const Navbar = () => {
     >
       <div className="page-container flex h-full items-center justify-between gap-6">
         <Link to="/" className="group flex shrink-0 items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-accent to-teal-500 shadow-lg shadow-accent/20 transition-all duration-300 group-hover:scale-105 group-hover:shadow-accent/40">
-            <ShieldCheck size={24} className="text-white" />
+          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-surface-800 shadow-lg shadow-accent/20 transition-all duration-300 group-hover:scale-105 group-hover:shadow-accent/40 border border-surface-700">
+            <img src="/app-logo.png" alt="Logo" className="h-full w-full object-cover" />
           </div>
           <span className="text-xl font-black tracking-tight text-surface-100">
             AntiFake<span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-teal-500">News</span>

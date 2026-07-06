@@ -6,8 +6,8 @@ const features = [
   {
     icon: FileText,
     step: '01',
-    title: 'NLP Analysis',
-    desc: 'Mô hình Transformer phân tích ngữ nghĩa bài viết, phát hiện các mẫu ngôn ngữ phổ biến trong tin sai lệch.',
+    title: 'NLP Analysis (BERT)',
+    desc: 'Mô hình Transformer (BERT) phân tích ngữ nghĩa, giọng điệu và phát hiện các mẫu ngôn ngữ phổ biến trong tin sai lệch.',
     accent: 'text-blue-600',
     iconBg: 'bg-blue-50',
     hoverBorder: 'hover:border-blue-200',
@@ -15,8 +15,8 @@ const features = [
   {
     icon: Image,
     step: '02',
-    title: 'Image Verification',
-    desc: 'Mạng CNN phân tích tính xác thực của hình ảnh, kiểm tra dấu hiệu chỉnh sửa và deepfake.',
+    title: 'Image Verification (ResNet)',
+    desc: 'Mạng CNN (ResNet50) phân tích tính xác thực của hình ảnh, trích xuất đặc trưng và kiểm tra dấu hiệu phi logic.',
     accent: 'text-purple-600',
     iconBg: 'bg-purple-50',
     hoverBorder: 'hover:border-purple-200',
@@ -25,7 +25,7 @@ const features = [
     icon: Layers,
     step: '03',
     title: 'Multimodal Fusion',
-    desc: 'Tín hiệu từ text và image được kết hợp qua kiến trúc late-fusion để đưa ra kết luận chính xác nhất.',
+    desc: 'Tín hiệu từ Text và Image được kết hợp qua kiến trúc Late-Fusion để đưa ra độ tin cậy (Confidence Score) chuẩn xác nhất.',
     accent: 'text-accent',
     iconBg: 'bg-emerald-50',
     hoverBorder: 'hover:border-emerald-200',
@@ -121,28 +121,32 @@ const Home = () => {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3 md:gap-8 lg:gap-10">
+          <div className="relative grid grid-cols-1 gap-8 md:grid-cols-3 md:gap-8 lg:gap-10 mt-6">
+            {/* Đường solid đen đứt đoạn qua các thẻ */}
+            <div className="absolute top-1/2 left-[18%] right-[18%] hidden h-[3px] bg-slate-900 md:block -translate-y-1/2 z-0" />
+            
             {features.map((item, i) => (
-              <motion.div
-                key={item.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className={`card card-padded flex h-full flex-col transition-all duration-200 ${item.hoverBorder} hover:shadow-md`}
-              >
-                <div className="mb-8 flex items-start justify-between gap-6">
-                  <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${item.iconBg} ${item.accent}`}>
-                    <item.icon size={22} />
+              <div key={item.title} className="relative h-full">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  className={`card card-padded relative z-10 flex h-full flex-col transition-all duration-300 ${item.hoverBorder} hover:-translate-y-2 hover:shadow-2xl bg-white`}
+                >
+                  <div className="mb-8 flex items-start justify-between gap-6">
+                    <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${item.iconBg} ${item.accent} shadow-md border border-white/50 ring-4 ring-white`}>
+                      <item.icon size={26} strokeWidth={2.5} />
+                    </div>
+                    <span className="select-none pr-1 text-5xl font-black leading-none text-surface-200/50">
+                      {item.step}
+                    </span>
                   </div>
-                  <span className="select-none pr-1 text-3xl font-black leading-none text-surface-700 md:text-4xl">
-                    {item.step}
-                  </span>
-                </div>
 
-                <h3 className="mb-3 text-lg font-bold text-surface-100">{item.title}</h3>
-                <p className="text-sm leading-relaxed text-surface-400 md:text-[15px]">{item.desc}</p>
-              </motion.div>
+                  <h3 className="mb-3 text-[19px] font-extrabold text-surface-100">{item.title}</h3>
+                  <p className="text-sm leading-relaxed text-surface-400 md:text-[15px]">{item.desc}</p>
+                </motion.div>
+              </div>
             ))}
           </div>
         </div>

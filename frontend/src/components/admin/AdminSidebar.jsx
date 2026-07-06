@@ -39,16 +39,20 @@ const AdminSidebar = ({ isSidebarOpen, toggleSidebar }) => {
       }`}
     >
       <div className="flex h-[4.25rem] shrink-0 items-center justify-between border-b border-surface-700 px-4">
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent shadow-sm">
-            <ShieldCheck size={18} className="text-white" />
+        <Link 
+          to="/" 
+          className="flex min-w-0 items-center gap-3 transition-opacity hover:opacity-80"
+          title="Về trang chủ"
+        >
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-surface-800 shadow-sm border border-surface-700">
+            <img src="/app-logo.png" alt="Logo" className="h-full w-full object-cover" />
           </div>
           {isSidebarOpen && (
             <span className="truncate text-base font-bold text-surface-50">
               AntiFakeNews
             </span>
           )}
-        </div>
+        </Link>
 
         {isSidebarOpen && (
           <button

@@ -17,8 +17,8 @@ const Footer = () => {
       <div className="site-footer-cta w-full flex justify-center">
         <div className="page-container mx-auto flex justify-center">
           <div className="mx-auto flex max-w-3xl flex-col items-center gap-6 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/15">
-              <ShieldCheck size={28} className="text-emerald-300" />
+            <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-surface-800 ring-1 ring-white/15">
+              <img src="/app-logo.png" alt="Logo" className="h-full w-full object-cover" />
             </div>
             <h2 className="text-2xl font-bold tracking-tight text-white md:text-4xl">
               Bảo vệ thông tin, bắt đầu từ hôm nay
@@ -43,8 +43,8 @@ const Footer = () => {
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-10">
             <div className="lg:col-span-4">
               <div className="mb-6 flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent shadow-sm">
-                  <ShieldCheck size={22} className="text-white" />
+                <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-surface-800 shadow-sm border border-surface-700">
+                  <img src="/app-logo.png" alt="Logo" className="h-full w-full object-cover" />
                 </div>
                 <div>
                   <p className="text-lg font-bold text-surface-50">AntiFakeNews</p>
