@@ -60,7 +60,21 @@ def clean_extracted_text(raw_text: str) -> str:
     # Giong ban cu nhung KHONG xoa tieng Viet, giu lai chu va so, loai bo ky tu dac biet
     text = re.sub(r'[^\w\s]', '', text) 
     clean_text = " ".join(text.split())
-    return clean_text if clean_text else NO_TEXT_CONTEXT
+    # Fix 5: Text qua ngan (< 10 ky tu) thuong la rac OCR -> bo qua
+    return clean_text if clean_text and len(clean_text) >= 10 else NO_TEXT_CONTEXT
+
+def _is_valid_ocr_text(text: str) -> bool:
+    """Fix 2: Kiem tra text OCR co du chat luong de dua vao model khong"""
+    if not text or text == NO_TEXT_CONTEXT:
+        return False
+    # Qua ngan (< 10 ky tu thuc) -> rac
+    if len(text.strip()) < 10:
+        return False
+    # Ty le chu cai phai > 50%, neu khong -> rac (so, ky tu dac biet)
+    alpha_count = sum(1 for c in text if c.isalpha())
+    if len(text) > 0 and alpha_count / len(text) < 0.5:
+        return False
+    return True
 
 def separate_pixels_and_text(pil_image: Image.Image):
     """Thuật toán: Nhận 1 ảnh gốc -> Trả về (Ảnh đã tẩy chữ, Text đã cạo)"""
@@ -106,6 +120,8 @@ def verify_text_only(pure_text: str):
     label = "REAL" if predicted_class == 0 else "FAKE"
     confidence = prob_real if predicted_class == 0 else prob_fake
     reason = "Van ban nhat quan, khong co dau hieu sai lech." if label == "REAL" else "Phat hien su bat thuong hoac tin gia trong noi dung."
+    # Fix 4: Debug logging
+    print(f"[DEBUG TextModel] prob_real={prob_real:.4f} | prob_fake={prob_fake:.4f} | label={label} | confidence={confidence:.4f}")
 
     return {
         "label": label,
@@ -136,6 +152,8 @@ def verify_multimodal(pure_image: Image.Image, pure_text: str):
     label = "REAL" if predicted_class == 0 else "FAKE"
     confidence = prob_real if predicted_class == 0 else prob_fake
     reason = "Van ban va hinh anh nhat quan, khong phat hien dau hieu cat ghep." if label == "REAL" else "Phat hien su bat thuong trong ngu canh van ban hoac dau hieu chinh sua hinh anh."
+    # Fix 4: Debug logging
+    print(f"[DEBUG MultiModal] prob_real={prob_real:.4f} | prob_fake={prob_fake:.4f} | label={label} | confidence={confidence:.4f}")
 
     return {
         "label": label,
@@ -186,8 +204,12 @@ def _analyze_text(original_text, translated_text):
 def _analyze_image(pil_image):
     # OCR bóc chữ
     clean_image, extracted_text = separate_pixels_and_text(pil_image)
-    # Dich text bóc duoc neu can
-    final_text = translate_to_english(extracted_text)
+    # Fix 2: Kiem tra chat luong OCR truoc khi dich
+    if _is_valid_ocr_text(extracted_text):
+        final_text = translate_to_english(extracted_text)
+    else:
+        print(f"[DEBUG] OCR text bi rac, bo qua: '{extracted_text[:50]}...'")
+        final_text = NO_TEXT_CONTEXT
     
     result = verify_multimodal(clean_image, final_text)
     return {
@@ -206,7 +228,13 @@ def _analyze_multimodal(pil_image, original_text, translated_text):
     # Ket hop text nguoi dung va anh
     clean_image, extracted_text = separate_pixels_and_text(pil_image)
     # Uu tien text nguoi dung nhap, neu khong co dung text OCR
-    final_text = translated_text if translated_text else translate_to_english(extracted_text)
+    if translated_text:
+        final_text = translated_text
+    elif _is_valid_ocr_text(extracted_text):
+        final_text = translate_to_english(extracted_text)
+    else:
+        print(f"[DEBUG] OCR text bi rac trong multimodal, bo qua: '{extracted_text[:50]}...'")
+        final_text = NO_TEXT_CONTEXT
     
     img_result = verify_multimodal(clean_image, final_text)
     
@@ -215,8 +243,10 @@ def _analyze_multimodal(pil_image, original_text, translated_text):
         
         # Trung binh cong prob_fake cua 2 model
         combined_prob_fake = (img_result["prob_fake"] + text_result["prob_fake"]) / 2
-        
-        if combined_prob_fake > 0.5:
+        # Fix 1: Tang nguong FAKE tu 0.5 -> 0.6 de giam false positive
+        FAKE_THRESHOLD = 0.6
+        print(f"[DEBUG Multimodal] combined_prob_fake={combined_prob_fake:.4f} | threshold={FAKE_THRESHOLD}")
+        if combined_prob_fake > FAKE_THRESHOLD:
             label = "FAKE"
             confidence = combined_prob_fake
             reason = "Phat hien su bat thuong khi ket hop ca van ban va hinh anh."

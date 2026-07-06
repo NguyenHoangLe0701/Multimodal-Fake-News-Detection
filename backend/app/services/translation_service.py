@@ -12,7 +12,8 @@ def _get_translator():
     if _translator is None:
         try:
             from deep_translator import GoogleTranslator
-            _translator = GoogleTranslator(source='vi', target='en')
+            # Fix 3: Dung auto-detect thay vi hard-code 'vi' de ho tro da ngon ngu
+            _translator = GoogleTranslator(source='auto', target='en')
         except Exception as e:
             print(f"[translation] Khong the khoi tao translator: {e}")
     return _translator
@@ -32,9 +33,8 @@ def translate_to_english(text: str) -> str:
     if not text or not text.strip():
         return text
     
-    if not is_vietnamese(text):
-        return text
-    
+    # Voi source='auto', Google Translate se tu phat hien ngon ngu
+    # Neu text da la Tieng Anh, no se tra ve nguyen van
     translator = _get_translator()
     if not translator:
         return text
