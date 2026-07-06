@@ -23,10 +23,6 @@ const History = () => {
   const itemsPerPage = 10;
 
   useEffect(() => {
-    setCurrentPage(1);
-  }, [search, filterMode]);
-
-  useEffect(() => {
     const savedUser = localStorage.getItem('user:v1') || localStorage.getItem('user');
     const user = savedUser ? JSON.parse(savedUser) : null;
 
@@ -58,6 +54,7 @@ const History = () => {
     if (filterMode === 'ALL') setFilterMode('REAL');
     else if (filterMode === 'REAL') setFilterMode('FAKE');
     else setFilterMode('ALL');
+    setCurrentPage(1);
   };
 
   return (
@@ -86,7 +83,10 @@ const History = () => {
                 aria-label="Tìm kiếm lịch sử"
                 placeholder="Tìm kiếm nội dung..."
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setCurrentPage(1);
+                }}
                 className="input-field w-full rounded-full py-3 pl-11"
               />
             </div>
