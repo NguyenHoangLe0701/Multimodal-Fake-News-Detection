@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Search, Filter, ShieldAlert, ShieldCheck, Loader2 } from 'lucide-react';
+import { Search, Filter, ShieldAlert, ShieldCheck, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { m as motion } from 'framer-motion';
 import { getHistory } from '../services/api';
 
@@ -18,6 +18,13 @@ const History = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState('');
+  const [filterMode, setFilterMode] = useState('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterMode]);
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user:v1') || localStorage.getItem('user');
@@ -30,15 +37,31 @@ const History = () => {
   }, []);
 
   const filtered = useMemo(() => {
-    if (!search.trim()) return records;
-    const q = search.toLowerCase();
-    return records.filter((item) =>
-      (item.news_text || '').toLowerCase().includes(q)
-    );
-  }, [records, search]);
+    let result = records;
+    if (filterMode !== 'ALL') {
+      result = result.filter(item => (item.prediction_label || item.label) === filterMode);
+    }
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter(item => (item.news_text || '').toLowerCase().includes(q));
+    }
+    return result;
+  }, [records, search, filterMode]);
+
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const paginatedRecords = filtered.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const toggleFilter = () => {
+    if (filterMode === 'ALL') setFilterMode('REAL');
+    else if (filterMode === 'REAL') setFilterMode('FAKE');
+    else setFilterMode('ALL');
+  };
 
   return (
-    <div className="page-shell pb-20 pt-12 md:pb-24 md:pt-16">
+    <div className="page-shell pb-32 pt-12 md:pb-40 md:pt-16 min-h-[100vh]">
       <div className="page-container">
         <motion.header
           initial={{ opacity: 0, y: 16 }}
@@ -61,15 +84,23 @@ const History = () => {
               <input
                 type="text"
                 aria-label="Tìm kiếm lịch sử"
-                placeholder="Tìm kiếm..."
+                placeholder="Tìm kiếm nội dung..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="input-field w-full rounded-full py-3 pl-11"
               />
             </div>
-            <button type="button" className="btn-outline shrink-0">
+            <button 
+              type="button" 
+              onClick={toggleFilter}
+              className={`btn-outline shrink-0 transition-colors ${
+                filterMode !== 'ALL' 
+                  ? filterMode === 'REAL' ? 'border-emerald-500/50 text-emerald-500 bg-emerald-500/10' : 'border-rose-500/50 text-rose-500 bg-rose-500/10'
+                  : ''
+              }`}
+            >
               <Filter size={15} />
-              Lọc
+              {filterMode === 'ALL' ? 'Lọc: Tất cả' : filterMode === 'REAL' ? 'Chỉ Tin Thật' : 'Chỉ Tin Giả'}
             </button>
           </div>
         </motion.header>
@@ -85,7 +116,7 @@ const History = () => {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.08 }}
-            className="card overflow-hidden"
+            className="card overflow-hidden mb-20"
           >
             <div className="overflow-x-auto">
               <table className="data-table min-w-[760px]">
@@ -98,7 +129,7 @@ const History = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((item, i) => {
+                  {paginatedRecords.map((item, i) => {
                     const label = item.prediction_label || item.label;
                     const score = item.confidence_score ?? item.score ?? 0;
                     return (
@@ -172,6 +203,37 @@ const History = () => {
                 </div>
               )}
             </div>
+
+            {/* Pagination moved OUTSIDE overflow-x-auto so it doesn't scroll horizontally or stick weirdly */}
+            {totalPages > 1 && !error && (
+              <div className="flex flex-col items-center justify-between gap-4 border-t border-surface-800 p-5 sm:flex-row bg-surface-900/50">
+                <span className="text-sm text-surface-400">
+                  Hiển thị <span className="text-surface-200">{(currentPage - 1) * itemsPerPage + 1}</span> - <span className="text-surface-200">{Math.min(currentPage * itemsPerPage, filtered.length)}</span> trong số <span className="text-surface-200 font-medium">{filtered.length}</span> kết quả
+                </span>
+                
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-surface-700 bg-surface-900 text-surface-300 transition-colors hover:bg-surface-700 disabled:opacity-30 disabled:hover:bg-surface-900"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  
+                  <div className="flex h-9 min-w-[40px] items-center justify-center rounded-lg bg-surface-800 px-3 text-sm font-medium text-surface-200">
+                    {currentPage} / {totalPages}
+                  </div>
+                  
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-surface-700 bg-surface-900 text-surface-300 transition-colors hover:bg-surface-700 disabled:opacity-30 disabled:hover:bg-surface-900"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
+              </div>
+            )}
           </motion.div>
         )}
       </div>
