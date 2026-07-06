@@ -156,11 +156,20 @@ def analyze(mode: str, provided_text: str, pil_image: Image.Image = None):
     translated_text = translate_to_english(original_text) if original_text else ""
     
     if mode == "text":
-        if not _text_model_available:
-            return {"error": "Text model is not available", "text_model_available": False}
-        
-        result = verify_text_only(translated_text or "no text context")
-        return {
+        return _analyze_text(original_text, translated_text)
+    elif mode == "image":
+        return _analyze_image(pil_image)
+    elif mode == "multimodal":
+        return _analyze_multimodal(pil_image, original_text, translated_text)
+    
+    return {"error": "Invalid mode"}
+
+def _analyze_text(original_text, translated_text):
+    if not _text_model_available:
+        return {"error": "Text model is not available", "text_model_available": False}
+    
+    result = verify_text_only(translated_text or "no text context")
+    return {
             "label": result["label"],
             "confidence": round(result["confidence"], 4),
             "text_score": round(result["prob_fake"], 4),
@@ -170,16 +179,16 @@ def analyze(mode: str, provided_text: str, pil_image: Image.Image = None):
             "original_text": original_text,
             "translated_text": translated_text,
             "text_model_available": True
-        }
-        
-    elif mode == "image":
-        # OCR bóc chữ
-        clean_image, extracted_text = separate_pixels_and_text(pil_image)
-        # Dich text bóc duoc neu can
-        final_text = translate_to_english(extracted_text)
-        
-        result = verify_multimodal(clean_image, final_text)
-        return {
+    }
+
+def _analyze_image(pil_image):
+    # OCR bóc chữ
+    clean_image, extracted_text = separate_pixels_and_text(pil_image)
+    # Dich text bóc duoc neu can
+    final_text = translate_to_english(extracted_text)
+    
+    result = verify_multimodal(clean_image, final_text)
+    return {
             "label": result["label"],
             "confidence": round(result["confidence"], 4),
             "text_score": "N/A",
@@ -189,52 +198,52 @@ def analyze(mode: str, provided_text: str, pil_image: Image.Image = None):
             "original_text": "",
             "translated_text": "",
             "text_model_available": _text_model_available
-        }
+    }
+
+def _analyze_multimodal(pil_image, original_text, translated_text):
+    # Ket hop text nguoi dung va anh
+    clean_image, extracted_text = separate_pixels_and_text(pil_image)
+    # Uu tien text nguoi dung nhap, neu khong co dung text OCR
+    final_text = translated_text if translated_text else translate_to_english(extracted_text)
+    
+    img_result = verify_multimodal(clean_image, final_text)
+    
+    if _text_model_available and original_text:
+        text_result = verify_text_only(translated_text)
         
-    elif mode == "multimodal":
-        # Ket hop text nguoi dung va anh
-        clean_image, extracted_text = separate_pixels_and_text(pil_image)
-        # Uu tien text nguoi dung nhap, neu khong co dung text OCR
-        final_text = translated_text if translated_text else translate_to_english(extracted_text)
+        # Trung binh cong prob_fake cua 2 model
+        combined_prob_fake = (img_result["prob_fake"] + text_result["prob_fake"]) / 2
         
-        img_result = verify_multimodal(clean_image, final_text)
-        
-        if _text_model_available and original_text:
-            text_result = verify_text_only(translated_text)
-            
-            # Trung binh cong prob_fake cua 2 model
-            combined_prob_fake = (img_result["prob_fake"] + text_result["prob_fake"]) / 2
-            
-            if combined_prob_fake > 0.5:
-                label = "FAKE"
-                confidence = combined_prob_fake
-                reason = "Phat hien su bat thuong khi ket hop ca van ban va hinh anh."
-            else:
-                label = "REAL"
-                confidence = 1 - combined_prob_fake
-                reason = "Noi dung tin cay sau khi kiem chung cheo van ban va hinh anh."
-                
-            return {
-                "label": label,
-                "confidence": round(confidence, 4),
-                "text_score": round(text_result["prob_fake"], 4),
-                "image_score": round(img_result["prob_fake"], 4),
-                "reason": translate_reason_to_vietnamese(reason),
-                "extracted_text": extracted_text,
-                "original_text": original_text,
-                "translated_text": translated_text,
-                "text_model_available": True
-            }
+        if combined_prob_fake > 0.5:
+            label = "FAKE"
+            confidence = combined_prob_fake
+            reason = "Phat hien su bat thuong khi ket hop ca van ban va hinh anh."
         else:
-            # Fallback ve multimodal binh thuong neu khong co text_model hoac khong co text
-            return {
-                "label": img_result["label"],
-                "confidence": round(img_result["confidence"], 4),
-                "text_score": "N/A",
-                "image_score": round(img_result["prob_fake"], 4),
-                "reason": translate_reason_to_vietnamese(img_result["reason"]),
-                "extracted_text": extracted_text,
-                "original_text": original_text,
-                "translated_text": translated_text,
-                "text_model_available": _text_model_available
-            }
+            label = "REAL"
+            confidence = 1 - combined_prob_fake
+            reason = "Noi dung tin cay sau khi kiem chung cheo van ban va hinh anh."
+            
+        return {
+            "label": label,
+            "confidence": round(confidence, 4),
+            "text_score": round(text_result["prob_fake"], 4),
+            "image_score": round(img_result["prob_fake"], 4),
+            "reason": translate_reason_to_vietnamese(reason),
+            "extracted_text": extracted_text,
+            "original_text": original_text,
+            "translated_text": translated_text,
+            "text_model_available": True
+        }
+    else:
+        # Fallback ve multimodal binh thuong neu khong co text_model hoac khong co text
+        return {
+            "label": img_result["label"],
+            "confidence": round(img_result["confidence"], 4),
+            "text_score": "N/A",
+            "image_score": round(img_result["prob_fake"], 4),
+            "reason": translate_reason_to_vietnamese(img_result["reason"]),
+            "extracted_text": extracted_text,
+            "original_text": original_text,
+            "translated_text": translated_text,
+            "text_model_available": _text_model_available
+        }

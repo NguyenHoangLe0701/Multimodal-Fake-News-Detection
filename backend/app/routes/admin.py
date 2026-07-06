@@ -4,7 +4,11 @@ from app.services.supabase_service import get_predictions, update_prediction_fee
 
 router = APIRouter()
 
-@router.get("/dashboard", summary="Lấy thông tin tổng quan (Thống kê)")
+@router.get(
+    "/dashboard", 
+    summary="Lấy thông tin tổng quan (Thống kê)",
+    responses={500: {"description": "Lỗi hệ thống"}}
+)
 async def admin_dashboard():
     try:
         stats = get_dashboard_stats()
@@ -16,7 +20,11 @@ async def admin_dashboard():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/predictions", summary="Lấy lịch sử dự đoán cho Admin")
+@router.get(
+    "/predictions", 
+    summary="Lấy lịch sử dự đoán cho Admin",
+    responses={500: {"description": "Lỗi hệ thống"}}
+)
 async def admin_get_predictions(limit: int = 50):
     try:
         # Gọi get_predictions với user_email=None để lấy toàn bộ
@@ -31,7 +39,14 @@ async def admin_get_predictions(limit: int = 50):
 class FeedbackRequest(BaseModel):
     feedback: str
 
-@router.post("/predictions/{prediction_id}/feedback", summary="Admin gửi feedback Đúng/Sai")
+@router.post(
+    "/predictions/{prediction_id}/feedback", 
+    summary="Admin gửi feedback Đúng/Sai",
+    responses={
+        400: {"description": "Feedback không hợp lệ"},
+        500: {"description": "Lỗi khi lưu feedback"}
+    }
+)
 async def admin_submit_feedback(prediction_id: str, req: FeedbackRequest):
     if req.feedback not in ["CORRECT", "INCORRECT"]:
         raise HTTPException(status_code=400, detail="Feedback không hợp lệ")

@@ -9,6 +9,36 @@ from app.services import ai_service, supabase_service
 
 router = APIRouter()
 
+async def _process_upload(image: Optional[UploadFile]) -> tuple[Optional[Image.Image], str]:
+    if not image:
+        return None, ""
+        
+    ext = image.filename.split('.')[-1].lower()
+    if ext not in Config.ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=400, detail="Định dạng ảnh không hợp lệ.")
+
+    image_bytes = await image.read()
+    if len(image_bytes) > Config.MAX_FILE_SIZE:
+        raise HTTPException(status_code=400, detail="Kích thước file vượt quá 10MB.")
+
+    pil_image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+    unique_name = f"{uuid.uuid4().hex}.{ext}"
+    image_url = supabase_service.upload_image_bytes(image_bytes, unique_name) or ""
+    
+    return pil_image, image_url
+
+def _resolve_analysis_mode(mode: str, text: str, has_image: bool) -> str:
+    if mode != "auto":
+        return mode
+    has_text = bool(text.strip())
+    if has_text and has_image:
+        return "multimodal"
+    if has_text:
+        return "text"
+    if has_image:
+        return "image"
+    return "auto"
+
 @router.post("/", responses={400: {"description": "Lỗi định dạng ảnh hoặc dung lượng vượt mức"}, 500: {"description": "Lỗi hệ thống khi xử lý AI"}})
 async def predict_fake_news(
     text: Optional[str] = Form(""), 
@@ -21,36 +51,8 @@ async def predict_fake_news(
     if not text.strip() and not image:
         raise HTTPException(status_code=400, detail="Vui lòng cung cấp văn bản hoặc hình ảnh.")
 
-    pil_image = None
-    image_url = ""
-
-    if image:
-        ext = image.filename.split('.')[-1].lower()
-        if ext not in Config.ALLOWED_EXTENSIONS:
-            raise HTTPException(status_code=400, detail="Định dạng ảnh không hợp lệ.")
-
-        image_bytes = await image.read()
-        if len(image_bytes) > Config.MAX_FILE_SIZE:
-            raise HTTPException(status_code=400, detail="Kích thước file vượt quá 10MB.")
-
-        # Nạp ảnh vào RAM dưới dạng đối tượng PIL
-        pil_image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-
-        # Tùy chọn: Upload ảnh gốc lên Supabase để lưu trữ
-        unique_name = f"{uuid.uuid4().hex}.{ext}"
-        upload_result = supabase_service.upload_image_bytes(image_bytes, unique_name)
-        if upload_result:
-            image_url = upload_result
-
-    # Xac dinh mode
-    resolved_mode = mode
-    if resolved_mode == "auto":
-        if text.strip() and pil_image:
-            resolved_mode = "multimodal"
-        elif text.strip():
-            resolved_mode = "text"
-        elif pil_image:
-            resolved_mode = "image"
+    pil_image, image_url = await _process_upload(image)
+    resolved_mode = _resolve_analysis_mode(mode, text, bool(pil_image))
 
     # Giao dữ liệu cho Pipeline phân tích
     try:
