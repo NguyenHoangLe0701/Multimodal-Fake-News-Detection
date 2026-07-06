@@ -362,4 +362,123 @@ const Detect = () => {
   );
 };
 
+const DetectResultCard = ({ result, isFake }) => {
+  return (
+    <motion.div
+      key="result"
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`detect-result ${result.imageUrl ? 'has-bg-image' : ''}`}
+    >
+      {result.imageUrl && (
+        <>
+          <div 
+            className="detect-result__bg" 
+            style={{ backgroundImage: `url(${result.imageUrl})` }}
+          />
+          <div className="detect-result__overlay" />
+        </>
+      )}
+      
+      <div className="detect-result__content">
+        {/* Mode Badge */}
+        <div className="detect-mode-badge mb-4 flex justify-center">
+          <span className={`text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full inline-flex items-center gap-2 ${result.imageUrl ? 'text-white/90 bg-white/20 backdrop-blur-md' : 'text-surface-500 bg-surface-700/50'}`}>
+            {result.mode === 'text' && <><FileSearch size={14} /> Chế độ Text-Only</>}
+            {result.mode === 'image' && <><ImageIcon size={14} /> Chế độ Image-Only</>}
+            {result.mode === 'multimodal' && <><Layers size={14} /> Chế độ Đa phương thức</>}
+          </span>
+        </div>
+
+        {/* Verdict */}
+        <div className={`detect-verdict ${isFake ? 'is-fake' : 'is-real'} ${result.imageUrl ? 'is-transparent' : ''}`}>
+          <div className="detect-verdict__glow" />
+          <div className="detect-verdict__icon">
+            {isFake ? <ShieldAlert size={36} /> : <ShieldCheck size={36} />}
+          </div>
+          <span className="detect-verdict__label">Kết quả AI</span>
+          <h3 className="detect-verdict__value">{result.label}</h3>
+          <span className="detect-verdict__tag">
+            {isFake ? 'Cảnh báo nội dung rác' : 'Nội dung tin cậy'}
+          </span>
+        </div>
+
+        {/* Confidence bar */}
+        <div className="detect-confidence">
+          <div className="detect-confidence__header">
+            <span className="detect-confidence__label">Độ tin cậy</span>
+            <div className="detect-confidence__value">
+              <span className="detect-confidence__num">
+                {(result.confidence * 100).toFixed(1)}
+              </span>
+              <span className="detect-confidence__pct">%</span>
+            </div>
+          </div>
+          <div className="detect-confidence__track">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${result.confidence * 100}%` }}
+              transition={{ duration: 1.5, ease: [0.25, 1, 0.5, 1] }}
+              className={`detect-confidence__fill ${isFake ? 'is-fake' : 'is-real'}`}
+            />
+          </div>
+        </div>
+
+        {/* AI Reason */}
+        {result.reason && (
+          <div className={`detect-reason mt-2 p-4 rounded-xl border ${result.imageUrl ? 'bg-white/10 border-white/20 backdrop-blur-md' : 'bg-surface-800 border-surface-700/50'}`}>
+            <div className={`flex items-center gap-2 mb-2 ${result.imageUrl ? 'text-white' : 'text-surface-200'}`}>
+              <Info size={16} className={result.imageUrl ? 'text-white' : 'text-accent'} />
+              <h4 className="text-sm font-bold">Lý do AI</h4>
+            </div>
+            <p className={`text-sm italic ${result.imageUrl ? 'text-white/90 shadow-black' : 'text-surface-400'}`} style={result.imageUrl ? {textShadow: '0 1px 3px rgba(0,0,0,0.8)'} : {}}>"{result.reason}"</p>
+          </div>
+        )}
+
+        {/* Score breakdown */}
+        <div className="detect-scores">
+          <h4 className="detect-scores__head">
+            <Layers size={14} />
+            Phân tích chi tiết
+          </h4>
+
+          {result.textScore !== "N/A" && (
+            <div className="detect-score-row">
+              <div className="detect-score-row__top">
+                <span className="detect-score-row__name">Text (NLP)</span>
+                <span className="detect-score-row__val">{result.textScore}</span>
+              </div>
+              <div className="detect-score-row__track">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.min(Math.abs(result.textScore) * 10, 100)}%` }}
+                  transition={{ duration: 1, delay: 0.5 }}
+                  className="detect-score-row__fill"
+                />
+              </div>
+            </div>
+          )}
+
+          {result.imageScore !== "N/A" && (
+            <div className="detect-score-row">
+              <div className="detect-score-row__top">
+                <span className="detect-score-row__name">Visual (CNN)</span>
+                <span className="detect-score-row__val">{result.imageScore}</span>
+              </div>
+              <div className="detect-score-row__track">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.min(Math.abs(result.imageScore) * 10, 100)}%` }}
+                  transition={{ duration: 1, delay: 0.7 }}
+                  className="detect-score-row__fill"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
 export default Detect;
