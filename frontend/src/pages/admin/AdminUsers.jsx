@@ -64,10 +64,7 @@ const AdminUsers = () => {
     });
   }, [users, searchTerm]);
 
-  // Reset to first page when search changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm]);
+  // Render loading state
 
   if (loading) {
     return (
@@ -99,7 +96,10 @@ const AdminUsers = () => {
               type="text"
               placeholder="Tìm kiếm email, tên người dùng..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
               className="input-field !pl-10"
             />
           </div>
