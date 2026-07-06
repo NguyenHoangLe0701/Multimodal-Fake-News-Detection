@@ -7,7 +7,6 @@ import {
   Users,
   LogOut,
   PanelLeftClose,
-  ShieldCheck,
 } from 'lucide-react';
 
 const navigation = [

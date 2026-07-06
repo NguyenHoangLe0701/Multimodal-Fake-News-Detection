@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ShieldCheck, ArrowRight, Mail, GitBranch } from 'lucide-react';
+import { ArrowRight, Mail, GitBranch } from 'lucide-react';
 
 const footerLinks = [
   { to: '/', label: 'Trang chủ' },
