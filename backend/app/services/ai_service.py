@@ -1,5 +1,3 @@
-import cv2
-import numpy as np
 import pytesseract
 import re
 import torch
@@ -35,33 +33,13 @@ def clean_extracted_text(raw_text: str) -> str:
     text = re.sub(r'http\S+|www\S+|https\S+', '', text, flags=re.MULTILINE)
     text = re.sub(r'<.*?>', '', text)
     text = re.sub(r'\[.*?\]|\(.*?\)', '', text)
-    text = re.sub(r'[^a-zA-Z0-9\s]', '', text)
+    # CẬP NHẬT: Giữ lại dấu chấm, phẩy, hỏi chấm, ngoặc kép, gạch ngang để chuẩn văn phong
+    text = re.sub(r'[^a-zA-Z0-9\s.,!?\'"-]', '', text)
     clean_text = " ".join(text.split())
-    return clean_text if clean_text else "no text context"
-
-def separate_pixels_and_text(pil_image: Image.Image):
-    """Thuật toán: Nhận 1 ảnh gốc -> Trả về (Ảnh đã tẩy chữ, Text đã cạo)"""
-    extracted_text = pytesseract.image_to_string(pil_image).strip()
-    
-    cv_img = np.array(pil_image)
-    cv_img = cv2.cvtColor(cv_img, cv2.COLOR_RGB2BGR)
-    h, w, _ = cv_img.shape
-    mask = np.zeros((h, w), dtype=np.uint8)
-    boxes = pytesseract.image_to_boxes(pil_image)
-    
-    for b in boxes.splitlines():
-        b = b.split(' ')
-        if len(b) >= 5:
-            x1, y1, x2, y2 = int(b[1]), int(b[2]), int(b[3]), int(b[4])
-            cv2.rectangle(mask, (x1, h - y1), (x2, h - y2), (255), thickness=-1)
-
-    clean_cv_img = cv2.inpaint(cv_img, mask, inpaintRadius=7, flags=cv2.INPAINT_TELEA)
-    clean_cv_img = cv2.cvtColor(clean_cv_img, cv2.COLOR_BGR2RGB)
-    
-    return Image.fromarray(clean_cv_img), clean_extracted_text(extracted_text)
+    return clean_text if clean_text else ""
 
 def verify_fake_news(pure_image: Image.Image, pure_text: str):
-    """Nhận 2 mảnh dữ liệu tách biệt để đưa vào Dual-Stream Model"""
+    """Nhận dữ liệu để đưa vào Dual-Stream Model"""
     global _model, _tokenizer, _transform, device
     
     inputs = _tokenizer(
@@ -94,12 +72,13 @@ def verify_fake_news(pure_image: Image.Image, pure_text: str):
 
 def analyze_image_pipeline(pil_image: Image.Image):
     """
-    TỔNG ĐIỀU PHỐI (Hàm này API sẽ gọi):
-    1. Đưa ảnh gốc vào hàm tách để lấy 2 dữ liệu độc lập.
-    2. Chuyền 2 dữ liệu đó vào mô hình huấn luyện trên Kaggle.
+    TỔNG ĐIỀU PHỐI MỚI:
+    1. Bóc chữ bằng OCR (Tesseract).
+    2. Giữ nguyên ảnh gốc đưa vào cho ResNet (bỏ qua Inpaint làm nhòe ảnh).
     """
-    # Bước 1: Tách ảnh gốc thành ảnh sạch và text riêng biệt
-    clean_image, extracted_text = separate_pixels_and_text(pil_image)
+    # Bước 1: Bóc chữ từ ảnh gốc
+    raw_text = pytesseract.image_to_string(pil_image).strip()
+    clean_text = clean_extracted_text(raw_text)
     
-    # Bước 2: Chuyền 2 dữ liệu vừa tách vào model
-    return verify_fake_news(clean_image, extracted_text)
+    # Bước 2: Truyền thẳng Ảnh gốc + Text đã làm sạch vào Mô hình
+    return verify_fake_news(pil_image, clean_text)
