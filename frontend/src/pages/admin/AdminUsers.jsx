@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
-import { Shield, User, Ban, Loader2 } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Shield, User, Ban, Loader2, Search } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '../../lib/supabaseClient';
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -31,8 +32,8 @@ const AdminUsers = () => {
   const toggleStatus = async (id, currentStatus) => {
     const newStatus = currentStatus === 'Active' ? 'Blocked' : 'Active';
     // Optimistic UI update
-    setUsers(
-      users.map((u) =>
+    setUsers((prevUsers) =>
+      prevUsers.map((u) =>
         u.id === id ? { ...u, status: newStatus } : u
       )
     );
@@ -42,9 +43,20 @@ const AdminUsers = () => {
     } catch (e) {
       console.error("Lỗi cập nhật trạng thái:", e);
       // Revert if error
-      setUsers(users.map((u) => (u.id === id ? { ...u, status: currentStatus } : u)));
+      setUsers((prevUsers) => 
+        prevUsers.map((u) => (u.id === id ? { ...u, status: currentStatus } : u))
+      );
     }
   };
+
+  const filteredUsers = useMemo(() => {
+    return users.filter(user => {
+      const searchLower = searchTerm.toLowerCase();
+      const nameMatch = (user.full_name || '').toLowerCase().includes(searchLower);
+      const emailMatch = (user.email || '').toLowerCase().includes(searchLower);
+      return nameMatch || emailMatch;
+    });
+  }, [users, searchTerm]);
 
   if (loading) {
     return (
@@ -57,100 +69,122 @@ const AdminUsers = () => {
   return (
     <div className="admin-page">
       <div className="admin-page-header">
-        <h2 className="page-title text-2xl md:text-3xl">User Management</h2>
-        <p className="page-subtitle !mt-0">Quản lý tài khoản người dùng và phân quyền truy cập.</p>
+        <h2 className="page-title text-2xl md:text-3xl">Quản lý Người dùng</h2>
+        <p className="page-subtitle !mt-0">Theo dõi, phân quyền và quản lý tài khoản hệ thống.</p>
       </div>
 
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
         className="card overflow-hidden"
       >
+        {/* Toolbar in card */}
+        <div className="card-header border-b border-surface-700 bg-surface-900 p-4 flex justify-between items-center">
+          <div className="relative w-full max-w-md">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search size={18} className="text-surface-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Tìm kiếm email, tên người dùng..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="input-field !pl-10"
+            />
+          </div>
+        </div>
+
         <div className="overflow-x-auto">
-        <table className="data-table min-w-[860px]">
-          <thead>
-            <tr>
-              <th>Người dùng</th>
-              <th>Vai trò</th>
-              <th>Trạng thái</th>
-              <th>Ngày tham gia</th>
-              <th className="text-right">Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user.id} className="group">
-                <td>
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-surface-700 bg-surface-900 text-sm font-bold text-surface-200">
-                      {(user.full_name || user.email || 'U').charAt(0).toUpperCase()}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-surface-100">
-                        {user.full_name || user.email || 'Unknown User'}
-                      </p>
-                      <p className="text-[11px] text-surface-500">
-                        {user.full_name ? user.email : `ID: ${user.id.substring(0, 8)}...`}
-                      </p>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <div className="flex items-center gap-1.5">
-                    {user.role === 'admin' ? (
-                      <>
-                        <Shield size={13} className="text-purple-600" />
-                        <span className="text-sm font-medium text-purple-600">Admin</span>
-                      </>
-                    ) : (
-                      <>
-                        <User size={13} className="text-surface-400" />
-                        <span className="text-sm text-surface-300">User</span>
-                      </>
-                    )}
-                  </div>
-                </td>
-                <td>
-                  <span
-                    className={`badge ${
-                      (user.status || 'Active') === 'Active' ? 'badge-real' : 'badge-fake'
-                    }`}
-                  >
-                    {user.status || 'Active'}
-                  </span>
-                </td>
-                <td className="whitespace-nowrap text-sm text-surface-400">
-                  {user.created_at
-                    ? new Date(user.created_at).toLocaleDateString()
-                    : 'Không rõ'}
-                </td>
-                <td className="text-right">
-                  <button
-                    type="button"
-                    onClick={() => toggleStatus(user.id, user.status || 'Active')}
-                    className={`btn-icon btn-icon-sm ${
-                      (user.status || 'Active') === 'Active'
-                        ? 'hover:border-red-200 hover:bg-red-50 hover:text-danger'
-                        : 'hover:border-emerald-200 hover:bg-emerald-50 hover:text-accent'
-                    }`}
-                    title={
-                      (user.status || 'Active') === 'Active'
-                        ? 'Chặn người dùng'
-                        : 'Bỏ chặn'
-                    }
-                  >
-                    <Ban size={16} />
-                  </button>
-                </td>
+          <table className="data-table min-w-[860px]">
+            <thead>
+              <tr>
+                <th>Người dùng</th>
+                <th>Vai trò</th>
+                <th>Trạng thái</th>
+                <th>Ngày tham gia</th>
+                <th className="text-right">Hành động</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        {users.length === 0 && (
-          <div className="p-8 text-center text-surface-400">Không có người dùng nào.</div>
-        )}
-      </div>
-    </motion.div>
+            </thead>
+            <tbody>
+              {filteredUsers.map((user) => (
+                <tr key={user.id} className="group">
+                  <td>
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-surface-700 bg-surface-900 text-sm font-bold text-surface-200">
+                        {(user.full_name || user.email || 'U').charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-surface-100">
+                          {user.full_name || user.email || 'Unknown User'}
+                        </p>
+                        <p className="text-[11px] text-surface-500">
+                          {user.full_name ? user.email : `ID: ${user.id.substring(0, 8)}...`}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="flex items-center gap-1.5">
+                      {user.role === 'admin' ? (
+                        <>
+                          <Shield size={13} className="text-purple-600" />
+                          <span className="text-sm font-medium text-purple-600">Admin</span>
+                        </>
+                      ) : (
+                        <>
+                          <User size={13} className="text-surface-400" />
+                          <span className="text-sm text-surface-300">User</span>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                  <td>
+                    <span
+                      className={`badge ${
+                        (user.status || 'Active') === 'Active' ? 'badge-real' : 'badge-fake'
+                      }`}
+                    >
+                      {user.status || 'Active'}
+                    </span>
+                  </td>
+                  <td className="whitespace-nowrap text-sm text-surface-400">
+                    {user.created_at
+                      ? new Date(user.created_at).toLocaleDateString('vi-VN')
+                      : 'Không rõ'}
+                  </td>
+                  <td className="text-right">
+                    <button
+                      type="button"
+                      onClick={() => toggleStatus(user.id, user.status || 'Active')}
+                      className={`btn-icon btn-icon-sm ${
+                        (user.status || 'Active') === 'Active'
+                          ? 'hover:border-red-200 hover:bg-red-50 hover:text-danger'
+                          : 'hover:border-emerald-200 hover:bg-emerald-50 hover:text-accent'
+                      }`}
+                      title={
+                        (user.status || 'Active') === 'Active'
+                          ? 'Chặn người dùng'
+                          : 'Bỏ chặn'
+                      }
+                    >
+                      <Ban size={16} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {filteredUsers.length === 0 && (
+            <div className="p-12 text-center flex flex-col items-center justify-center">
+              <div className="w-16 h-16 bg-surface-900 rounded-full flex items-center justify-center mb-4">
+                <User size={32} className="text-surface-400" />
+              </div>
+              <p className="text-surface-100 font-semibold mb-1">Không tìm thấy người dùng</p>
+              <p className="text-surface-400 text-sm">Chưa có người dùng nào khớp với tìm kiếm của bạn.</p>
+            </div>
+          )}
+        </div>
+      </motion.div>
     </div>
   );
 };

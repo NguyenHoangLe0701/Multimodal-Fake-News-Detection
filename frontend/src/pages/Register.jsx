@@ -117,6 +117,16 @@ const Register = () => {
           email: userEmail, 
           login_time: new Date().toISOString()
         }]);
+
+        // Insert into public.users to show up in Admin User Management
+        await supabase.from('users').insert([{
+          id: data.user.id,
+          email: userEmail,
+          full_name: name,
+          role: userRole,
+          status: 'Active',
+          created_at: new Date().toISOString()
+        }]);
       } catch (logError) {
         console.error("Không thể ghi log xuống Supabase:", logError);
       }
