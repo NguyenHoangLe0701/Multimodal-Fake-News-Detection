@@ -64,7 +64,7 @@ const AdminLogs = () => {
               className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
               style={{ position: 'fixed' }}
             >
-              <button className="absolute top-6 right-6 text-white hover:text-gray-300 p-2 bg-white/10 rounded-full backdrop-blur-md transition-colors z-50">
+              <button type="button" className="absolute top-6 right-6 text-white hover:text-gray-300 p-2 bg-white/10 rounded-full backdrop-blur-md transition-colors z-50">
                  <X size={24} />
               </button>
               <motion.img
@@ -106,6 +106,14 @@ const AdminLogs = () => {
                   <div 
                     className={`flex h-11 w-11 items-center justify-center overflow-hidden rounded-lg border border-surface-700 bg-surface-900 ${log.image_url ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
                     onClick={() => log.image_url && setSelectedImage(log.image_url)}
+                    onKeyDown={(e) => {
+                      if ((e.key === 'Enter' || e.key === ' ') && log.image_url) {
+                        e.preventDefault();
+                        setSelectedImage(log.image_url);
+                      }
+                    }}
+                    role={log.image_url ? "button" : undefined}
+                    tabIndex={log.image_url ? 0 : undefined}
                     title={log.image_url ? "Nhấn để xem ảnh phóng to" : ""}
                   >
                     {log.image_url ? (
@@ -204,6 +212,7 @@ const AdminLogs = () => {
           <div className="flex items-center justify-between border-t border-surface-700 bg-surface-900 px-4 py-3 sm:px-6">
             <div className="flex flex-1 justify-between sm:hidden">
               <button
+                type="button"
                 onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
                 disabled={currentPage === 1}
                 className="relative inline-flex items-center rounded-md px-4 py-2 text-sm font-medium text-surface-300 ring-1 ring-inset ring-surface-700 hover:bg-surface-800 disabled:opacity-50"
@@ -211,6 +220,7 @@ const AdminLogs = () => {
                 Trước
               </button>
               <button
+                type="button"
                 onClick={() => setCurrentPage(p => Math.min(p + 1, Math.ceil(logs.length / itemsPerPage)))}
                 disabled={currentPage === Math.ceil(logs.length / itemsPerPage)}
                 className="relative inline-flex items-center rounded-md px-4 py-2 text-sm font-medium text-surface-300 ring-1 ring-inset ring-surface-700 hover:bg-surface-800 disabled:opacity-50"
@@ -231,6 +241,7 @@ const AdminLogs = () => {
               <div>
                 <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
                   <button
+                    type="button"
                     onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
                     disabled={currentPage === 1}
                     className="relative inline-flex items-center rounded-l-md px-2 py-2 text-surface-400 ring-1 ring-inset ring-surface-700 hover:bg-surface-800 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
@@ -239,6 +250,7 @@ const AdminLogs = () => {
                     <ChevronLeft size={16} aria-hidden="true" />
                   </button>
                   <button
+                    type="button"
                     onClick={() => setCurrentPage(p => Math.min(p + 1, Math.ceil(logs.length / itemsPerPage)))}
                     disabled={currentPage === Math.ceil(logs.length / itemsPerPage)}
                     className="relative inline-flex items-center rounded-r-md px-2 py-2 text-surface-400 ring-1 ring-inset ring-surface-700 hover:bg-surface-800 focus:z-20 focus:outline-offset-0 disabled:opacity-50"

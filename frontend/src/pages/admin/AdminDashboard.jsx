@@ -7,6 +7,16 @@ import { ShieldAlert, ShieldCheck, Activity, Users, Loader2 } from 'lucide-react
 import { motion } from 'framer-motion';
 import { getAdminStats } from '../../services/api';
 
+const defaultBarData = [
+  { name: 'Mon', fake: 0, real: 0 },
+  { name: 'Tue', fake: 0, real: 0 },
+  { name: 'Wed', fake: 0, real: 0 },
+  { name: 'Thu', fake: 0, real: 0 },
+  { name: 'Fri', fake: 0, real: 0 },
+  { name: 'Sat', fake: 0, real: 0 },
+  { name: 'Sun', fake: 0, real: 0 },
+];
+
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
@@ -87,15 +97,6 @@ const AdminDashboard = () => {
     { name: 'Tin thật (Real)', value: realCount, color: '#10b981' },
   ];
 
-  const defaultBarData = [
-    { name: 'Mon', fake: 0, real: 0 },
-    { name: 'Tue', fake: 0, real: 0 },
-    { name: 'Wed', fake: 0, real: 0 },
-    { name: 'Thu', fake: 0, real: 0 },
-    { name: 'Fri', fake: 0, real: 0 },
-    { name: 'Sat', fake: 0, real: 0 },
-    { name: 'Sun', fake: 0, real: 0 },
-  ];
   
   const barData = data?.weekly_stats || defaultBarData;
 

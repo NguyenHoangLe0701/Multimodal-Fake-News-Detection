@@ -55,6 +55,7 @@ const AdminHeader = ({ isSidebarOpen, toggleSidebar, title }) => {
           <Search size={17} className="admin-search-icon" />
           <input
             type="text"
+            aria-label="Tìm kiếm"
             className="admin-search"
             placeholder="Tìm kiếm logs, users..."
           />

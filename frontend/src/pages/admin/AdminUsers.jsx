@@ -94,6 +94,7 @@ const AdminUsers = () => {
             </div>
             <input
               type="text"
+              aria-label="Tìm kiếm người dùng"
               placeholder="Tìm kiếm email, tên người dùng..."
               value={searchTerm}
               onChange={(e) => {
@@ -198,6 +199,7 @@ const AdminUsers = () => {
             <div className="flex items-center justify-between border-t border-surface-700 bg-surface-900 px-4 py-3 sm:px-6">
               <div className="flex flex-1 justify-between sm:hidden">
                 <button
+                  type="button"
                   onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
                   disabled={currentPage === 1}
                   className="relative inline-flex items-center rounded-md px-4 py-2 text-sm font-medium text-surface-300 ring-1 ring-inset ring-surface-700 hover:bg-surface-800 disabled:opacity-50"
@@ -205,6 +207,7 @@ const AdminUsers = () => {
                   Trước
                 </button>
                 <button
+                  type="button"
                   onClick={() => setCurrentPage(p => Math.min(p + 1, Math.ceil(filteredUsers.length / itemsPerPage)))}
                   disabled={currentPage === Math.ceil(filteredUsers.length / itemsPerPage)}
                   className="relative inline-flex items-center rounded-md px-4 py-2 text-sm font-medium text-surface-300 ring-1 ring-inset ring-surface-700 hover:bg-surface-800 disabled:opacity-50"
@@ -225,6 +228,7 @@ const AdminUsers = () => {
                 <div>
                   <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
                     <button
+                      type="button"
                       onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
                       disabled={currentPage === 1}
                       className="relative inline-flex items-center rounded-l-md px-2 py-2 text-surface-400 ring-1 ring-inset ring-surface-700 hover:bg-surface-800 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
@@ -233,6 +237,7 @@ const AdminUsers = () => {
                       <ChevronLeft size={16} aria-hidden="true" />
                     </button>
                     <button
+                      type="button"
                       onClick={() => setCurrentPage(p => Math.min(p + 1, Math.ceil(filteredUsers.length / itemsPerPage)))}
                       disabled={currentPage === Math.ceil(filteredUsers.length / itemsPerPage)}
                       className="relative inline-flex items-center rounded-r-md px-2 py-2 text-surface-400 ring-1 ring-inset ring-surface-700 hover:bg-surface-800 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
