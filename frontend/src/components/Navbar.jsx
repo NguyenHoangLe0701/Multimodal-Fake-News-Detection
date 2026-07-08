@@ -31,10 +31,11 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', onScroll, { passive: true });
   }, []);
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+  const [prevPathname, setPrevPathname] = useState(location.pathname);
+  if (location.pathname !== prevPathname) {
+    setPrevPathname(location.pathname);
     setMobileOpen(false);
-  }, [location.pathname]);
+  }
 
   const handleLogout = () => {
     localStorage.removeItem('user:v1');
@@ -119,6 +120,7 @@ const Navbar = () => {
               <button 
                 type="button"
                 onClick={handleLogout}
+                aria-label="Đăng xuất"
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-white/50 border border-white shadow-sm text-surface-400 hover:text-danger hover:bg-red-50 hover:border-red-100 transition-all"
                 title="Đăng xuất"
               >
@@ -145,9 +147,9 @@ const Navbar = () => {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
             className="overflow-hidden border-b border-surface-700 bg-white md:hidden"
           >
             <nav className="page-container flex flex-col gap-2 py-5">

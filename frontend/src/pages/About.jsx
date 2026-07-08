@@ -1,6 +1,6 @@
 import { m as motion } from 'framer-motion';
 import { Layers, Video, Image as ImageIcon, FileText, Sparkles, Network, ShieldCheck, ArrowRight, BrainCircuit } from 'lucide-react';
-import { Link } from 'react-router-dom';
+
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -141,7 +141,7 @@ const About = () => {
 
             {newsFeatures.map((feat, i) => (
               <motion.div
-                key={i}
+                key={feat.title}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -204,7 +204,7 @@ const About = () => {
 
             {videoFeatures.map((feat, i) => (
               <motion.div
-                key={i}
+                key={feat.title}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}

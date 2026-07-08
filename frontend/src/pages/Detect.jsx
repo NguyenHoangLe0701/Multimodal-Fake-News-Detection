@@ -241,7 +241,7 @@ const Detect = () => {
                     >
                       <img src={imagePreview} alt="Preview" className="detect-preview__img" />
                       <div className="detect-preview__overlay" />
-                      <button type="button" onClick={removeImage} className="detect-preview__remove">
+                      <button type="button" onClick={removeImage} className="detect-preview__remove" aria-label="Xóa ảnh">
                         <X size={16} />
                       </button>
                       <div className="detect-preview__meta">
@@ -279,8 +279,8 @@ const Detect = () => {
 
             {error && (
               <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
                 className="detect-error"
               >
                 <AlertTriangle size={16} />
@@ -417,10 +417,10 @@ const DetectResultCard = ({ result, isFake }) => {
           </div>
           <div className="detect-confidence__track">
             <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${result.confidence * 100}%` }}
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: result.confidence }}
               transition={{ duration: 1.5, ease: [0.25, 1, 0.5, 1] }}
-              className={`detect-confidence__fill ${isFake ? 'is-fake' : 'is-real'}`}
+              className={`detect-confidence__fill w-full origin-left ${isFake ? 'is-fake' : 'is-real'}`}
             />
           </div>
         </div>
@@ -451,10 +451,10 @@ const DetectResultCard = ({ result, isFake }) => {
               </div>
               <div className="detect-score-row__track">
                 <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${Math.min(Math.abs(result.textScore) * 10, 100)}%` }}
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: Math.min(Math.abs(result.textScore) * 10, 100) / 100 }}
                   transition={{ duration: 1, delay: 0.5 }}
-                  className="detect-score-row__fill"
+                  className="detect-score-row__fill w-full origin-left"
                 />
               </div>
             </div>
@@ -468,10 +468,10 @@ const DetectResultCard = ({ result, isFake }) => {
               </div>
               <div className="detect-score-row__track">
                 <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${Math.min(Math.abs(result.imageScore) * 10, 100)}%` }}
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: Math.min(Math.abs(result.imageScore) * 10, 100) / 100 }}
                   transition={{ duration: 1, delay: 0.7 }}
-                  className="detect-score-row__fill"
+                  className="detect-score-row__fill w-full origin-left"
                 />
               </div>
             </div>

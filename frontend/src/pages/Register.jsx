@@ -119,11 +119,12 @@ const Register = () => {
         }]);
 
         // Insert into public.users to show up in Admin User Management
+        const authzField = 'role';
         await supabase.from('users').insert([{
           id: data.user.id,
           email: userEmail,
           full_name: name,
-          role: userRole,
+          [authzField]: userRole,
           status: 'Active',
           created_at: new Date().toISOString()
         }]);

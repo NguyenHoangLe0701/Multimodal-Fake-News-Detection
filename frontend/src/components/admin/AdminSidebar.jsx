@@ -124,6 +124,7 @@ const AdminSidebar = ({ isSidebarOpen, toggleSidebar }) => {
           <button
             type="button"
             onClick={handleLogout}
+            aria-label="Đăng xuất"
             title="Đăng xuất"
             className="admin-logout-btn admin-logout-btn-collapsed"
           >

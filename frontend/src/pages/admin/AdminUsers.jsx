@@ -168,6 +168,7 @@ const AdminUsers = () => {
                     <button
                       type="button"
                       onClick={() => toggleStatus(user.id, user.status || 'Active')}
+                      aria-label={user.status === 'Banned' ? 'Mở khóa tài khoản' : 'Khóa tài khoản'}
                       className={`btn-icon btn-icon-sm ${
                         (user.status || 'Active') === 'Active'
                           ? 'hover:border-red-200 hover:bg-red-50 hover:text-danger'

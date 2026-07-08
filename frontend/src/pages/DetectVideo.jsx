@@ -165,6 +165,7 @@ const DetectVideo = () => {
                       <button 
                         type="button" 
                         onClick={removeVideo} 
+                        aria-label="Xóa video"
                         className="absolute top-2 right-2 h-8 w-8 flex items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-md hover:bg-danger hover:text-white transition-colors"
                       >
                         <X size={16} />
@@ -205,8 +206,8 @@ const DetectVideo = () => {
 
             {error && (
               <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
                 className="detect-error"
               >
                 <AlertTriangle size={16} />
@@ -403,10 +404,10 @@ const DetectVideoResultCard = ({ result, isFake }) => {
           </div>
           <div className="detect-confidence__track">
             <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${result.confidence * 100}%` }}
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: result.confidence }}
               transition={{ duration: 1.5, ease: [0.25, 1, 0.5, 1] }}
-              className={`detect-confidence__fill ${isFake ? 'is-fake' : 'is-real'}`}
+              className={`detect-confidence__fill w-full origin-left ${isFake ? 'is-fake' : 'is-real'}`}
             />
           </div>
         </div>
@@ -436,10 +437,10 @@ const DetectVideoResultCard = ({ result, isFake }) => {
             </div>
             <div className="detect-score-row__track bg-surface-700/50">
               <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${Math.min(result.videoScore * 100, 100)}%` }}
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: Math.min(result.videoScore * 100, 100) / 100 }}
                 transition={{ duration: 1, delay: 0.5 }}
-                className="detect-score-row__fill"
+                className="detect-score-row__fill w-full origin-left"
                 style={{ background: result.videoScore > 0.5 ? '#ef4444' : '#10b981' }}
               />
             </div>

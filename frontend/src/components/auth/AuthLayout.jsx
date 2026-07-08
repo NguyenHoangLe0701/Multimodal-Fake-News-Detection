@@ -68,10 +68,11 @@ const AuthLayout = ({ children, title, subtitle }) => {
                   <div className="flex-1 space-y-3 py-1">
                     <div className="h-2.5 w-3/4 bg-white/20 rounded-full overflow-hidden relative">
                       <motion.div 
-                        initial={{ width: "0%" }}
-                        animate={{ width: "100%" }}
+                        initial={{ scaleX: 0 }}
+                        animate={{ scaleX: 1 }}
+                        style={{ transformOrigin: "left" }}
                         transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                        className="absolute inset-y-0 left-0 bg-cyan-400 rounded-full shadow-[0_0_10px_rgba(34,211,238,0.5)]"
+                        className="absolute inset-0 bg-cyan-400 rounded-full shadow-[0_0_10px_rgba(34,211,238,0.5)]"
                       />
                     </div>
                     <div className="h-2 w-1/2 bg-white/10 rounded-full"></div>

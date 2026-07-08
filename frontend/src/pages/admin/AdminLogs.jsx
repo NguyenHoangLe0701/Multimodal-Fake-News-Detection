@@ -64,7 +64,7 @@ const AdminLogs = () => {
               className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
               style={{ position: 'fixed' }}
             >
-              <button type="button" className="absolute top-6 right-6 text-white hover:text-gray-300 p-2 bg-white/10 rounded-full backdrop-blur-md transition-colors z-50">
+              <button onClick={() => setSelectedImage(null)} className="absolute -top-4 -right-4 rounded-full bg-surface-800 p-1.5 text-surface-400 hover:text-white hover:bg-surface-700 transition-colors shadow-lg border border-surface-600" aria-label="Đóng ảnh">
                  <X size={24} />
               </button>
               <motion.img
