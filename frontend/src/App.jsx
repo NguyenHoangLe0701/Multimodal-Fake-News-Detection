@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import Detect from './pages/Detect';
+import DetectVideo from './pages/DetectVideo';
 import History from './pages/History';
 import About from './pages/About';
 import Login from './pages/Login';
@@ -34,6 +35,7 @@ function App() {
           <Route element={<ClientLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/detect" element={<Detect />} />
+            <Route path="/detect-video" element={<DetectVideo />} />
             <Route path="/history" element={<History />} />
             <Route path="/about" element={<About />} />
           </Route>

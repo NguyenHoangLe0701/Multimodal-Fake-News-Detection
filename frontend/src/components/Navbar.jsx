@@ -7,6 +7,7 @@ import adminAvatar from '../assets/admin.jpg';
 const navLinks = [
   { to: '/', label: 'Trang chủ' },
   { to: '/detect', label: 'Kiểm tra tin' },
+  { to: '/detect-video', label: 'Kiểm tra Video' },
   { to: '/history', label: 'Lịch sử' },
   { to: '/about', label: 'Công nghệ' },
 ];
