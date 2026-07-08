@@ -33,6 +33,29 @@ export async function predictNews(text, imageFile, userEmail = null, mode = 'aut
   return await parseResponse(response);
 }
 
+export async function predictVideo(videoFile, userEmail = null) {
+  const formData = new FormData();
+  if (videoFile) formData.append('video', videoFile);
+  if (userEmail) formData.append('user_email', userEmail);
+
+  const response = await fetch(`${API_BASE}/predict-video/`, {
+    method: 'POST',
+    body: formData,
+  });
+  
+  if (!response.ok) {
+    let errorMsg = `Lỗi máy chủ (${response.status})`;
+    try {
+      const errJson = await response.json();
+      if (errJson.detail) errorMsg = errJson.detail;
+    } catch (e) {
+      console.debug('Failed to parse error response:', e);
+    }
+    throw new Error(errorMsg);
+  }
+  return await parseResponse(response);
+}
+
 export async function getHistory(limit = 50, userEmail = null) {
   let url = `${API_BASE}/history/?limit=${limit}`;
   if (userEmail) url += `&email=${encodeURIComponent(userEmail)}`;

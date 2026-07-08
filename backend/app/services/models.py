@@ -41,3 +41,20 @@ class TextOnlyFakeNewsModel(nn.Module):
         outputs = self.bert(input_ids=input_ids, attention_mask=attention_mask)
         pooled = self.dropout(outputs.pooler_output)
         return self.fc(pooled)
+
+class VideoDeepfakeModel(nn.Module):
+    """3D ResNet Model cho viec phan tich Frame Video"""
+    def __init__(self, num_classes=2):
+        super(VideoDeepfakeModel, self).__init__()
+        from torchvision.models.video import r3d_18
+        self.video_resnet = r3d_18(weights=None)
+        
+        num_ftrs = self.video_resnet.fc.in_features
+        self.video_resnet.fc = nn.Sequential(
+            nn.BatchNorm1d(num_ftrs),
+            nn.Dropout(0.5),
+            nn.Linear(num_ftrs, num_classes)
+        )
+
+    def forward(self, x):
+        return self.video_resnet(x)

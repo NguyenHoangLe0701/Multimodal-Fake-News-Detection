@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ArrowRight, Mail, GitBranch } from 'lucide-react';
 
 const footerLinks = [
@@ -11,10 +11,13 @@ const footerLinks = [
 const techStack = ['React', 'Flask', 'PyTorch', 'Supabase', 'Tailwind'];
 
 const Footer = () => {
+  const location = useLocation();
+  const isDetectVideoPage = location.pathname === '/detect-video';
 
   return (
     <footer className="site-footer w-full">
-      <div className="site-footer-cta w-full flex justify-center">
+      {!isDetectVideoPage && (
+        <div className="site-footer-cta w-full flex justify-center">
         <div className="page-container mx-auto flex justify-center">
           <div className="mx-auto flex max-w-3xl flex-col items-center gap-6 text-center">
             <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-surface-800 ring-1 ring-white/15">
@@ -37,6 +40,7 @@ const Footer = () => {
           </div>
         </div>
       </div>
+      )}
 
       <div className="site-footer-main bg-white w-full flex justify-center">
         <div className="page-container mx-auto">

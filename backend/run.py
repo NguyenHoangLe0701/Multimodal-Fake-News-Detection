@@ -11,9 +11,11 @@ from contextlib import asynccontextmanager
 
 from config import Config
 from app.services.ai_service import _load_model
+from app.services.video_ai_service import _get_video_model
 
 # 2. Import các Router (Đã dọn dẹp các dòng trùng lặp)
 from app.routes.predict import router as predict_router
+from app.routes.predict_video import router as predict_video_router
 from app.routes.auth import router as auth_router
 from app.routes.history import router as history_router
 from app.routes.admin import router as admin_router
@@ -23,6 +25,7 @@ async def lifespan(app: FastAPI):
     print("Dang khoi dong Server FastAPI...")
     # Tải mô hình AI vào RAM ngay khi bật server
     _load_model()
+    _get_video_model()
     print("Server da san sang nhan Request!")
     yield
     print("Dang tat Server và giai phong RAM...")
@@ -47,6 +50,7 @@ from fastapi.staticfiles import StaticFiles
 
 # 3. Đăng ký Router (Mỗi router 1 đường dẫn duy nhất)
 app.include_router(predict_router, prefix="/api/predict", tags=["AI Prediction"])
+app.include_router(predict_video_router, prefix="/api/predict-video", tags=["AI Prediction Video"])
 app.include_router(auth_router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(history_router, prefix="/api/history", tags=["History"])
 app.include_router(admin_router, prefix="/api/admin", tags=["Admin Dashboard"])

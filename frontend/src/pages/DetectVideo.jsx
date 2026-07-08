@@ -14,6 +14,7 @@ import {
   Info
 } from 'lucide-react';
 import { m as motion, AnimatePresence } from 'framer-motion';
+import { predictVideo } from '../services/api';
 
 const DetectVideo = () => {
   const [videoFile, setVideoFile] = useState(null);
@@ -50,25 +51,20 @@ const DetectVideo = () => {
     setResult(null);
     setError(null);
 
-    // Mock API call
     try {
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      const savedUser = localStorage.getItem('user:v1') || localStorage.getItem('user');
+      const user = savedUser ? JSON.parse(savedUser) : null;
       
-      // Random result for demonstration
-      const isFake = Math.random() > 0.5;
-      
+      const data = await predictVideo(videoFile, user?.email);
       setResult({
-        label: isFake ? 'FAKE' : 'REAL',
-        confidence: isFake ? 0.92 : 0.89,
-        videoScore: isFake ? 0.95 : 0.12,
-        audioScore: isFake ? 0.88 : 0.05,
-        reason: isFake 
-          ? "Phát hiện dấu hiệu thao túng khuôn mặt (Deepfake) và sự không đồng bộ giữa khẩu hình miệng và âm thanh ở giây thứ 12."
-          : "Không phát hiện dấu hiệu can thiệp AI vào hình ảnh hoặc âm thanh. Tệp tin nguyên bản.",
-        mode: 'video'
+        label: data.label,
+        confidence: data.confidence,
+        videoScore: data.videoScore !== undefined ? Number(data.videoScore).toFixed(2) : "N/A",
+        reason: data.reason,
+        mode: data.mode || 'video'
       });
     } catch (err) {
-      setError('Đã xảy ra lỗi khi phân tích video. Vui lòng thử lại sau.');
+      setError(err.message || 'Không thể kết nối backend. Vui lòng thử lại sau.');
     } finally {
       setIsLoading(false);
     }
@@ -289,6 +285,77 @@ const DetectVideo = () => {
           </motion.aside>
         </div>
       </div>
+
+      {/* === CORE TECHNOLOGY SECTION (GIỐNG TRANG CHỦ) === */}
+      <section className="section-block border-t border-surface-700 bg-surface-900 mt-20 w-full">
+        <div className="page-container mx-auto">
+          <div className="section-head text-center">
+            <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-accent">
+              Core Technology
+            </p>
+            <h2 className="text-2xl font-bold tracking-tight text-surface-50 md:text-4xl">
+              Ba bước phân tích chuyên sâu
+            </h2>
+          </div>
+
+          <div className="relative grid grid-cols-1 gap-8 md:grid-cols-3 md:gap-8 lg:gap-10 mt-6">
+            {/* Đường solid đen đứt đoạn qua các thẻ */}
+            <div className="absolute top-1/2 left-[18%] right-[18%] hidden h-[3px] bg-slate-900 md:block -translate-y-1/2 z-0" />
+            
+            {[
+              {
+                icon: Video,
+                step: '01',
+                title: 'Frame Extraction',
+                desc: 'Hệ thống tự động phân rã video thành các khung hình rời rạc, trích xuất chính xác 30 frame đại diện trải đều theo toàn bộ thời lượng.',
+                accent: 'text-blue-600',
+                iconBg: 'bg-blue-50',
+                hoverBorder: 'hover:border-blue-200',
+              },
+              {
+                icon: Layers,
+                step: '02',
+                title: 'Spatio-Temporal CNN',
+                desc: 'Mạng 3D ResNet (r3d_18) phân tích không gian từng điểm ảnh và sự liên kết chuyển động mượt mà (temporal) giữa các frame.',
+                accent: 'text-purple-600',
+                iconBg: 'bg-purple-50',
+                hoverBorder: 'hover:border-purple-200',
+              },
+              {
+                icon: ShieldCheck,
+                step: '03',
+                title: 'Video Verification',
+                desc: 'Tổng hợp các điểm bất thường vi mô không thể thấy bằng mắt thường, đánh giá xác suất giả mạo để xuất ra báo cáo (Confidence Score).',
+                accent: 'text-emerald-600',
+                iconBg: 'bg-emerald-50',
+                hoverBorder: 'hover:border-emerald-200',
+              },
+            ].map((item, i) => (
+              <div key={item.title} className="relative h-full">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  className={`card card-padded relative z-10 flex h-full flex-col transition-all duration-300 ${item.hoverBorder} hover:-translate-y-2 hover:shadow-2xl bg-white`}
+                >
+                  <div className="mb-8 flex items-start justify-between gap-6">
+                    <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${item.iconBg} ${item.accent} shadow-md border border-white/50 ring-4 ring-white`}>
+                      <item.icon size={26} strokeWidth={2.5} />
+                    </div>
+                    <span className="select-none pr-1 text-5xl font-black leading-none text-surface-200/50">
+                      {item.step}
+                    </span>
+                  </div>
+
+                  <h3 className="mb-3 text-[19px] font-extrabold text-surface-100">{item.title}</h3>
+                  <p className="text-sm leading-relaxed text-surface-400 md:text-[15px]">{item.desc}</p>
+                </motion.div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 };
@@ -378,21 +445,7 @@ const DetectVideoResultCard = ({ result, isFake }) => {
             </div>
           </div>
 
-          <div className="detect-score-row mt-3">
-            <div className="detect-score-row__top">
-              <span className="detect-score-row__name">Âm thanh (Phổ & Tần số)</span>
-              <span className="detect-score-row__val">{result.audioScore}</span>
-            </div>
-            <div className="detect-score-row__track bg-surface-700/50">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${Math.min(result.audioScore * 100, 100)}%` }}
-                transition={{ duration: 1, delay: 0.7 }}
-                className="detect-score-row__fill"
-                style={{ background: result.audioScore > 0.5 ? '#ef4444' : '#10b981' }}
-              />
-            </div>
-          </div>
+
         </div>
       </div>
     </motion.div>
