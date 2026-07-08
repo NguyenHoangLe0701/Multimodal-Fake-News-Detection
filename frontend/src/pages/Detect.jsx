@@ -18,6 +18,7 @@ import {
 import { m as motion, AnimatePresence } from 'framer-motion';
 import { predictNews } from '../services/api';
 
+
 const Detect = () => {
   const [newsText, setNewsText] = useState('');
   const [imageFile, setImageFile] = useState(null);
@@ -283,59 +284,8 @@ const Detect = () => {
           >
             <AnimatePresence mode="wait">
               {/* Empty state */}
-              {!result && !isLoading && (
-                <motion.div
-                  key="empty"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="detect-result-empty"
-                >
-                  <div className="detect-result-empty__glow" />
-                  <div className="detect-result-empty__icon">
-                    <ShieldCheck size={40} strokeWidth={1.4} />
-                  </div>
-                  <h3 className="detect-result-empty__title">Chờ nội dung</h3>
-                  <p className="detect-result-empty__desc">
-                    Hệ thống đã sẵn sàng. Hãy nhập dữ liệu ở bên trái
-                    để AI tiến hành phân tích và đối chiếu.
-                  </p>
-                  <div className="detect-result-empty__steps">
-                    <div className="detect-result-empty__step">
-                      <FileText size={14} />
-                      <span>Nhập văn bản</span>
-                    </div>
-                    <div className="detect-result-empty__step">
-                      <ImageIcon size={14} />
-                      <span>Đính kèm ảnh</span>
-                    </div>
-                    <div className="detect-result-empty__step">
-                      <CheckCircle2 size={14} />
-                      <span>Xem kết quả</span>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Loading state */}
-              {isLoading && (
-                <motion.div
-                  key="loading"
-                  initial={{ opacity: 0, scale: 0.96 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.96 }}
-                  className="detect-result-loading"
-                >
-                  <div className="detect-result-loading__pulse" />
-                  <div className="detect-result-loading__spinner">
-                    <div className="detect-spinner-ring detect-spinner-ring--outer" />
-                    <div className="detect-spinner-ring detect-spinner-ring--inner" />
-                    <Sparkles size={24} className="detect-spinner-icon" />
-                  </div>
-                  <h3 className="detect-result-loading__title">Đang quét AI</h3>
-                  <p className="detect-result-loading__desc">Đang xử lý mạng neural đa phương thức…</p>
-                </motion.div>
-              )}
+              {!result && !isLoading && <DetectEmptyState />}
+              {isLoading && <DetectLoadingState />}
 
               {result && !isLoading && (
                 <DetectResultCard result={result} isFake={isFake} isUncertain={isUncertain} />
@@ -346,74 +296,11 @@ const Detect = () => {
       </div>
 
       {/* Text Prompt Modal */}
-      <AnimatePresence>
-        {showTextPrompt && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-6"
-            onClick={() => setShowTextPrompt(false)}
-          >
-            {/* Backdrop */}
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-md" />
-
-            {/* Modal Card */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.92, y: 24 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.92, y: 24 }}
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-md bg-white rounded-[28px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] overflow-hidden"
-            >
-              {/* Top accent bar */}
-              <div className="h-1 w-full bg-gradient-to-r from-orange-400 via-amber-400 to-orange-500" />
-
-              {/* Content */}
-              <div className="px-8 pt-10 pb-8 flex flex-col items-center text-center">
-                {/* Icon */}
-                <div className="w-[72px] h-[72px] rounded-full bg-gradient-to-br from-orange-50 via-amber-50 to-orange-100 flex items-center justify-center mb-7 ring-1 ring-orange-200/60 shadow-sm">
-                  <AlertTriangle size={34} className="text-orange-500" strokeWidth={2} />
-                </div>
-
-                {/* Title */}
-                <h3 className="text-[22px] font-bold text-slate-900 mb-3 leading-tight">
-                  Thiếu ngữ cảnh văn bản
-                </h3>
-
-                {/* Description */}
-                <p className="text-[15px] text-slate-500 leading-[1.7] max-w-[340px]">
-                  Mô hình AI cần <span className="text-slate-700 font-semibold">cả hình ảnh lẫn văn bản</span> để đối chiếu chéo. Nhập quá ít chữ có thể cho kết quả không chính xác.
-                </p>
-              </div>
-
-              {/* Actions */}
-              <div className="px-8 pb-8 flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowTextPrompt(false);
-                    handleSubmit('multimodal', true);
-                  }}
-                  className="flex-1 h-12 rounded-2xl text-[15px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 active:bg-slate-200 transition-colors"
-                >
-                  Bỏ qua
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setShowTextPrompt(false)}
-                  className="flex-1 h-12 rounded-2xl text-[15px] font-semibold text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 active:from-orange-600 active:to-amber-600 shadow-md shadow-orange-500/20 transition-colors flex items-center justify-center gap-2"
-                >
-                  <FileText size={17} />
-                  Bổ sung văn bản
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <TextPromptModal 
+        show={showTextPrompt} 
+        onClose={() => setShowTextPrompt(false)} 
+        onContinue={() => handleSubmit('multimodal', true)} 
+      />
     </div>
   );
 };
@@ -440,7 +327,7 @@ const DetectResultCard = ({ result, isFake, isUncertain }) => {
         {/* Mode Badge */}
         <div className="detect-mode-badge mb-4 flex justify-center">
           <span className={`text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full inline-flex items-center gap-2 ${result.imageUrl ? 'text-white/90 bg-white/20 backdrop-blur-md' : 'text-surface-500 bg-surface-700/50'}`}>
-            {result.mode === 'text' && <><FileSearch size={14} /> Chế độ Text-Only</>}
+            {result.mode === 'text' && <><FileText size={14} /> Chế độ Text-Only</>}
             {result.mode === 'image' && <><ImageIcon size={14} /> Chế độ Image-Only</>}
             {result.mode === 'multimodal' && <><Layers size={14} /> Chế độ Đa phương thức</>}
           </span>
@@ -536,5 +423,113 @@ const DetectResultCard = ({ result, isFake, isUncertain }) => {
     </motion.div>
   );
 };
+
+const DetectEmptyState = () => (
+  <motion.div
+    key="empty"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    className="detect-result-empty"
+  >
+    <div className="detect-result-empty__glow" />
+    <div className="detect-result-empty__icon">
+      <ShieldCheck size={40} strokeWidth={1.4} />
+    </div>
+    <h3 className="detect-result-empty__title">Chờ nội dung</h3>
+    <p className="detect-result-empty__desc">
+      Hệ thống đã sẵn sàng. Hãy nhập dữ liệu ở bên trái
+      để AI tiến hành phân tích và đối chiếu.
+    </p>
+    <div className="detect-result-empty__steps">
+      <div className="detect-result-empty__step">
+        <FileText size={14} />
+        <span>Nhập văn bản</span>
+      </div>
+      <div className="detect-result-empty__step">
+        <ImageIcon size={14} />
+        <span>Đính kèm ảnh</span>
+      </div>
+      <div className="detect-result-empty__step">
+        <CheckCircle2 size={14} />
+        <span>Xem kết quả</span>
+      </div>
+    </div>
+  </motion.div>
+);
+
+const DetectLoadingState = () => (
+  <motion.div
+    key="loading"
+    initial={{ opacity: 0, scale: 0.96 }}
+    animate={{ opacity: 1, scale: 1 }}
+    exit={{ opacity: 0, scale: 0.96 }}
+    className="detect-result-loading"
+  >
+    <div className="detect-result-loading__pulse" />
+    <div className="detect-result-loading__spinner">
+      <div className="detect-spinner-ring detect-spinner-ring--outer" />
+      <div className="detect-spinner-ring detect-spinner-ring--inner" />
+      <Sparkles size={24} className="detect-spinner-icon" />
+    </div>
+    <h3 className="detect-result-loading__title">Đang quét AI</h3>
+    <p className="detect-result-loading__desc">Đang xử lý mạng neural đa phương thức…</p>
+  </motion.div>
+);
+
+const TextPromptModal = ({ show, onClose, onContinue }) => (
+  <AnimatePresence>
+    {show && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[100] flex items-center justify-center p-6"
+        onClick={onClose}
+      >
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-md" />
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.92, y: 24 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.92, y: 24 }}
+          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          onClick={(e) => e.stopPropagation()}
+          className="relative w-full max-w-md bg-white rounded-[28px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] overflow-hidden"
+        >
+          <div className="h-1 w-full bg-gradient-to-r from-orange-400 via-amber-400 to-orange-500" />
+          <div className="px-8 pt-10 pb-8 flex flex-col items-center text-center">
+            <div className="w-[72px] h-[72px] rounded-full bg-gradient-to-br from-orange-50 via-amber-50 to-orange-100 flex items-center justify-center mb-7 ring-1 ring-orange-200/60 shadow-sm">
+              <AlertTriangle size={34} className="text-orange-500" strokeWidth={2} />
+            </div>
+            <h3 className="text-[22px] font-bold text-slate-900 mb-3 leading-tight">
+              Thiếu ngữ cảnh văn bản
+            </h3>
+            <p className="text-[15px] text-slate-500 leading-[1.7] max-w-[340px]">
+              Mô hình AI cần <span className="text-slate-700 font-semibold">cả hình ảnh lẫn văn bản</span> để đối chiếu chéo. Nhập quá ít chữ có thể cho kết quả không chính xác.
+            </p>
+          </div>
+          <div className="px-8 pb-8 flex gap-3">
+            <button
+              type="button"
+              onClick={onContinue}
+              className="flex-1 h-12 rounded-2xl text-[15px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 active:bg-slate-200 transition-colors"
+            >
+              Bỏ qua
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 h-12 rounded-2xl text-[15px] font-semibold text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 active:from-orange-600 active:to-amber-600 shadow-md shadow-orange-500/20 transition-colors flex items-center justify-center gap-2"
+            >
+              <FileText size={17} />
+              Bổ sung văn bản
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
 
 export default Detect;
