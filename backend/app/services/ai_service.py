@@ -211,6 +211,19 @@ def _analyze_image(pil_image):
         print(f"[DEBUG] OCR text bi rac, bo qua: '{extracted_text[:50]}...'")
         final_text = NO_TEXT_CONTEXT
     
+    if final_text == NO_TEXT_CONTEXT:
+        return {
+            "label": "UNCERTAIN",
+            "confidence": 0.5,
+            "text_score": "N/A",
+            "image_score": "N/A",
+            "reason": "Không tìm thấy văn bản để đối chiếu. Hệ thống đa phương thức yêu cầu cả chữ và ảnh để đưa ra kết luận chính xác.",
+            "extracted_text": extracted_text, # hien thi Tieng Viet/goc
+            "original_text": "",
+            "translated_text": "",
+            "text_model_available": _text_model_available
+        }
+
     result = verify_multimodal(clean_image, final_text)
     return {
             "label": result["label"],
@@ -236,6 +249,19 @@ def _analyze_multimodal(pil_image, original_text, translated_text):
         print(f"[DEBUG] OCR text bi rac trong multimodal, bo qua: '{extracted_text[:50]}...'")
         final_text = NO_TEXT_CONTEXT
     
+    if final_text == NO_TEXT_CONTEXT:
+        return {
+            "label": "UNCERTAIN",
+            "confidence": 0.5,
+            "text_score": "N/A",
+            "image_score": "N/A",
+            "reason": "Không tìm thấy văn bản để đối chiếu. Hệ thống đa phương thức yêu cầu cả chữ và ảnh để đưa ra kết luận chính xác.",
+            "extracted_text": extracted_text,
+            "original_text": original_text,
+            "translated_text": translated_text,
+            "text_model_available": _text_model_available
+        }
+
     img_result = verify_multimodal(clean_image, final_text)
     
     if _text_model_available and original_text:

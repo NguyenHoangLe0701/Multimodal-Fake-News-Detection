@@ -14,6 +14,7 @@ class DualStreamFakeNewsModel(nn.Module):
         self.image_dropout = nn.Dropout(p=0.5)
         
         self.fc1 = nn.Linear(768 + 2048, 512)
+        self.batch_norm = nn.BatchNorm1d(512)
         self.relu = nn.ReLU()
         self.fusion_dropout = nn.Dropout(p=0.5)
         self.fc2 = nn.Linear(512, 2)
@@ -24,7 +25,9 @@ class DualStreamFakeNewsModel(nn.Module):
         image_features = self.resnet_features(image)
         image_features = self.image_dropout(image_features.view(image_features.size(0), -1))
         combined_features = torch.cat((text_features, image_features), dim=1)
-        x = self.fusion_dropout(self.relu(self.fc1(combined_features)))
+        x = self.fc1(combined_features)
+        x = self.batch_norm(x)
+        x = self.fusion_dropout(self.relu(x))
         logits = self.fc2(x)
         return logits
 

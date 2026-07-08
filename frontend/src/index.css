@@ -1709,6 +1709,10 @@ img {
   background: linear-gradient(145deg, #fef2f2 0%, #fecaca 100%);
 }
 
+.detect-verdict.is-uncertain {
+  background: linear-gradient(145deg, #fffbeb 0%, #fde68a 100%);
+}
+
 .detect-verdict__glow {
   position: absolute;
   top: -3rem;
@@ -1727,6 +1731,10 @@ img {
 
 .detect-verdict.is-fake .detect-verdict__glow {
   background: #fca5a5;
+}
+
+.detect-verdict.is-uncertain .detect-verdict__glow {
+  background: #fcd34d;
 }
 
 .detect-verdict__icon {
@@ -1749,6 +1757,11 @@ img {
 .detect-verdict.is-fake .detect-verdict__icon {
   color: var(--color-danger);
   box-shadow: 0 2px 10px rgba(239, 68, 68, 0.15);
+}
+
+.detect-verdict.is-uncertain .detect-verdict__icon {
+  color: #f59e0b;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.15);
 }
 
 .detect-verdict__label {
@@ -1776,6 +1789,10 @@ img {
   color: var(--color-danger);
 }
 
+.detect-verdict.is-uncertain .detect-verdict__value {
+  color: #d97706;
+}
+
 .detect-verdict__tag {
   display: inline-block;
   padding: 0.25rem 0.75rem;
@@ -1792,6 +1809,11 @@ img {
 .detect-verdict.is-fake .detect-verdict__tag {
   background: rgba(239, 68, 68, 0.12);
   color: #b91c1c;
+}
+
+.detect-verdict.is-uncertain .detect-verdict__tag {
+  background: rgba(245, 158, 11, 0.12);
+  color: #b45309;
 }
 
 /* Confidence */
@@ -1855,6 +1877,10 @@ img {
 
 .detect-confidence__fill.is-fake {
   background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+.detect-confidence__fill.is-uncertain {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
 }
 
 /* Scores */
