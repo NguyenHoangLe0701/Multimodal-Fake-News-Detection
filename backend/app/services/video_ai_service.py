@@ -24,7 +24,7 @@ def _get_video_model():
             
             _video_model = VideoDeepfakeModel()
             
-            state_dict = torch.load(model_path, map_location=_device)
+            state_dict = torch.load(model_path, map_location=_device, weights_only=True)  # nosec B614
             if 'module.' in list(state_dict.keys())[0]:
                 state_dict = {k.replace('module.', ''): v for k, v in state_dict.items()}
                 

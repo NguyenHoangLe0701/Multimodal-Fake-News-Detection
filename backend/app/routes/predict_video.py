@@ -14,7 +14,7 @@ UPLOAD_DIR = os.path.join(Config.UPLOAD_FOLDER, "videos")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @router.post("/", responses={400: {"description": "Lỗi định dạng video hoặc dung lượng"}, 500: {"description": "Lỗi hệ thống khi phân tích video"}})
-async def predict_fake_video(
+def predict_fake_video(
     video: UploadFile = File(...), 
     user_email: str = Form("")
 ):
