@@ -19,7 +19,7 @@ import { m as motion, AnimatePresence } from 'framer-motion';
 import { predictNews } from '../services/api';
 
 
-const Detect = () => {
+function useDetectLogic() {
   const [newsText, setNewsText] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -28,6 +28,7 @@ const Detect = () => {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
+  const [showTextPrompt, setShowTextPrompt] = useState(false);
 
   const handleImageChange = (e) => {
     const file = e.dataTransfer?.files?.[0] || e.target?.files?.[0];
@@ -57,8 +58,6 @@ const Detect = () => {
     window.addEventListener('paste', handlePaste);
     return () => window.removeEventListener('paste', handlePaste);
   }, []);
-
-  const [showTextPrompt, setShowTextPrompt] = useState(false);
 
   const removeImage = () => {
     setImageFile(null);
@@ -105,10 +104,31 @@ const Detect = () => {
     }
   };
 
-
   const canSubmitMultimodal = imageFile !== null;
   const isFake = result?.label === 'FAKE';
   const isUncertain = result?.label === 'UNCERTAIN';
+
+  return {
+    newsText, setNewsText,
+    imageFile, imagePreview,
+    isLoading, loadingMode,
+    result, error,
+    fileInputRef, showTextPrompt, setShowTextPrompt,
+    handleImageChange, removeImage, handleSubmit,
+    canSubmitMultimodal, isFake, isUncertain
+  };
+}
+
+const Detect = () => {
+  const {
+    newsText, setNewsText,
+    imageFile, imagePreview,
+    isLoading, loadingMode,
+    result, error,
+    fileInputRef, showTextPrompt, setShowTextPrompt,
+    handleImageChange, removeImage, handleSubmit,
+    canSubmitMultimodal, isFake, isUncertain
+  } = useDetectLogic();
 
   return (
     <div className="detect-page">
