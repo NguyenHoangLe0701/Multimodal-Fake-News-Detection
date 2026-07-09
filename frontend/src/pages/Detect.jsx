@@ -140,140 +140,20 @@ const Detect = () => {
 
         <div className="detect-grid">
           {/* === LEFT COLUMN: inputs === */}
-          <motion.div
-            initial={{ opacity: 0, x: -24 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1, duration: 0.5 }}
-            className="detect-left"
-          >
-            {/* Card: Text Input */}
-            <div className="detect-card">
-              <div className="detect-card__glow detect-card__glow--emerald" />
-              <div className="detect-card__inner">
-                <div className="detect-card__head">
-                  <div className="detect-card__icon detect-card__icon--emerald">
-                    <FileText size={22} />
-                  </div>
-                  <div>
-                    <h2 className="detect-card__title">Nội dung bài viết</h2>
-                    <p className="detect-card__desc">Dán nội dung văn bản cần kiểm chứng</p>
-                  </div>
-                </div>
-
-                <div className="detect-textarea-wrap">
-                  <textarea
-                    aria-label="Nội dung bài viết cần kiểm tra"
-                    value={newsText}
-                    onChange={(e) => setNewsText(e.target.value)}
-                    placeholder="Dán nội dung tin tức, bài đăng mạng xã hội hoặc bất kỳ đoạn văn bản nào bạn nghi ngờ..."
-                    className="detect-textarea"
-                    maxLength={5000}
-                  />
-                  <span className={`detect-textarea-count ${newsText.length > 0 ? 'is-active' : ''}`}>
-                    {newsText.length} / 5000
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Card: Image Input */}
-            <div className="detect-card">
-              <div className="detect-card__glow detect-card__glow--teal" />
-              <div className="detect-card__inner">
-                <div className="detect-card__head">
-                  <div className="detect-card__icon detect-card__icon--teal">
-                    <ImageIcon size={22} />
-                  </div>
-                  <div>
-                    <h2 className="detect-card__title">Hình ảnh đính kèm</h2>
-                    <p className="detect-card__desc">Hình ảnh minh họa cho bài viết (Tùy chọn)</p>
-                  </div>
-                </div>
-
-                <AnimatePresence mode="wait">
-                  {!imagePreview ? (
-                    <motion.div
-                      key="upload"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      onDrop={(e) => { e.preventDefault(); handleImageChange(e); }}
-                      onDragOver={(e) => e.preventDefault()}
-                      onClick={() => fileInputRef.current?.click()}
-                      className="detect-dropzone"
-                    >
-                      <div className="detect-dropzone__icon">
-                        <Upload size={26} />
-                      </div>
-                      <p className="detect-dropzone__text">
-                        Kéo thả ảnh hoặc{' '}
-                        <span className="detect-dropzone__link">duyệt qua máy tính</span>
-                      </p>
-                      <p className="detect-dropzone__hint">PNG, JPG, WEBP — Tối đa 10 MB</p>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="hidden"
-                      />
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="preview"
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="detect-preview"
-                    >
-                      <img src={imagePreview} alt="Preview" className="detect-preview__img" />
-                      <div className="detect-preview__overlay" />
-                      <button type="button" onClick={removeImage} className="detect-preview__remove" aria-label="Xóa ảnh">
-                        <X size={16} />
-                      </button>
-                      <div className="detect-preview__meta">
-                        <p className="detect-preview__name">{imageFile?.name}</p>
-                        <p className="detect-preview__size">{(imageFile?.size / 1024 / 1024).toFixed(2)} MB</p>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-
-            {/* Submit Multimodal */}
-            <button
-              type="button"
-              onClick={() => handleSubmit('multimodal')}
-              disabled={!canSubmitMultimodal || isLoading}
-              className={`detect-submit ${canSubmitMultimodal && !isLoading ? 'is-ready' : ''}`}
-            >
-              {canSubmitMultimodal && !isLoading && <div className="detect-submit__shimmer" />}
-              <span className="detect-submit__content">
-                {isLoading && loadingMode === 'multimodal' ? (
-                  <>
-                    <Loader2 size={20} className="animate-spin" />
-                    Đang phân tích Đa phương thức…
-                  </>
-                ) : (
-                  <>
-                    <Layers size={20} />
-                    Kiểm tra Đa phương thức
-                  </>
-                )}
-              </span>
-            </button>
-
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="detect-error"
-              >
-                <AlertTriangle size={16} />
-                {error}
-              </motion.div>
-            )}
-          </motion.div>
+          <DetectInputForm 
+            newsText={newsText}
+            setNewsText={setNewsText}
+            imageFile={imageFile}
+            imagePreview={imagePreview}
+            fileInputRef={fileInputRef}
+            handleImageChange={handleImageChange}
+            removeImage={removeImage}
+            handleSubmit={handleSubmit}
+            canSubmitMultimodal={canSubmitMultimodal}
+            isLoading={isLoading}
+            loadingMode={loadingMode}
+            error={error}
+          />
 
           {/* === RIGHT COLUMN: result === */}
           <motion.aside
@@ -533,3 +413,147 @@ const TextPromptModal = ({ show, onClose, onContinue }) => (
 );
 
 export default Detect;
+
+const DetectInputForm = ({
+  newsText, setNewsText,
+  imageFile, imagePreview,
+  fileInputRef, handleImageChange, removeImage,
+  handleSubmit, canSubmitMultimodal, isLoading, loadingMode, error
+}) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -24 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: 0.1, duration: 0.5 }}
+      className="detect-left"
+    >
+      {/* Card: Text Input */}
+      <div className="detect-card">
+        <div className="detect-card__glow detect-card__glow--emerald" />
+        <div className="detect-card__inner">
+          <div className="detect-card__head">
+            <div className="detect-card__icon detect-card__icon--emerald">
+              <FileText size={22} />
+            </div>
+            <div>
+              <h2 className="detect-card__title">Nội dung bài viết</h2>
+              <p className="detect-card__desc">Dán nội dung văn bản cần kiểm chứng</p>
+            </div>
+          </div>
+
+          <div className="detect-textarea-wrap">
+            <textarea
+              aria-label="Nội dung bài viết cần kiểm tra"
+              value={newsText}
+              onChange={(e) => setNewsText(e.target.value)}
+              placeholder="Dán nội dung tin tức, bài đăng mạng xã hội hoặc bất kỳ đoạn văn bản nào bạn nghi ngờ..."
+              className="detect-textarea"
+              maxLength={5000}
+            />
+            <span className={`detect-textarea-count ${newsText.length > 0 ? 'is-active' : ''}`}>
+              {newsText.length} / 5000
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Card: Image Input */}
+      <div className="detect-card">
+        <div className="detect-card__glow detect-card__glow--teal" />
+        <div className="detect-card__inner">
+          <div className="detect-card__head">
+            <div className="detect-card__icon detect-card__icon--teal">
+              <ImageIcon size={22} />
+            </div>
+            <div>
+              <h2 className="detect-card__title">Hình ảnh đính kèm</h2>
+              <p className="detect-card__desc">Hình ảnh minh họa cho bài viết (Tùy chọn)</p>
+            </div>
+          </div>
+
+          <AnimatePresence mode="wait">
+            {!imagePreview ? (
+              <motion.div
+                key="upload"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onDrop={(e) => { e.preventDefault(); handleImageChange(e); }}
+                onDragOver={(e) => e.preventDefault()}
+                onClick={() => fileInputRef.current?.click()}
+                className="detect-dropzone"
+              >
+                <div className="detect-dropzone__icon">
+                  <Upload size={26} />
+                </div>
+                <p className="detect-dropzone__text">
+                  Kéo thả ảnh hoặc{' '}
+                  <span className="detect-dropzone__link">duyệt qua máy tính</span>
+                </p>
+                <p className="detect-dropzone__hint">PNG, JPG, WEBP — Tối đa 10 MB</p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="preview"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="detect-preview"
+              >
+                <img src={imagePreview} alt="Preview" className="detect-preview__img" />
+                <div className="detect-preview__overlay" />
+                <button type="button" onClick={removeImage} className="detect-preview__remove" aria-label="Xóa ảnh">
+                  <X size={16} />
+                </button>
+                <div className="detect-preview__meta">
+                  <p className="detect-preview__name">{imageFile?.name}</p>
+                  <p className="detect-preview__size">{(imageFile?.size / 1024 / 1024).toFixed(2)} MB</p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* Submit Multimodal */}
+      <button
+        type="button"
+        onClick={() => handleSubmit('multimodal')}
+        disabled={!canSubmitMultimodal || isLoading}
+        className={`detect-submit ${canSubmitMultimodal && !isLoading ? 'is-ready' : ''}`}
+      >
+        {canSubmitMultimodal && !isLoading && <div className="detect-submit__shimmer" />}
+        <span className="detect-submit__content">
+          {isLoading && loadingMode === 'multimodal' ? (
+            <>
+              <Loader2 size={20} className="animate-spin" />
+              Đang phân tích Đa phương thức…
+            </>
+          ) : (
+            <>
+              <Layers size={20} />
+              Kiểm tra Đa phương thức
+            </>
+          )}
+        </span>
+      </button>
+
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="detect-error"
+        >
+          <AlertTriangle size={16} />
+          {error}
+        </motion.div>
+      )}
+    </motion.div>
+  );
+};
