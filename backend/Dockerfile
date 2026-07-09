@@ -33,4 +33,4 @@ USER appuser
 EXPOSE 5000
 
 # Chạy ứng dụng bằng Gunicorn thay vì python run.py để ổn định và chịu tải tốt hơn
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "120", "run:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "-k", "uvicorn.workers.UvicornWorker", "--timeout", "120", "run:app"]

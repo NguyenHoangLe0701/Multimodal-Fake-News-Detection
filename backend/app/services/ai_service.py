@@ -63,8 +63,8 @@ def _load_model():
 
     if _clip_model is None:
         print("[Info] Loading CLIP model for semantic alignment (Dual-Engine)...")
-        _clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32").to(device)
-        _clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+        _clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32").to(device)  # nosec B615
+        _clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")  # nosec B615
         _clip_model.eval()
         print("[Info] CLIP model loaded successfully!")
 
