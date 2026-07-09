@@ -13,8 +13,16 @@ class Config:
     SUPABASE_BUCKET = os.getenv('SUPABASE_BUCKET', 'images')
 
     # ── AI Model ───────────────────────────────
-    MODEL_PATH = os.getenv('MODEL_PATH', 'model_weights/best_model.pth')
-    TEXT_MODEL_PATH = os.getenv('TEXT_MODEL_PATH', 'model_weights/text_model.pth')
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    MODEL_PATH = os.path.join(BASE_DIR, 'model_weights', 'best_model_v2.pth')
+    TEXT_MODEL_PATH = os.path.join(BASE_DIR, 'model_weights', 'text_model.pth')
+    
+    # OCR Config
+    TESSERACT_CMD = os.getenv('TESSERACT_CMD', r'C:\Program Files\Tesseract-OCR\tesseract.exe')
+    
+    # Fake News Config
+    COSINE_THRESHOLD = float(os.getenv('COSINE_THRESHOLD', '0.2'))
+    
 
     # ── File Upload ────────────────────────────
     MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB

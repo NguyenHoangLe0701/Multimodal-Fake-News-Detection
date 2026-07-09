@@ -84,7 +84,7 @@ def upload_image_bytes(file_bytes: bytes, file_name: str):
 
 
 # ── Database (Bảng Predictions) ─────────────────────────────────
-def save_prediction(news_text, image_url, label, confidence, text_score, image_score, user_email=""):
+def save_prediction(news_text, image_url, label, confidence, text_score, image_score, user_email="", semantic_score=None):
     record = {
         "news_text": news_text[:2000] if news_text else "no text context",
         "image_url": image_url,

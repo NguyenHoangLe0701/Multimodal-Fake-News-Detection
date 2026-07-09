@@ -73,6 +73,7 @@ async def predict_fake_news(
         confidence=ai_result['confidence'],
         text_score=ai_result['text_score'] if isinstance(ai_result['text_score'], (int, float)) else None,
         image_score=ai_result['image_score'] if isinstance(ai_result['image_score'], (int, float)) else None,
+        semantic_score=ai_result.get('semantic_score') if isinstance(ai_result.get('semantic_score'), (int, float)) else None,
         user_email=user_email
     )
 
@@ -88,6 +89,7 @@ async def predict_fake_news(
             "translated_text": ai_result.get('translated_text', ''),
             "text_score": ai_result['text_score'],
             "image_score": ai_result['image_score'],
+            "semantic_score": ai_result.get('semantic_score', 'N/A'),
             "image_url": image_url,
             "mode": resolved_mode,
             "text_model_available": ai_result.get('text_model_available', False)

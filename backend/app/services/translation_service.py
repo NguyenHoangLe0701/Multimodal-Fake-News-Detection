@@ -56,14 +56,18 @@ def translate_reason_to_vietnamese(reason_en: str) -> str:
     # Map cac reason co dinh sang Tieng Viet
     reason_map = {
         "Van ban va hinh anh nhat quan, khong phat hien dau hieu cat ghep.":
-            "Van ban va hinh anh nhat quan, khong phat hien dau hieu cat ghep.",
+            "Văn bản và hình ảnh nhất quán, không phát hiện dấu hiệu cắt ghép.",
         "Phat hien su bat thuong trong ngu canh van ban hoac dau hieu chinh sua hinh anh.":
-            "Phat hien su bat thuong trong ngu canh van ban hoac dau hieu chinh sua hinh anh.",
+            "Phát hiện sự bất thường trong ngữ cảnh văn bản hoặc dấu hiệu chỉnh sửa hình ảnh.",
     }
     
     if reason_en in reason_map:
         return reason_map[reason_en]
     
+    # Nếu câu đưa vào đã có dấu Tiếng Việt thì trả về luôn không cần dịch
+    if is_vietnamese(reason_en):
+        return reason_en
+        
     # Dich dong neu khong co trong map
     try:
         from deep_translator import GoogleTranslator

@@ -5,13 +5,20 @@ import re
 import torch
 import torch.nn.functional as F
 from PIL import Image
-from transformers import BertTokenizer
+from transformers import BertTokenizer, CLIPProcessor, CLIPModel
 from torchvision import transforms
+import os
 from config import Config
 from .models import DualStreamFakeNewsModel, TextOnlyFakeNewsModel
 from .translation_service import translate_to_english, translate_reason_to_vietnamese
 
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+# Cấu hình Tesseract linh hoạt (Tránh lỗi khi mang sang máy khác)
+tesseract_path = getattr(Config, "TESSERACT_CMD", r'C:\Program Files\Tesseract-OCR\tesseract.exe')
+pytesseract.pytesseract.tesseract_cmd = tesseract_path
+
+# Đặt biến môi trường tự động lấy đường dẫn tuyệt đối thư mục backend
+backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+os.environ['TESSDATA_PREFIX'] = os.path.join(backend_dir, 'tessdata')
 
 NO_TEXT_CONTEXT = "no text context"
 
@@ -20,11 +27,13 @@ _text_model = None
 _text_model_available = False
 _tokenizer = None
 _transform = None
+_clip_model = None
+_clip_processor = None
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def _load_model():
     """Load both Multimodal and Text-Only models"""
-    global _model, _text_model, _text_model_available, _tokenizer, _transform, device
+    global _model, _text_model, _text_model_available, _tokenizer, _transform, device, _clip_model, _clip_processor
     
     if _model is None:
         _model = DualStreamFakeNewsModel().to(device)
@@ -51,6 +60,13 @@ def _load_model():
             _text_model_available = False
             print(f"[Warning] Text model chua san sang tai {Config.TEXT_MODEL_PATH}. Tinh nang text-only dang phat trien.")
         _text_model.eval()
+
+    if _clip_model is None:
+        print("[Info] Loading CLIP model for semantic alignment (Dual-Engine)...")
+        _clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32").to(device)
+        _clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+        _clip_model.eval()
+        print("[Info] CLIP model loaded successfully!")
 
 def clean_extracted_text(raw_text: str) -> str:
     text = str(raw_text).lower()
@@ -79,7 +95,7 @@ def _is_valid_ocr_text(text: str) -> bool:
 def separate_pixels_and_text(pil_image: Image.Image):
     """Thuật toán: Nhận 1 ảnh gốc -> Trả về (Ảnh đã tẩy chữ, Text đã cạo)"""
     try:
-        extracted_text = pytesseract.image_to_string(pil_image).strip()
+        extracted_text = pytesseract.image_to_string(pil_image, lang='vie+eng').strip()
         
         cv_img = np.array(pil_image)
         cv_img = cv2.cvtColor(cv_img, cv2.COLOR_RGB2BGR)
@@ -131,8 +147,8 @@ def verify_text_only(pure_text: str):
     }
 
 def verify_multimodal(pure_image: Image.Image, pure_text: str):
-    """Xu ly image-only hoac multimodal bang DualStreamFakeNewsModel"""
-    global _model, _tokenizer, _transform, device
+    """Xu ly image-only hoac multimodal bang DualStreamFakeNewsModel V2 (Semantic Alignment)"""
+    global _model, _tokenizer, _transform, device, _clip_model, _clip_processor
     
     inputs = _tokenizer(
         pure_text, add_special_tokens=True, max_length=256,
@@ -142,24 +158,43 @@ def verify_multimodal(pure_image: Image.Image, pure_text: str):
     img_tensor = _transform(pure_image).unsqueeze(0).to(device)
 
     with torch.no_grad():
-        logits = _model(inputs['input_ids'], inputs['attention_mask'], img_tensor)
+        # Lõi 1: TruthGuard V2 (Phân loại)
+        logits, _ = _model(inputs['input_ids'], inputs['attention_mask'], img_tensor)
         probabilities = F.softmax(logits, dim=1)
         
         prob_real = probabilities[0][0].item()
         prob_fake = probabilities[0][1].item()
         predicted_class = torch.argmax(logits, dim=1).item()
 
+        # Lõi 2: CLIP Semantic AI (Chấm điểm ngữ cảnh)
+        try:
+            clip_inputs = _clip_processor(text=[pure_text], images=pure_image, return_tensors="pt", padding=True, truncation=True, max_length=77).to(device)
+            clip_outputs = _clip_model(**clip_inputs)
+            
+            image_embeds = clip_outputs.image_embeds
+            text_embeds = clip_outputs.text_embeds
+            
+            # Normalize embeddings (in case they are not already)
+            image_embeds = image_embeds / image_embeds.norm(p=2, dim=-1, keepdim=True)
+            text_embeds = text_embeds / text_embeds.norm(p=2, dim=-1, keepdim=True)
+            
+            cos_sim_val = torch.sum(image_embeds * text_embeds, dim=-1).item()
+        except Exception as e:
+            print(f"[Warning] CLIP processing error: {e}. Fallback to 1.0")
+            cos_sim_val = 1.0
+
     label = "REAL" if predicted_class == 0 else "FAKE"
     confidence = prob_real if predicted_class == 0 else prob_fake
-    reason = "Van ban va hinh anh nhat quan, khong phat hien dau hieu cat ghep." if label == "REAL" else "Phat hien su bat thuong trong ngu canh van ban hoac dau hieu chinh sua hinh anh."
-    # Fix 4: Debug logging
-    print(f"[DEBUG MultiModal] prob_real={prob_real:.4f} | prob_fake={prob_fake:.4f} | label={label} | confidence={confidence:.4f}")
+    reason = "Văn bản và hình ảnh nhất quán, không phát hiện dấu hiệu cắt ghép." if label == "REAL" else "Phát hiện sự bất thường trong ngữ cảnh văn bản hoặc dấu hiệu chỉnh sửa hình ảnh."
+    # Debug logging
+    print(f"[DEBUG MultiModal] prob_real={prob_real:.4f} | prob_fake={prob_fake:.4f} | cos_sim={cos_sim_val:.4f} | label={label} | confidence={confidence:.4f}")
 
     return {
         "label": label,
         "confidence": confidence,
         "prob_fake": prob_fake,
-        "reason": reason
+        "reason": reason,
+        "cos_sim": cos_sim_val
     }
 
 def analyze(mode: str, provided_text: str, pil_image: Image.Image = None):
@@ -194,6 +229,7 @@ def _analyze_text(original_text, translated_text):
             "confidence": round(result["confidence"], 4),
             "text_score": round(result["prob_fake"], 4),
             "image_score": "N/A",
+            "semantic_score": "N/A",
             "reason": translate_reason_to_vietnamese(result["reason"]),
             "extracted_text": "",
             "original_text": original_text,
@@ -230,6 +266,7 @@ def _analyze_image(pil_image):
             "confidence": round(result["confidence"], 4),
             "text_score": "N/A",
             "image_score": round(result["prob_fake"], 4),
+            "semantic_score": round(result.get("cos_sim", -1), 4),
             "reason": translate_reason_to_vietnamese(result["reason"]),
             "extracted_text": extracted_text, # hien thi Tieng Viet/goc
             "original_text": "",
@@ -263,29 +300,96 @@ def _analyze_multimodal(pil_image, original_text, translated_text):
         }
 
     img_result = verify_multimodal(clean_image, final_text)
-    
+
+    # === SEMANTIC ALIGNMENT CHECK ===
+    cos_sim_val = img_result.get("cos_sim", 1.0)
+    is_text_valid = final_text != NO_TEXT_CONTEXT
+
+    if is_text_valid and cos_sim_val < Config.COSINE_THRESHOLD:
+        # Anh that, chu that, nhung ghep sai ngu canh
+        print(f"[DEBUG Semantic] cos_sim={cos_sim_val:.4f} < threshold={Config.COSINE_THRESHOLD} -> FAKE (sai ngu canh)")
+        clamped_confidence = min(0.9999, 1.0 - cos_sim_val)
+        return {
+            "label": "FAKE",
+            "confidence": round(clamped_confidence, 4),
+            "text_score": "N/A",
+            "image_score": round(img_result["prob_fake"], 4),
+            "semantic_score": round(cos_sim_val, 4),
+            "reason": translate_reason_to_vietnamese(
+                "Cảnh báo: Ảnh và văn bản có độ khớp ngữ nghĩa rất thấp. "
+                "Có thể ảnh thật, chữ thật nhưng bị ghép sai ngữ cảnh."
+            ),
+            "extracted_text": extracted_text,
+            "original_text": original_text,
+            "translated_text": translated_text,
+            "text_model_available": _text_model_available
+        }
+
+    # === GATE 3: OCR FACT-CHECK (Treo đầu dê bán thịt chó) ===
+    # Nới lỏng điều kiện: Chỉ cần bóc được > 15 ký tự là đem ra đối chiếu ngay (Tránh sót chữ do Tesseract bắt kém)
+    if translated_text and _is_valid_ocr_text(extracted_text) and len(extracted_text) > 15:
+        global _clip_processor, _clip_model, device
+        if _clip_model is not None and _clip_processor is not None:
+            try:
+                ocr_english = translate_to_english(extracted_text)
+                clip_text_inputs = _clip_processor(text=[translated_text, ocr_english], return_tensors="pt", padding=True, truncation=True, max_length=77).to(device)
+                
+                with torch.no_grad():
+                    clip_outputs = _clip_model.text_model(**clip_text_inputs)
+                    text_embeds = _clip_model.text_projection(clip_outputs.pooler_output)
+                    text_embeds = text_embeds / text_embeds.norm(p=2, dim=-1, keepdim=True)
+                    ocr_cos_sim = torch.sum(text_embeds[0] * text_embeds[1]).item()
+                
+                print(f"[DEBUG OCR CrossCheck] ocr_cos_sim={ocr_cos_sim:.4f}")
+                
+                if ocr_cos_sim < 0.82:
+                    print(f"[DEBUG OCR CrossCheck] FAKE detected! OCR Text and Article Text mismatch.")
+                    clamped_confidence = min(0.9999, 1.4 - ocr_cos_sim)
+                    return {
+                        "label": "FAKE",
+                        "confidence": round(clamped_confidence, 4),
+                        "text_score": "N/A",
+                        "image_score": round(img_result["prob_fake"], 4),
+                        "semantic_score": round(cos_sim_val, 4),
+                        "reason": translate_reason_to_vietnamese(
+                            "Phát hiện tin giả tinh vi (Treo đầu dê bán thịt chó): "
+                            "Văn bản bên trong bức ảnh hoàn toàn mâu thuẫn với nội dung bài báo đang viết."
+                        ),
+                        "extracted_text": extracted_text,
+                        "original_text": original_text,
+                        "translated_text": translated_text,
+                        "text_model_available": _text_model_available
+                    }
+            except Exception as e:
+                print(f"[Warning] OCR CrossCheck error: {e}")
+
     if _text_model_available and original_text:
         text_result = verify_text_only(translated_text)
         
         # Trung binh cong prob_fake cua 2 model
         combined_prob_fake = (img_result["prob_fake"] + text_result["prob_fake"]) / 2
-        # Fix 1: Tang nguong FAKE tu 0.5 -> 0.6 de giam false positive
+        # Tang nguong FAKE tu 0.5 -> 0.6 de giam false positive
         FAKE_THRESHOLD = 0.6
-        print(f"[DEBUG Multimodal] combined_prob_fake={combined_prob_fake:.4f} | threshold={FAKE_THRESHOLD}")
+        print(f"[DEBUG Multimodal] combined_prob_fake={combined_prob_fake:.4f} | threshold={FAKE_THRESHOLD} | cos_sim={cos_sim_val:.4f}")
         if combined_prob_fake > FAKE_THRESHOLD:
             label = "FAKE"
             confidence = combined_prob_fake
-            reason = "Phat hien su bat thuong khi ket hop ca van ban va hinh anh."
+            reason = "Phát hiện sự bất thường khi kết hợp cả văn bản và hình ảnh."
         else:
             label = "REAL"
             confidence = 1 - combined_prob_fake
-            reason = "Noi dung tin cay sau khi kiem chung cheo van ban va hinh anh."
+            # Reward Mechanism: Cộng điểm tự tin nếu ảnh và chữ khớp nhau
+            if cos_sim_val > 0.25:
+                # Cộng thêm 1 khoảng tỷ lệ thuận với độ khớp
+                confidence = min(0.99, confidence + (cos_sim_val - 0.20) * 1.5)
+            reason = "Nội dung tin cậy sau khi kiểm chứng chéo văn bản và hình ảnh."
             
         return {
             "label": label,
             "confidence": round(confidence, 4),
             "text_score": round(text_result["prob_fake"], 4),
             "image_score": round(img_result["prob_fake"], 4),
+            "semantic_score": round(cos_sim_val, 4),
             "reason": translate_reason_to_vietnamese(reason),
             "extracted_text": extracted_text,
             "original_text": original_text,
@@ -294,11 +398,19 @@ def _analyze_multimodal(pil_image, original_text, translated_text):
         }
     else:
         # Fallback ve multimodal binh thuong neu khong co text_model hoac khong co text
+        label = img_result["label"]
+        confidence = img_result["confidence"]
+        
+        # Reward Mechanism
+        if label == "REAL" and cos_sim_val > 0.25:
+            confidence = min(0.99, confidence + (cos_sim_val - 0.20) * 1.5)
+
         return {
-            "label": img_result["label"],
-            "confidence": round(img_result["confidence"], 4),
+            "label": label,
+            "confidence": round(confidence, 4),
             "text_score": "N/A",
             "image_score": round(img_result["prob_fake"], 4),
+            "semantic_score": round(cos_sim_val, 4),
             "reason": translate_reason_to_vietnamese(img_result["reason"]),
             "extracted_text": extracted_text,
             "original_text": original_text,
