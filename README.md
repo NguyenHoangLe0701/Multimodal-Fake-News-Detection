@@ -18,7 +18,7 @@
 
 Dự án **Multimodal Fake News Detection** là một hệ thống toàn diện sử dụng trí tuệ nhân tạo để phân tích và đánh giá độ tin cậy của tin tức. Hệ thống không chỉ dựa vào nội dung văn bản (Text) mà còn phân tích cả hình ảnh đính kèm (Image) và video (Video Deepfake) để đưa ra dự đoán chính xác hơn về việc một phương tiện truyền thông là **Thật (REAL)** hay **Giả (FAKE)**.
 
-Hệ thống có khả năng tự động trích xuất văn bản từ hình ảnh (OCR) và dịch ngôn ngữ tự động để phân tích dữ liệu đa quốc gia.
+Hệ thống có khả năng tự động trích xuất văn bản từ hình ảnh (OCR) và dịch ngôn ngữ tự động để phân tích dữ liệu song ngữ (Việt - Anh).
 
 ## ✨ Tính năng nổi bật
 
