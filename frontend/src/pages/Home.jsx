@@ -6,8 +6,8 @@ const features = [
   {
     icon: FileText,
     step: '01',
-    title: 'NLP Analysis (BERT)',
-    desc: 'Mô hình Transformer (BERT) phân tích ngữ nghĩa, giọng điệu và phát hiện các mẫu ngôn ngữ phổ biến trong tin sai lệch.',
+    title: 'NLP & OCR (BERT)',
+    desc: 'Trích xuất văn bản từ hình ảnh bằng Tesseract, kết hợp dịch thuật và phân tích ngữ nghĩa chuyên sâu qua mô hình Transformer (BERT).',
     accent: 'text-blue-600',
     iconBg: 'bg-blue-50',
     hoverBorder: 'hover:border-blue-200',
@@ -15,8 +15,8 @@ const features = [
   {
     icon: Image,
     step: '02',
-    title: 'Image Verification (ResNet)',
-    desc: 'Mạng CNN (ResNet50) phân tích tính xác thực của hình ảnh, trích xuất đặc trưng và kiểm tra dấu hiệu phi logic.',
+    title: 'Image Vision (ResNet)',
+    desc: 'Tự động xóa chữ trên ảnh (OpenCV Inpainting) và sử dụng mạng CNN (ResNet50) để kiểm tra các dấu hiệu phi logic trên không gian 2D.',
     accent: 'text-purple-600',
     iconBg: 'bg-purple-50',
     hoverBorder: 'hover:border-purple-200',
@@ -24,8 +24,8 @@ const features = [
   {
     icon: Layers,
     step: '03',
-    title: 'Multimodal Fusion',
-    desc: 'Tín hiệu từ Text và Image được kết hợp qua kiến trúc Late-Fusion để đưa ra độ tin cậy (Confidence Score) chuẩn xác nhất.',
+    title: 'Semantic Fusion (CLIP)',
+    desc: 'Áp dụng mô hình CLIP (ViT-B/32) kết hợp Late-Fusion để đo độ lệch pha ngữ nghĩa, chặn đứng các trường hợp "ảnh thật nhưng ghép sai ngữ cảnh".',
     accent: 'text-accent',
     iconBg: 'bg-emerald-50',
     hoverBorder: 'hover:border-emerald-200',
