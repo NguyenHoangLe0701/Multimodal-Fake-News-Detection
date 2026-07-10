@@ -2,7 +2,7 @@ frontend:
   replicaCount: 1
   image:
     repository: ghcr.io/nguyenhoangle070105/multimodal-fake-news-frontend
-    tag: e5692cfc985f114c3bd7873ba59eddffe6e01c9a
+    tag: bd98f2c269a93a559cfa4177304449b880396ddb
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
@@ -12,7 +12,7 @@ backend:
   replicaCount: 1
   image:
     repository: ghcr.io/nguyenhoangle070105/multimodal-fake-news-backend
-    tag: e5692cfc985f114c3bd7873ba59eddffe6e01c9a
+    tag: bd98f2c269a93a559cfa4177304449b880396ddb
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
