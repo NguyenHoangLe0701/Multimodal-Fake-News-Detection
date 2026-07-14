@@ -37,10 +37,9 @@ def _load_model():
     
     if _model is None:
         _model = DualStreamFakeNewsModel().to(device)
-        try:
-            _model.load_state_dict(torch.load(Config.MODEL_PATH, map_location=device, weights_only=True))
-        except FileNotFoundError:
-            print(f"[Warning] Khong the tim thay file weights {Config.MODEL_PATH}. Dang chay model ngau nhien de debug!")
+        if not os.path.exists(Config.MODEL_PATH):
+            raise RuntimeError(f"Hệ thống chưa được cài đặt Model Weights tại: {Config.MODEL_PATH}. Vui lòng tải file best_model_v2.pth và đặt vào thư mục model_weights.")
+        _model.load_state_dict(torch.load(Config.MODEL_PATH, map_location=device, weights_only=True))
         _model.eval()
         
         _tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')  # nosec B615
@@ -50,16 +49,9 @@ def _load_model():
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
 
-    if _text_model is None:
-        _text_model = TextOnlyFakeNewsModel().to(device)
-        try:
-            _text_model.load_state_dict(torch.load(Config.TEXT_MODEL_PATH, map_location=device, weights_only=True))
-            _text_model_available = True
-            print(f"[Info] Text model loaded from {Config.TEXT_MODEL_PATH}")
-        except FileNotFoundError:
-            _text_model_available = False
-            print(f"[Warning] Text model chua san sang tai {Config.TEXT_MODEL_PATH}. Tinh nang text-only dang phat trien.")
-        _text_model.eval()
+    # Text-only model removed as part of multimodal-only strategy
+    _text_model_available = False
+
 
     if _clip_model is None:
         print("[Info] Loading CLIP model for semantic alignment (Dual-Engine)...")
@@ -93,26 +85,10 @@ def _is_valid_ocr_text(text: str) -> bool:
     return True
 
 def separate_pixels_and_text(pil_image: Image.Image):
-    """Thuật toán: Nhận 1 ảnh gốc -> Trả về (Ảnh đã tẩy chữ, Text đã cạo)"""
+    """Thuật toán (Mới): Đọc chữ trên ảnh nhưng KHÔNG bôi xóa ảnh gốc"""
     try:
         extracted_text = pytesseract.image_to_string(pil_image, lang='vie+eng').strip()
-        
-        cv_img = np.array(pil_image)
-        cv_img = cv2.cvtColor(cv_img, cv2.COLOR_RGB2BGR)
-        h, w, _ = cv_img.shape
-        mask = np.zeros((h, w), dtype=np.uint8)
-        boxes = pytesseract.image_to_boxes(pil_image)
-        
-        for b in boxes.splitlines():
-            b = b.split(' ')
-            if len(b) >= 5:
-                x1, y1, x2, y2 = int(b[1]), int(b[2]), int(b[3]), int(b[4])
-                cv2.rectangle(mask, (x1, h - y1), (x2, h - y2), (255), thickness=-1)
-
-        clean_cv_img = cv2.inpaint(cv_img, mask, inpaintRadius=7, flags=cv2.INPAINT_TELEA)
-        clean_cv_img = cv2.cvtColor(clean_cv_img, cv2.COLOR_BGR2RGB)
-        
-        return Image.fromarray(clean_cv_img), clean_extracted_text(extracted_text)
+        return pil_image, clean_extracted_text(extracted_text)
     except Exception as e:
         print(f"[OCR Warning] Tesseract khong kha dung, bo qua OCR: {e}")
         return pil_image, NO_TEXT_CONTEXT
@@ -456,8 +432,8 @@ def _combine_final_results(img_result, text_result, original_text, translated_te
     else:
         label = img_result["label"]
         confidence = img_result["confidence"]
-        if label == "REAL" and cos_sim_val > 0.25:
-            confidence = min(0.99, confidence + (cos_sim_val - 0.20) * 1.5)
+        if label == "REAL" and cos_sim_val > 0.15:
+            confidence = min(0.95, confidence + (cos_sim_val - 0.15) * 2.0)
 
         return {
             "label": label,

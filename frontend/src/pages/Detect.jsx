@@ -383,8 +383,8 @@ const DetectResultCard = ({ result, isFake, isUncertain }) => {
             />
             <FactorBar
               icon={<ImageIcon size={15} />}
-              name="Phân tích hình ảnh (CNN)"
-              hint="Mạng CNN nhận diện đặc trưng thị giác liên quan đến tin giả (meme, screenshot, cắt ghép)"
+              name="Phân tích Đa phương thức (AI)"
+              hint="Mô hình học sâu kết hợp phân tích đồng thời nội dung văn bản và đặc trưng hình ảnh để phát hiện dấu hiệu tin giả"
               value={result.imageScore}
               delay={0.5}
               hasImage={hasImage}
