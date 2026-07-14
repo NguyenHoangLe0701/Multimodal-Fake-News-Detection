@@ -16,6 +16,62 @@ import {
 import { m as motion, AnimatePresence } from 'framer-motion';
 import { predictVideo } from '../services/api';
 
+const FactorBar = ({ icon, name, hint, value, delay }) => {
+  if (value === "N/A") return null;
+
+  const numVal = Math.min(Math.max(Number(value), 0), 1);
+  const pct = (numVal * 100).toFixed(0);
+
+  const getBarColor = (v) => {
+    if (v < 0.35) return '#10b981'; // emerald-500
+    if (v < 0.65) return '#f59e0b'; // amber-500
+    return '#ef4444'; // red-500
+  };
+
+  const getRiskLabel = (v) => {
+    if (v < 0.35) return 'BÌNH THƯỜNG';
+    if (v < 0.65) return 'CẦN LƯU Ý';
+    return 'BẤT THƯỜNG';
+  };
+
+  const barColor = getBarColor(numVal);
+  const riskLabel = getRiskLabel(numVal);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -12 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.4, delay }}
+      className="mb-2 mt-4"
+    >
+      <div className="flex justify-between items-center mb-3">
+        <div className="flex items-center gap-3 text-slate-800 font-bold text-[14px]">
+          <span className="text-slate-600 bg-slate-100 p-2 rounded-lg flex items-center justify-center shadow-sm border border-slate-200/50">{icon}</span>
+          <span className="leading-tight">{name}</span>
+        </div>
+        <div className="flex items-center gap-3 bg-white px-3 py-1.5 rounded-lg shadow-sm border border-slate-100">
+          <span className="font-bold text-[11px] tracking-widest" style={{ color: barColor }}>{riskLabel}</span>
+          <span className="font-black text-[14px]" style={{ color: barColor }}>{pct}%</span>
+        </div>
+      </div>
+      
+      <div className="h-2.5 w-full bg-slate-200 rounded-full overflow-hidden shadow-inner mb-3">
+        <motion.div
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: numVal }}
+          transition={{ duration: 1.2, delay: delay + 0.15, ease: [0.25, 1, 0.5, 1] }}
+          className="h-full rounded-full"
+          style={{ background: `linear-gradient(90deg, ${barColor}88, ${barColor})`, transformOrigin: 'left' }}
+        />
+      </div>
+      
+      <div className="bg-slate-50/80 rounded-lg p-3 border border-slate-100 mt-2">
+        <p className="text-[13px] text-slate-500 italic leading-relaxed">{hint}</p>
+      </div>
+    </motion.div>
+  );
+};
+
 const DetectVideo = () => {
   const [videoFile, setVideoFile] = useState(null);
   const [videoPreview, setVideoPreview] = useState(null);
@@ -414,39 +470,33 @@ const DetectVideoResultCard = ({ result, isFake }) => {
 
         {/* AI Reason */}
         {result.reason && (
-          <div className={`detect-reason mt-6 p-4 rounded-xl border bg-surface-800 border-surface-700/50`}>
-            <div className={`flex items-center gap-2 mb-2 text-surface-200`}>
-              <Info size={16} className="text-accent" style={{ color: '#10b981' }} />
-              <h4 className="text-sm font-bold">Báo cáo phân tích</h4>
+          <div className="mt-6 p-5 rounded-xl border border-white/60 bg-white/80 shadow-sm backdrop-blur-md">
+            <div className="flex items-center gap-2 mb-2 text-slate-800">
+              <Info size={16} className="text-emerald-500" />
+              <h4 className="text-[15px] font-bold">Lý do AI</h4>
             </div>
-            <p className={`text-sm italic text-surface-400 leading-relaxed`}>"{result.reason}"</p>
+            <p className="text-[14px] italic text-slate-700 leading-relaxed font-medium">"{result.reason}"</p>
           </div>
         )}
 
-        {/* Score breakdown */}
-        <div className="detect-scores mt-6">
-          <h4 className="detect-scores__head text-surface-300">
-            <Layers size={14} />
-            Điểm bất thường (Anomaly Score)
+        {/* Factor Breakdown */}
+        <div className="mt-6 p-5 rounded-xl border border-white/60 bg-white/80 shadow-sm backdrop-blur-md">
+          <h4 className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-wider text-slate-500 mb-2">
+            <Layers size={14} /> Phân tích từng yếu tố
           </h4>
-
-          <div className="detect-score-row mt-4">
-            <div className="detect-score-row__top">
-              <span className="detect-score-row__name">Hình ảnh (Vi ảnh & Môi trường)</span>
-              <span className="detect-score-row__val">{result.videoScore}</span>
-            </div>
-            <div className="detect-score-row__track bg-surface-700/50">
-              <motion.div
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: Math.min(result.videoScore * 100, 100) / 100 }}
-                transition={{ duration: 1, delay: 0.5 }}
-                className="detect-score-row__fill w-full origin-left"
-                style={{ background: result.videoScore > 0.5 ? '#ef4444' : '#10b981' }}
-              />
-            </div>
+          <p className="text-[13px] text-slate-500 mb-6 leading-relaxed">
+            Biểu đồ dưới đây cho thấy mức độ bất thường mà AI phát hiện qua từng khía cạnh.
+            Thanh càng dài và đỏ nghĩa là yếu tố đó càng có dấu hiệu tin giả.
+          </p>
+          <div className="flex flex-col gap-2">
+            <FactorBar
+              icon={<Video size={16} />}
+              name="Không gian & Thời gian (3D-CNN)"
+              hint="Mạng 3D ResNet phát hiện viền ghép nối, sự thiếu tự nhiên về ánh sáng và độ mượt mà giữa các khung hình liên tiếp."
+              value={result.videoScore}
+              delay={0.3}
+            />
           </div>
-
-
         </div>
       </div>
     </motion.div>

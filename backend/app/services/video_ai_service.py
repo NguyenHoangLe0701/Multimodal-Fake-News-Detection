@@ -115,7 +115,17 @@ def analyze_video(video_path: str) -> Dict[str, Any]:
         is_fake = fake_prob > 0.5
         confidence = fake_prob if is_fake else (1.0 - fake_prob)
         
-        reason = "Hệ thống AI phát hiện dấu vết bất thường về kết cấu khung hình (spatial) và sự thiếu mượt mà (temporal) giữa các khung hình liên tiếp." if is_fake else "Không phát hiện dấu vết can thiệp AI nổi bật. Video có tính liền mạch tự nhiên."
+        # Build dynamic reason
+        if is_fake:
+            if fake_prob > 0.8:
+                reason = f"Phát hiện dấu vết can thiệp Deepfake rõ rệt (3D-CNN: {fake_prob*100:.0f}% nghi vấn)."
+            else:
+                reason = f"Phát hiện một số dấu hiệu bất thường về kết cấu khung hình hoặc chuyển động (3D-CNN: {fake_prob*100:.0f}% nghi vấn)."
+        else:
+            if fake_prob < 0.2:
+                reason = f"Video liền mạch tự nhiên, không phát hiện dấu vết cắt ghép (3D-CNN: {fake_prob*100:.0f}% nghi vấn)."
+            else:
+                reason = f"Video cơ bản bình thường nhưng có vài điểm mờ/nhiễu tự nhiên cần lưu ý (3D-CNN: {fake_prob*100:.0f}% nghi vấn)."
         
         process_time = time.time() - start_time
         print(f"[VideoAI] Phân tích xong sau {process_time:.2f} giây. Fake Prob: {fake_prob:.4f}")
