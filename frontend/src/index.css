@@ -1622,10 +1622,7 @@ img {
 
 .detect-result.has-bg-image .detect-confidence__label,
 .detect-result.has-bg-image .detect-confidence__num,
-.detect-result.has-bg-image .detect-confidence__pct,
-.detect-result.has-bg-image .detect-scores__head,
-.detect-result.has-bg-image .detect-score-row__name,
-.detect-result.has-bg-image .detect-score-row__val {
+.detect-result.has-bg-image .detect-confidence__pct {
   color: #ffffff !important;
   text-shadow: 0 1px 4px rgba(0,0,0,0.8);
 }
@@ -1883,22 +1880,24 @@ img {
   background: linear-gradient(90deg, #f59e0b, #fbbf24);
 }
 
-/* Scores */
+/* ── Factor Breakdown ── */
 
-.detect-scores {
-  padding: 1rem;
+.detect-factors {
+  padding: 1.25rem;
   border-radius: 1rem;
   border: 1px solid var(--color-surface-700);
   background: var(--color-surface-900);
 }
 
-.detect-result.has-bg-image .detect-scores {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(8px);
+.detect-result.has-bg-image .detect-factors {
+  background: rgba(255, 255, 255, 0.88);
+  border-color: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
 }
 
-.detect-scores__head {
+.detect-factors__head {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -1907,53 +1906,130 @@ img {
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--color-surface-500);
-  margin-bottom: 0.875rem;
+  margin-bottom: 0.375rem;
 }
 
-.detect-score-row {
+.detect-result.has-bg-image .detect-factors__head {
+  color: #334155;
+}
+
+.detect-factors__desc {
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: var(--color-surface-500);
+  margin-bottom: 1rem;
+  padding-bottom: 0.875rem;
+  border-bottom: 1px solid var(--color-surface-800);
+}
+
+.detect-result.has-bg-image .detect-factors__desc {
+  color: #64748b;
+  border-bottom-color: #e2e8f0;
+}
+
+.detect-factors__list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ── Individual Factor Bar ── */
+
+.factor-bar {
   display: flex;
   flex-direction: column;
   gap: 0.375rem;
 }
 
-.detect-score-row + .detect-score-row {
-  margin-top: 0.75rem;
-}
-
-.detect-score-row__top {
+.factor-bar__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.detect-score-row__name {
+.factor-bar__label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.factor-bar__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.625rem;
+  height: 1.625rem;
+  border-radius: 0.375rem;
+  background: var(--color-surface-800);
+  color: var(--color-surface-400);
+  flex-shrink: 0;
+}
+
+.factor-bar--on-image .factor-bar__icon {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.factor-bar__name {
   font-size: 0.8125rem;
   font-weight: 600;
   color: var(--color-surface-300);
 }
 
-.detect-score-row__val {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--color-surface-200);
-  background: #fff;
-  padding: 0.15rem 0.5rem;
-  border-radius: 0.375rem;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+.factor-bar--on-image .factor-bar__name {
+  color: #1e293b;
 }
 
-.detect-score-row__track {
-  height: 0.375rem;
+.factor-bar__stats {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.factor-bar__risk {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.factor-bar__pct {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 800;
+  min-width: 2.5rem;
+  text-align: right;
+}
+
+.factor-bar__track {
+  height: 0.5rem;
   border-radius: 9999px;
   background: var(--color-surface-800);
   overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
-.detect-score-row__fill {
+.factor-bar--on-image .factor-bar__track {
+  background: #e2e8f0;
+}
+
+.factor-bar__fill {
   height: 100%;
+  width: 100%;
   border-radius: 9999px;
-  background: linear-gradient(90deg, var(--color-surface-500), var(--color-surface-400));
+  position: relative;
+}
+
+.factor-bar__hint {
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  color: var(--color-surface-600);
+  margin: 0;
+  padding-left: 2.125rem;
+}
+
+.factor-bar--on-image .factor-bar__hint {
+  color: #94a3b8;
 }
 
 /* ── Utility animation keyframes (used by detect) ── */

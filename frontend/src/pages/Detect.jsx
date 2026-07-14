@@ -88,6 +88,8 @@ function useDetectLogic() {
         confidence: data.confidence,
         textScore: data.text_score !== "N/A" ? Number(data.text_score).toFixed(2) : "N/A",
         imageScore: data.image_score !== "N/A" ? Number(data.image_score).toFixed(2) : "N/A",
+        semanticScore: data.semantic_score !== "N/A" ? Number(data.semantic_score) : "N/A",
+        ocrMismatchScore: data.ocr_mismatch_score !== "N/A" ? Number(data.ocr_mismatch_score) : "N/A",
         reason: data.reason,
         mode: data.mode,
         textModelAvailable: data.text_model_available,
@@ -238,11 +240,10 @@ const VerdictSection = ({ label, isFake, isUncertain, hasImage }) => {
 
 const ReasonSection = ({ reason, hasImage }) => {
   if (!reason) return null;
-  const bgClass = hasImage ? 'bg-white/10 border-white/20 backdrop-blur-md' : 'bg-surface-800 border-surface-700/50';
-  const textClass = hasImage ? 'text-white' : 'text-surface-200';
-  const iconColor = hasImage ? 'text-white' : 'text-accent';
-  const pClass = hasImage ? 'text-white/90 shadow-black' : 'text-surface-400';
-  const pStyle = hasImage ? { textShadow: '0 1px 3px rgba(0,0,0,0.8)' } : {};
+  const bgClass = hasImage ? 'bg-white/90 border-white/50 backdrop-blur-xl shadow-lg' : 'bg-surface-800 border-surface-700/50';
+  const textClass = hasImage ? 'text-slate-800' : 'text-surface-200';
+  const iconColor = hasImage ? 'text-emerald-600' : 'text-accent';
+  const pClass = hasImage ? 'text-slate-600' : 'text-surface-400';
 
   return (
     <div className={`detect-reason mt-2 p-4 rounded-xl border ${bgClass}`}>
@@ -250,36 +251,77 @@ const ReasonSection = ({ reason, hasImage }) => {
         <Info size={16} className={iconColor} />
         <h4 className="text-sm font-bold">Lý do AI</h4>
       </div>
-      <p className={`text-sm italic ${pClass}`} style={pStyle}>"{reason}"</p>
+      <p className={`text-sm italic ${pClass}`}>"{reason}"</p>
     </div>
   );
 };
 
-const ScoreRow = ({ name, score, delay }) => {
-  if (score === "N/A") return null;
-  const numScore = Math.min(Math.abs(score) * 10, 100) / 100;
-  
+const FactorBar = ({ icon, name, hint, value, delay, hasImage }) => {
+  // value: 0..1 where higher = more risky/fake
+  // "N/A" means this factor was not evaluated
+  if (value === "N/A") return null;
+
+  const numVal = Math.min(Math.max(Number(value), 0), 1);
+  const pct = (numVal * 100).toFixed(0);
+
+  // Dynamic color: low risk = green, mid = amber, high = red
+  const getBarColor = (v) => {
+    if (v < 0.35) return '#10b981'; // emerald-500
+    if (v < 0.65) return '#f59e0b'; // amber-500
+    return '#ef4444'; // red-500
+  };
+
+  const getRiskLabel = (v) => {
+    if (v < 0.35) return 'Bình thường';
+    if (v < 0.65) return 'Cần lưu ý';
+    return 'Bất thường';
+  };
+
+  const barColor = getBarColor(numVal);
+  const riskLabel = getRiskLabel(numVal);
+  const textColorClass = hasImage ? 'factor-bar--on-image' : '';
+
   return (
-    <div className="detect-score-row">
-      <div className="detect-score-row__top">
-        <span className="detect-score-row__name">{name}</span>
-        <span className="detect-score-row__val">{score}</span>
+    <motion.div
+      initial={{ opacity: 0, x: -12 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.4, delay }}
+      className={`factor-bar ${textColorClass}`}
+    >
+      <div className="factor-bar__header">
+        <div className="factor-bar__label">
+          <span className="factor-bar__icon">{icon}</span>
+          <span className="factor-bar__name">{name}</span>
+        </div>
+        <div className="factor-bar__stats">
+          <span className="factor-bar__risk" style={{ color: barColor }}>{riskLabel}</span>
+          <span className="factor-bar__pct" style={{ color: barColor }}>{pct}%</span>
+        </div>
       </div>
-      <div className="detect-score-row__track">
+      <div className="factor-bar__track">
         <motion.div
           initial={{ scaleX: 0 }}
-          animate={{ scaleX: numScore }}
-          transition={{ duration: 1, delay }}
-          className="detect-score-row__fill w-full origin-left"
+          animate={{ scaleX: numVal }}
+          transition={{ duration: 1.2, delay: delay + 0.15, ease: [0.25, 1, 0.5, 1] }}
+          className="factor-bar__fill"
+          style={{ background: `linear-gradient(90deg, ${barColor}88, ${barColor})`, transformOrigin: 'left' }}
         />
       </div>
-    </div>
+      <p className="factor-bar__hint">{hint}</p>
+    </motion.div>
   );
 };
 
 const DetectResultCard = ({ result, isFake, isUncertain }) => {
   const hasImage = !!result.imageUrl;
   const statusClass = isFake ? 'is-fake' : isUncertain ? 'is-uncertain' : 'is-real';
+
+  // Normalize CLIP semantic mismatch based on actual CLIP distribution:
+  // CLIP cosine similarity typically ranges 0.10 (unrelated) to 0.40+ (very related)
+  // We map this range to 0% (aligned) → 100% (mismatched)
+  const semanticMismatch = result.semanticScore !== "N/A"
+    ? Math.min(Math.max((0.40 - result.semanticScore) / 0.30, 0), 1).toFixed(4)
+    : "N/A";
 
   return (
     <motion.div
@@ -321,13 +363,49 @@ const DetectResultCard = ({ result, isFake, isUncertain }) => {
 
         <ReasonSection reason={result.reason} hasImage={hasImage} />
 
-        {/* Score breakdown */}
-        <div className="detect-scores">
-          <h4 className="detect-scores__head">
-            <Layers size={14} /> Phân tích chi tiết
+        {/* Factor Breakdown */}
+        <div className="detect-factors">
+          <h4 className="detect-factors__head">
+            <Layers size={14} /> Phân tích từng yếu tố
           </h4>
-          <ScoreRow name="Text (NLP)" score={result.textScore} delay={0.5} />
-          <ScoreRow name="Visual (CNN)" score={result.imageScore} delay={0.7} />
+          <p className="detect-factors__desc">
+            Biểu đồ dưới đây cho thấy mức độ bất thường mà AI phát hiện trên từng khía cạnh.
+            Thanh càng dài và đỏ nghĩa là yếu tố đó càng có dấu hiệu tin giả.
+          </p>
+          <div className="detect-factors__list">
+            <FactorBar
+              icon={<FileText size={15} />}
+              name="Phân tích văn bản (NLP)"
+              hint="Mô hình BERT đánh giá mức độ bất thường về ngữ pháp, giật tít, sai lệch thông tin"
+              value={result.textScore}
+              delay={0.3}
+              hasImage={hasImage}
+            />
+            <FactorBar
+              icon={<ImageIcon size={15} />}
+              name="Phân tích hình ảnh (CNN)"
+              hint="Mạng CNN nhận diện đặc trưng thị giác liên quan đến tin giả (meme, screenshot, cắt ghép)"
+              value={result.imageScore}
+              delay={0.5}
+              hasImage={hasImage}
+            />
+            <FactorBar
+              icon={<ScanSearch size={15} />}
+              name="Tương quan ảnh — văn bản"
+              hint="CLIP so sánh ngữ nghĩa: ảnh có đúng ngữ cảnh với nội dung văn bản không"
+              value={semanticMismatch}
+              delay={0.7}
+              hasImage={hasImage}
+            />
+            <FactorBar
+              icon={<AlertTriangle size={15} />}
+              name="Đối chiếu chữ trong ảnh"
+              hint="OCR trích xuất chữ từ ảnh và so sánh với nội dung bài viết để phát hiện mâu thuẫn"
+              value={result.ocrMismatchScore}
+              delay={0.9}
+              hasImage={hasImage}
+            />
+          </div>
         </div>
       </div>
     </motion.div>

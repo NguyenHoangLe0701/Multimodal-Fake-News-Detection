@@ -135,7 +135,7 @@ def verify_text_only(pure_text: str):
 
     label = "REAL" if predicted_class == 0 else "FAKE"
     confidence = prob_real if predicted_class == 0 else prob_fake
-    reason = "Van ban nhat quan, khong co dau hieu sai lech." if label == "REAL" else "Phat hien su bat thuong hoac tin gia trong noi dung."
+    reason = _build_dynamic_reason(label, prob_fake_txt=prob_fake)
     # Fix 4: Debug logging
     print(f"[DEBUG TextModel] prob_real={prob_real:.4f} | prob_fake={prob_fake:.4f} | label={label} | confidence={confidence:.4f}")
 
@@ -145,6 +145,81 @@ def verify_text_only(pure_text: str):
         "prob_fake": prob_fake,
         "reason": reason
     }
+
+def _build_dynamic_reason(label, prob_fake_img=None, prob_fake_txt=None, cos_sim=None):
+    """Sinh ly do AI cu the dua tren diem so thuc te cua tung yeu to.
+    CLIP cos_sim phan bo thuc te: 0.10 (khong lien quan) den 0.40+ (rat lien quan).
+    Moi yeu to duoc danh gia trung thuc theo muc diem."""
+    
+    # Normalize CLIP mismatch: 0.40+ -> 0% mismatch, 0.10 -> 100% mismatch
+    def _clip_mismatch_pct(cs):
+        return max(0, min(100, (0.40 - cs) / 0.30 * 100))
+    
+    if label == "REAL":
+        parts = []
+        warnings = []
+        # --- Text ---
+        if prob_fake_txt is not None:
+            if prob_fake_txt < 0.35:
+                parts.append(f"Ngôn từ nhất quán, không giật tít (NLP: {prob_fake_txt*100:.0f}% nghi vấn)")
+            elif prob_fake_txt < 0.50:
+                parts.append(f"Ngôn từ tương đối bình thường nhưng có vài điểm cần lưu ý (NLP: {prob_fake_txt*100:.0f}% nghi vấn)")
+            else:
+                warnings.append(f"Lưu ý: Văn bản có dấu hiệu bất thường (NLP phát hiện {prob_fake_txt*100:.0f}% nghi vấn)")
+        # --- Image ---
+        if prob_fake_img is not None:
+            if prob_fake_img < 0.35:
+                parts.append(f"Hình ảnh bình thường, không phát hiện đặc trưng tin giả (CNN: {prob_fake_img*100:.0f}% nghi vấn)")
+            elif prob_fake_img < 0.50:
+                parts.append(f"Hình ảnh có vài đặc trưng cần xem xét thêm (CNN: {prob_fake_img*100:.0f}% nghi vấn)")
+            else:
+                warnings.append(f"Lưu ý: Hình ảnh có đặc trưng tương tự tin giả (CNN phát hiện {prob_fake_img*100:.0f}% nghi vấn)")
+        # --- CLIP Semantic (dùng ngưỡng thực tế của CLIP) ---
+        if cos_sim is not None:
+            mismatch = _clip_mismatch_pct(cos_sim)
+            if cos_sim >= 0.35:
+                parts.append(f"Ảnh và văn bản phù hợp ngữ cảnh (CLIP: {mismatch:.0f}% lệch pha)")
+            elif cos_sim >= 0.25:
+                parts.append(f"Ảnh và văn bản có liên quan ở mức chấp nhận (CLIP: {mismatch:.0f}% lệch pha)")
+            elif cos_sim >= 0.15:
+                warnings.append(f"Lưu ý: Ảnh và văn bản có sự khác biệt ngữ cảnh (CLIP: {mismatch:.0f}% lệch pha)")
+            else:
+                warnings.append(f"Cảnh báo: Ảnh và văn bản gần như không liên quan (CLIP: {mismatch:.0f}% lệch pha)")
+        
+        result_parts = parts + warnings
+        return ". ".join(result_parts) + "." if result_parts else "Nội dung tin cậy sau khi kiểm chứng chéo."
+    else:  # FAKE
+        factors = []
+        # --- Image ---
+        if prob_fake_img is not None:
+            if prob_fake_img > 0.6:
+                factors.append(f"hình ảnh mang đặc trưng tin giả rõ ràng (CNN: {prob_fake_img*100:.0f}% nghi vấn)")
+            elif prob_fake_img > 0.4:
+                factors.append(f"hình ảnh có đặc trưng nghi vấn (CNN: {prob_fake_img*100:.0f}% bất thường)")
+        # --- Text ---
+        if prob_fake_txt is not None:
+            if prob_fake_txt > 0.6:
+                factors.append(f"lối viết giật tít, sai ngữ pháp rõ rệt (NLP: {prob_fake_txt*100:.0f}% nghi vấn)")
+            elif prob_fake_txt > 0.4:
+                factors.append(f"lối viết có dấu hiệu bất thường (NLP: {prob_fake_txt*100:.0f}% nghi vấn)")
+        # --- CLIP Semantic (dùng ngưỡng thực tế) ---
+        if cos_sim is not None and cos_sim < 0.15:
+            mismatch = _clip_mismatch_pct(cos_sim)
+            factors.append(f"ảnh và văn bản lệch ngữ cảnh nghiêm trọng (CLIP: {mismatch:.0f}% lệch pha)")
+        elif cos_sim is not None and cos_sim < 0.25:
+            mismatch = _clip_mismatch_pct(cos_sim)
+            factors.append(f"ảnh và văn bản lệch ngữ cảnh (CLIP: {mismatch:.0f}% lệch pha)")
+        
+        if factors:
+            return "Phát hiện " + "; ".join(factors) + "."
+        # Fallback nếu điểm sát ngưỡng
+        if prob_fake_img is not None and prob_fake_txt is not None:
+            return f"Kết hợp phân tích cho thấy nghi vấn (NLP: {prob_fake_txt*100:.0f}%, CNN: {prob_fake_img*100:.0f}%)."
+        if prob_fake_img is not None:
+            return f"Phân tích hình ảnh phát hiện bất thường (CNN: {prob_fake_img*100:.0f}%)."
+        if prob_fake_txt is not None:
+            return f"Phân tích văn bản phát hiện bất thường (NLP: {prob_fake_txt*100:.0f}%)."
+        return "Phát hiện sự bất thường khi phân tích đa phương thức."
 
 def verify_multimodal(pure_image: Image.Image, pure_text: str):
     """Xu ly image-only hoac multimodal bang DualStreamFakeNewsModel V2 (Semantic Alignment)"""
@@ -185,7 +260,7 @@ def verify_multimodal(pure_image: Image.Image, pure_text: str):
 
     label = "REAL" if predicted_class == 0 else "FAKE"
     confidence = prob_real if predicted_class == 0 else prob_fake
-    reason = "Văn bản và hình ảnh nhất quán, không phát hiện dấu hiệu cắt ghép." if label == "REAL" else "Phát hiện sự bất thường trong ngữ cảnh văn bản hoặc dấu hiệu chỉnh sửa hình ảnh."
+    reason = _build_dynamic_reason(label, prob_fake_img=prob_fake, cos_sim=cos_sim_val)
     # Debug logging
     print(f"[DEBUG MultiModal] prob_real={prob_real:.4f} | prob_fake={prob_fake:.4f} | cos_sim={cos_sim_val:.4f} | label={label} | confidence={confidence:.4f}")
 
@@ -230,6 +305,7 @@ def _analyze_text(original_text, translated_text):
             "text_score": round(result["prob_fake"], 4),
             "image_score": "N/A",
             "semantic_score": "N/A",
+            "ocr_mismatch_score": "N/A",
             "reason": translate_reason_to_vietnamese(result["reason"]),
             "extracted_text": "",
             "original_text": original_text,
@@ -253,6 +329,8 @@ def _analyze_image(pil_image):
             "confidence": 0.5,
             "text_score": "N/A",
             "image_score": "N/A",
+            "semantic_score": "N/A",
+            "ocr_mismatch_score": "N/A",
             "reason": "Không tìm thấy văn bản để đối chiếu. Hệ thống đa phương thức yêu cầu cả chữ và ảnh để đưa ra kết luận chính xác.",
             "extracted_text": extracted_text, # hien thi Tieng Viet/goc
             "original_text": "",
@@ -267,6 +345,7 @@ def _analyze_image(pil_image):
             "text_score": "N/A",
             "image_score": round(result["prob_fake"], 4),
             "semantic_score": round(result.get("cos_sim", -1), 4),
+            "ocr_mismatch_score": "N/A",
             "reason": translate_reason_to_vietnamese(result["reason"]),
             "extracted_text": extracted_text, # hien thi Tieng Viet/goc
             "original_text": "",
@@ -287,6 +366,7 @@ def _check_gate2_semantic_alignment(img_result, final_text, original_text, trans
             "text_score": "N/A",
             "image_score": round(img_result["prob_fake"], 4),
             "semantic_score": round(cos_sim_val, 4),
+            "ocr_mismatch_score": "N/A",
             "reason": translate_reason_to_vietnamese(
                 "Cảnh báo: Ảnh và văn bản có độ khớp ngữ nghĩa rất thấp. "
                 "Có thể ảnh thật, chữ thật nhưng bị ghép sai ngữ cảnh."
@@ -328,6 +408,7 @@ def _check_gate3_ocr_fact_check(extracted_text, translated_text, img_result, ori
                 "text_score": "N/A",
                 "image_score": round(img_result["prob_fake"], 4),
                 "semantic_score": round(cos_sim_val, 4),
+                "ocr_mismatch_score": round(1.0 - ocr_cos_sim, 4),
                 "reason": translate_reason_to_vietnamese(
                     "Phát hiện tin giả tinh vi (Treo đầu dê bán thịt chó): "
                     "Văn bản bên trong bức ảnh hoàn toàn mâu thuẫn với nội dung bài báo đang viết."
@@ -352,13 +433,12 @@ def _combine_final_results(img_result, text_result, original_text, translated_te
         if combined_prob_fake > FAKE_THRESHOLD:
             label = "FAKE"
             confidence = combined_prob_fake
-            reason = "Phát hiện sự bất thường khi kết hợp cả văn bản và hình ảnh."
         else:
             label = "REAL"
             confidence = 1 - combined_prob_fake
             if cos_sim_val > 0.25:
                 confidence = min(0.99, confidence + (cos_sim_val - 0.20) * 1.5)
-            reason = "Nội dung tin cậy sau khi kiểm chứng chéo văn bản và hình ảnh."
+        reason = _build_dynamic_reason(label, prob_fake_img=img_result["prob_fake"], prob_fake_txt=text_result["prob_fake"], cos_sim=cos_sim_val)
             
         return {
             "label": label,
@@ -366,6 +446,7 @@ def _combine_final_results(img_result, text_result, original_text, translated_te
             "text_score": round(text_result["prob_fake"], 4),
             "image_score": round(img_result["prob_fake"], 4),
             "semantic_score": round(cos_sim_val, 4),
+            "ocr_mismatch_score": "N/A",
             "reason": translate_reason_to_vietnamese(reason),
             "extracted_text": extracted_text,
             "original_text": original_text,
@@ -384,6 +465,7 @@ def _combine_final_results(img_result, text_result, original_text, translated_te
             "text_score": "N/A",
             "image_score": round(img_result["prob_fake"], 4),
             "semantic_score": round(cos_sim_val, 4),
+            "ocr_mismatch_score": "N/A",
             "reason": translate_reason_to_vietnamese(img_result["reason"]),
             "extracted_text": extracted_text,
             "original_text": original_text,
@@ -407,6 +489,8 @@ def _analyze_multimodal(pil_image, original_text, translated_text):
             "confidence": 0.5,
             "text_score": "N/A",
             "image_score": "N/A",
+            "semantic_score": "N/A",
+            "ocr_mismatch_score": "N/A",
             "reason": "Không tìm thấy văn bản để đối chiếu. Hệ thống đa phương thức yêu cầu cả chữ và ảnh để đưa ra kết luận chính xác.",
             "extracted_text": extracted_text,
             "original_text": original_text,

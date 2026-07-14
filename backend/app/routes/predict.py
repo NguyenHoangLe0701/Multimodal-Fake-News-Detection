@@ -90,6 +90,7 @@ async def predict_fake_news(
             "text_score": ai_result['text_score'],
             "image_score": ai_result['image_score'],
             "semantic_score": ai_result.get('semantic_score', 'N/A'),
+            "ocr_mismatch_score": ai_result.get('ocr_mismatch_score', 'N/A'),
             "image_url": image_url,
             "mode": resolved_mode,
             "text_model_available": ai_result.get('text_model_available', False)
