@@ -127,40 +127,35 @@ def _build_dynamic_reason(label, prob_fake_img=None, prob_fake_txt=None, cos_sim
     CLIP cos_sim phan bo thuc te: 0.10 (khong lien quan) den 0.40+ (rat lien quan).
     Moi yeu to duoc danh gia trung thuc theo muc diem."""
     
-    # Normalize CLIP mismatch: 0.40+ -> 0% mismatch, 0.10 -> 100% mismatch
-    def _clip_mismatch_pct(cs):
-        return max(0, min(100, (0.40 - cs) / 0.30 * 100))
-    
     if label == "REAL":
         parts = []
         warnings = []
         # --- Text ---
         if prob_fake_txt is not None:
             if prob_fake_txt < 0.35:
-                parts.append(f"Ngôn từ nhất quán, không giật tít (NLP: {prob_fake_txt*100:.0f}% nghi vấn)")
+                parts.append("Ngôn từ nhất quán, không giật tít")
             elif prob_fake_txt < 0.50:
-                parts.append(f"Ngôn từ tương đối bình thường nhưng có vài điểm cần lưu ý (NLP: {prob_fake_txt*100:.0f}% nghi vấn)")
+                parts.append("Ngôn từ tương đối bình thường nhưng có vài điểm cần lưu ý")
             else:
-                warnings.append(f"Lưu ý: Văn bản có dấu hiệu bất thường (NLP phát hiện {prob_fake_txt*100:.0f}% nghi vấn)")
+                warnings.append("Lưu ý: Văn bản có dấu hiệu bất thường")
         # --- Image ---
         if prob_fake_img is not None:
             if prob_fake_img < 0.35:
-                parts.append(f"Hình ảnh bình thường, không phát hiện đặc trưng tin giả (CNN: {prob_fake_img*100:.0f}% nghi vấn)")
+                parts.append("Hình ảnh tự nhiên, không phát hiện đặc trưng cắt ghép hay thao túng")
             elif prob_fake_img < 0.50:
-                parts.append(f"Hình ảnh có vài đặc trưng cần xem xét thêm (CNN: {prob_fake_img*100:.0f}% nghi vấn)")
+                parts.append("Hình ảnh có vài chi tiết đồ họa cần xem xét thêm")
             else:
-                warnings.append(f"Lưu ý: Hình ảnh có đặc trưng tương tự tin giả (CNN phát hiện {prob_fake_img*100:.0f}% nghi vấn)")
+                warnings.append("Lưu ý: Hình ảnh mang một số đặc trưng thường thấy ở tin giả")
         # --- CLIP Semantic (dùng ngưỡng thực tế của CLIP) ---
         if cos_sim is not None:
-            mismatch = _clip_mismatch_pct(cos_sim)
             if cos_sim >= 0.35:
-                parts.append(f"Ảnh và văn bản phù hợp ngữ cảnh (CLIP: {mismatch:.0f}% lệch pha)")
+                parts.append("Nội dung văn bản và hình ảnh minh họa hoàn toàn khớp ngữ cảnh")
             elif cos_sim >= 0.25:
-                parts.append(f"Ảnh và văn bản có liên quan ở mức chấp nhận (CLIP: {mismatch:.0f}% lệch pha)")
+                parts.append("Hình ảnh có sự liên quan nhất định đến nội dung bài viết")
             elif cos_sim >= 0.15:
-                warnings.append(f"Lưu ý: Ảnh và văn bản có sự khác biệt ngữ cảnh (CLIP: {mismatch:.0f}% lệch pha)")
+                warnings.append("Lưu ý: Bức ảnh minh họa mang tính chất chung chung, độ liên kết với bài viết chưa cao")
             else:
-                warnings.append(f"Cảnh báo: Ảnh và văn bản gần như không liên quan (CLIP: {mismatch:.0f}% lệch pha)")
+                warnings.append("Cảnh báo: Ảnh đính kèm có dấu hiệu lệch pha hoàn toàn với nội dung văn bản")
         
         result_parts = parts + warnings
         return ". ".join(result_parts) + "." if result_parts else "Nội dung tin cậy sau khi kiểm chứng chéo."
@@ -169,32 +164,30 @@ def _build_dynamic_reason(label, prob_fake_img=None, prob_fake_txt=None, cos_sim
         # --- Image ---
         if prob_fake_img is not None:
             if prob_fake_img > 0.6:
-                factors.append(f"hình ảnh mang đặc trưng tin giả rõ ràng (CNN: {prob_fake_img*100:.0f}% nghi vấn)")
+                factors.append("hình ảnh mang đặc trưng thao túng/tin giả rõ ràng")
             elif prob_fake_img > 0.4:
-                factors.append(f"hình ảnh có đặc trưng nghi vấn (CNN: {prob_fake_img*100:.0f}% bất thường)")
+                factors.append("hình ảnh có một số chi tiết nghi vấn")
         # --- Text ---
         if prob_fake_txt is not None:
             if prob_fake_txt > 0.6:
-                factors.append(f"lối viết giật tít, sai ngữ pháp rõ rệt (NLP: {prob_fake_txt*100:.0f}% nghi vấn)")
+                factors.append("lối viết giật tít, sai lệch thông tin rõ rệt")
             elif prob_fake_txt > 0.4:
-                factors.append(f"lối viết có dấu hiệu bất thường (NLP: {prob_fake_txt*100:.0f}% nghi vấn)")
+                factors.append("văn phong có dấu hiệu câu view, bất thường")
         # --- CLIP Semantic (dùng ngưỡng thực tế) ---
         if cos_sim is not None and cos_sim < 0.15:
-            mismatch = _clip_mismatch_pct(cos_sim)
-            factors.append(f"ảnh và văn bản lệch ngữ cảnh nghiêm trọng (CLIP: {mismatch:.0f}% lệch pha)")
+            factors.append("ảnh và văn bản hoàn toàn sai lệch ngữ cảnh")
         elif cos_sim is not None and cos_sim < 0.25:
-            mismatch = _clip_mismatch_pct(cos_sim)
-            factors.append(f"ảnh và văn bản lệch ngữ cảnh (CLIP: {mismatch:.0f}% lệch pha)")
+            factors.append("hình ảnh minh họa không khớp với câu chuyện được kể")
         
         if factors:
             return "Phát hiện " + "; ".join(factors) + "."
         # Fallback nếu điểm sát ngưỡng
         if prob_fake_img is not None and prob_fake_txt is not None:
-            return f"Kết hợp phân tích cho thấy nghi vấn (NLP: {prob_fake_txt*100:.0f}%, CNN: {prob_fake_img*100:.0f}%)."
+            return "Kết hợp phân tích đa phương thức cho thấy nhiều điểm nghi vấn."
         if prob_fake_img is not None:
-            return f"Phân tích hình ảnh phát hiện bất thường (CNN: {prob_fake_img*100:.0f}%)."
+            return "Phân tích hình ảnh phát hiện dấu hiệu bất thường."
         if prob_fake_txt is not None:
-            return f"Phân tích văn bản phát hiện bất thường (NLP: {prob_fake_txt*100:.0f}%)."
+            return "Phân tích văn bản phát hiện dấu hiệu bất thường."
         return "Phát hiện sự bất thường khi phân tích đa phương thức."
 
 def verify_multimodal(pure_image: Image.Image, pure_text: str):
